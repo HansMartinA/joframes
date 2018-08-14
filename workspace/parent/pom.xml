@@ -6,4 +6,11 @@
 	<artifactId>parent</artifactId>
 	<version>0.0.0</version>
 	<packaging>pom</packaging>
+	<modules>
+		<module>language-syntax</module>
+	</modules>
+	<properties>
+		<maven.compiler.source>1.8</maven.compiler.source>
+		<maven.compiler.target>1.8</maven.compiler.target>
+	</properties>
 </project>

@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+	xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+	elementFormDefault="qualified" attributeFormDefault="unqualified"
+	targetNamespace="fwspec" xmlns="fwspec" version="1.0">
+	<xsd:element name="framework-specification">
+		<xsd:complexType>
+			<xsd:sequence>
+				<xsd:element name="resource-loader" minOccurs="0">
+					<xsd:simpleType>
+						<xsd:restriction base="xs:string">
+							<xsd:pattern value="[A-Z]([A-Za-z0-9])*.class" />
+						</xsd:restriction>
+					</xsd:simpleType>
+				</xsd:element>
+				<xsd:element name="phases">
+					<xsd:complexType>
+						<xsd:sequence>
+							<xsd:element name="start">
+								<xsd:complexType>
+									<xsd:sequence>
+										<xsd:element name="explicit-declaration"
+											type="explicitDeclarationType" maxOccurs="unbounded" />
+									</xsd:sequence>
+								</xsd:complexType>
+							</xsd:element>
+							<xsd:element name="end">
+								<xsd:complexType>
+									<xsd:sequence>
+										<xsd:element name="explicit-declaration"
+											type="explicitDeclarationType" />
+									</xsd:sequence>
+								</xsd:complexType>
+							</xsd:element>
+							<xsd:element name="working-phases">
+								<xsd:complexType>
+									<xsd:sequence>
+										<xsd:element name="working" maxOccurs="unbounded">
+											<xsd:complexType>
+												<xsd:sequence>
+													<xsd:choice maxOccurs="unbounded">
+														<xsd:element name="rule-regex"
+															type="xs:string" />
+														<xsd:element name="rule-supertype"
+															type="xs:string" />
+														<xsd:element name="rule-block"
+															type="rulesBlockType" />
+													</xsd:choice>
+												</xsd:sequence>
+												<xsd:attribute name="threads" use="required"
+													type="threadType" />
+											</xsd:complexType>
+										</xsd:element>
+									</xsd:sequence>
+								</xsd:complexType>
+							</xsd:element>
+						</xsd:sequence>
+					</xsd:complexType>
+				</xsd:element>
+			</xsd:sequence>
+			<xsd:attribute name="name" use="required"
+				type="xs:string" />
+		</xsd:complexType>
+	</xsd:element>
+	<xsd:simpleType name="threadType">
+		<xsd:restriction base="xs:string">
+			<xsd:enumeration value="multi" />
+			<xsd:enumeration value="single" />
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:simpleType name="blockQuantorType">
+		<xsd:restriction base="xs:string">
+			<xsd:enumeration value="for_all" />
+		</xsd:restriction>
+	</xsd:simpleType>
+	<xsd:complexType name="rulesBlockType">
+		<xsd:choice>
+			<xsd:element name="rule-block" type="rulesBlockType" />
+			<xsd:element name="explicit-declaration"
+				type="explicitDeclarationType" />
+		</xsd:choice>
+		<xsd:attribute name="quantor" type="blockQuantorType"
+			use="required" />
+		<xsd:attribute name="class" type="xs:string"
+			use="required" />
+	</xsd:complexType>
+	<xsd:complexType name="explicitDeclarationType">
+		<xsd:sequence>
+			<xsd:choice maxOccurs="unbounded">
+				<xsd:element name="method-call" type="xs:string" />
+				<xsd:element name="explicit-declaration"
+					type="explicitDeclarationType" />
+				<xsd:element name="static-call" type="xs:string" />
+			</xsd:choice>
+		</xsd:sequence>
+		<xsd:attribute name="for_all" type="xs:string" />
+	</xsd:complexType>
+</xsd:schema>
