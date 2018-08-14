@@ -12,6 +12,7 @@ target
 .project
 .classpath
 .checkstyle
+.recommenders
 
 ###########################################
 #              Intellij files             #
