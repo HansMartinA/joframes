@@ -10,6 +10,7 @@
 		<module>language-syntax</module>
 		<module>ast-base</module>
 		<module>ast-ap</module>
+		<module>ast-acha</module>
 	</modules>
 	<properties>
 		<maven.compiler.source>1.8</maven.compiler.source>
