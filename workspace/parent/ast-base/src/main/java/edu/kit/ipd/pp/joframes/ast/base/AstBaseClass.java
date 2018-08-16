@@ -1,4 +1,4 @@
-package ast.base;
+package edu.kit.ipd.pp.joframes.ast.base;
 
 /**
  * Base interface for all nodes in the abstract syntax tree.

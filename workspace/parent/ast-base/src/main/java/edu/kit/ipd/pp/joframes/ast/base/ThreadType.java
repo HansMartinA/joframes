@@ -1,4 +1,4 @@
-package ast.base;
+package edu.kit.ipd.pp.joframes.ast.base;
 
 /**
  * Options for the threading policy of a working phase.

@@ -1,4 +1,4 @@
-package ast.ap;
+package edu.kit.ipd.pp.joframes.ast.ap;
 
 /**
  * Available quantors for the block rule.

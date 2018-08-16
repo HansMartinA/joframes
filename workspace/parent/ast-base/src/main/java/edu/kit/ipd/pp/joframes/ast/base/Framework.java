@@ -1,4 +1,4 @@
-package ast.base;
+package edu.kit.ipd.pp.joframes.ast.base;
 
 import java.util.ArrayList;
 

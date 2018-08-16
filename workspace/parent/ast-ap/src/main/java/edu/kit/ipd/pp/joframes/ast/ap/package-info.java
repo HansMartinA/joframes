@@ -3,4 +3,4 @@
  * 
  * @author Martin Armbruster
  */
-package ast.ap;
+package edu.kit.ipd.pp.joframes.ast.ap;

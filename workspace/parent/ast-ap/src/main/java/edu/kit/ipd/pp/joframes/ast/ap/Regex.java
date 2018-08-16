@@ -1,6 +1,6 @@
-package ast.ap;
+package edu.kit.ipd.pp.joframes.ast.ap;
 
-import ast.base.Rule;
+import edu.kit.ipd.pp.joframes.ast.base.Rule;
 
 /**
  * Represents a regular expression as a rule for a working phase.

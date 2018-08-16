@@ -1,4 +1,4 @@
-package ast.base;
+package edu.kit.ipd.pp.joframes.ast.base;
 
 /**
  * Represents a call to a static method.
