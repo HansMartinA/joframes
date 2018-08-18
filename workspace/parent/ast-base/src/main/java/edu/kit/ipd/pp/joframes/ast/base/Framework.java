@@ -9,6 +9,10 @@ import java.util.ArrayList;
  */
 public class Framework implements AstBaseClass {
 	/**
+	 * Stores the framework name.
+	 */
+	private String name;
+	/**
 	 * Stores the start phase of the framework.
 	 */
 	private StartPhase start;
@@ -23,9 +27,21 @@ public class Framework implements AstBaseClass {
 	
 	/**
 	 * Creates a new instance.
+	 * 
+	 * @param name name of the framework.
 	 */
-	public Framework() {
+	public Framework(String name) {
+		this.name = name;
 		workingPhases = new ArrayList<>();
+	}
+	
+	/**
+	 * Returns the name of the framework.
+	 * 
+	 * @return the framework name.
+	 */
+	public String getName() {
+		return name;
 	}
 	
 	/**

@@ -129,8 +129,14 @@ class FrameworkSpecificationParser {
 	 * @return the parsed Framework object.
 	 */
 	private Framework parseFramework(XMLStreamReader xmlParser) {
-		Framework framework = new Framework();
 		try {
+			String frameworkName = null;
+			for(int i=0; i<xmlParser.getAttributeCount(); i++) {
+				if(xmlParser.getAttributeLocalName(i).equals(ATTRIBUTE_FRAMEWORK_NAME)) {
+					frameworkName = xmlParser.getAttributeValue(i);
+				}
+			}
+			Framework framework = new Framework(frameworkName);
 			while(xmlParser.hasNext()) {
 				switch(xmlParser.getEventType()) {
 					case XMLStreamConstants.START_ELEMENT:
@@ -156,7 +162,7 @@ class FrameworkSpecificationParser {
 			}
 		} catch(XMLStreamException e) {
 		}
-		return framework;
+		return null;
 	}
 	
 	/**
