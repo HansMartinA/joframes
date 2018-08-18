@@ -1,6 +1,26 @@
 package edu.kit.ipd.pp.joframes.api;
 
+import edu.kit.ipd.pp.joframes.ast.ap.Block;
+import edu.kit.ipd.pp.joframes.ast.ap.BlockQuantor;
+import edu.kit.ipd.pp.joframes.ast.ap.Regex;
+import edu.kit.ipd.pp.joframes.ast.ap.Supertype;
+import edu.kit.ipd.pp.joframes.ast.base.Call;
+import edu.kit.ipd.pp.joframes.ast.base.EndPhase;
+import edu.kit.ipd.pp.joframes.ast.base.ExplicitDeclaration;
 import edu.kit.ipd.pp.joframes.ast.base.Framework;
+import edu.kit.ipd.pp.joframes.ast.base.Method;
+import edu.kit.ipd.pp.joframes.ast.base.Rule;
+import edu.kit.ipd.pp.joframes.ast.base.StartPhase;
+import edu.kit.ipd.pp.joframes.ast.base.StaticMethod;
+import edu.kit.ipd.pp.joframes.ast.base.ThreadType;
+import edu.kit.ipd.pp.joframes.ast.base.WorkingPhase;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.io.IOException;
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamConstants;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
 
 /**
  * This class parses a framework specification and generates an abstract syntax tree out of it.
@@ -37,9 +57,9 @@ class FrameworkSpecificationParser {
 	 */
 	private static final String ELEMENT_METHOD_CALL = "method-call";
 	/**
-	 * Name of the static call element within an explicit declaration.
+	 * Name of the static method call element within an explicit declaration.
 	 */
-	private static final String ELEMENT_METHOD_STATIC_CALL = "static-call";
+	private static final String ELEMENT_STATIC_METHOD_CALL = "static-call";
 	/**
 	 * Name of the regular expression rule element.
 	 */
@@ -80,6 +100,330 @@ class FrameworkSpecificationParser {
 	 * @return the parsed framework specification as abstract syntax tree.
 	 */
 	Framework parse(String file) {
+		Framework framework = null;
+		try(InputStream in = new FileInputStream(file)) {
+			XMLInputFactory factory = XMLInputFactory.newInstance();
+			XMLStreamReader xmlParser = factory.createXMLStreamReader(in);
+			while(xmlParser.hasNext()) {
+				switch(xmlParser.getEventType()) {
+					case XMLStreamConstants.START_ELEMENT:
+						if(xmlParser.getLocalName().equals(ELEMENT_FRAMEWORK)) {
+							framework = parseFramework(xmlParser);
+						}
+						break;
+					case XMLStreamConstants.END_DOCUMENT:
+						xmlParser.close();
+						break;
+				}
+				xmlParser.next();
+			}
+		} catch(IOException | XMLStreamException e) {
+		}
+		return framework;
+	}
+	
+	/**
+	 * Parses the framework element.
+	 * 
+	 * @param xmlParser the xml parser.
+	 * @return the parsed Framework object.
+	 */
+	private Framework parseFramework(XMLStreamReader xmlParser) {
+		Framework framework = new Framework();
+		try {
+			while(xmlParser.hasNext()) {
+				switch(xmlParser.getEventType()) {
+					case XMLStreamConstants.START_ELEMENT:
+						String elementName = xmlParser.getLocalName();
+						if(elementName.equals(ELEMENT_START_PHASE)) {
+							StartPhase start = parseStartPhase(xmlParser);
+							framework.setStartPhase(start);
+						} else if(elementName.equals(ELEMENT_END_PHASE)) {
+							EndPhase end = parseEndPhase(xmlParser);
+							framework.setEndPhase(end);
+						} else if(elementName.equals(ELEMENT_WORKING_PHASE)) {
+							WorkingPhase working = parseWorkingPhase(xmlParser);
+							framework.addWorkingPhase(working);
+						}
+						break;
+					case XMLStreamConstants.END_ELEMENT:
+						if(xmlParser.getLocalName().equals(ELEMENT_FRAMEWORK)) {
+							return framework;
+						}
+						break;
+				}
+				xmlParser.next();
+			}
+		} catch(XMLStreamException e) {
+		}
+		return framework;
+	}
+	
+	/**
+	 * Parses the start phase element.
+	 * 
+	 * @param xmlParser the xml parser.
+	 * @return the parsed start phase.
+	 */
+	private StartPhase parseStartPhase(XMLStreamReader xmlParser) {
+		StartPhase start = new StartPhase();
+		try {
+			while(xmlParser.hasNext()) {
+				switch(xmlParser.getEventType()) {
+					case XMLStreamConstants.START_ELEMENT:
+						if(xmlParser.getLocalName().equals(ELEMENT_EXPLICIT_DECLARATION)) {
+							ExplicitDeclaration declaration = parseExplicitDeclaration(xmlParser);
+							start.addExplicitDeclaration(declaration);
+						}
+						break;
+					case XMLStreamConstants.END_ELEMENT:
+						if(xmlParser.getLocalName().equals(ELEMENT_START_PHASE)) {
+							return start;
+						}
+						break;
+				}
+				xmlParser.next();
+			}
+		} catch(XMLStreamException e) {
+		}
+		return start;
+	}
+	
+	/**
+	 * Parses the end phase element.
+	 * 
+	 * @param xmlParser the xml parser.
+	 * @return the parsed end phase.
+	 */
+	private EndPhase parseEndPhase(XMLStreamReader xmlParser) {
+		try {
+			while(xmlParser.hasNext()) {
+				switch(xmlParser.getEventType()) {
+					case XMLStreamConstants.START_ELEMENT:
+						if(xmlParser.getLocalName().equals(ELEMENT_EXPLICIT_DECLARATION)) {
+							ExplicitDeclaration declaration = parseExplicitDeclaration(xmlParser);
+							return new EndPhase(declaration);
+						}
+						break;
+				}
+				xmlParser.next();
+			}
+		} catch(XMLStreamException e) {
+		}
+		return null;
+	}
+	
+	/**
+	 * Parses a working phase element.
+	 * 
+	 * @param xmlParser the xml parser.
+	 * @return the parsed working phase.
+	 */
+	private WorkingPhase parseWorkingPhase(XMLStreamReader xmlParser) {
+		try {
+			WorkingPhase working = null;
+			for(int i=0; i<xmlParser.getAttributeCount(); i++) {
+				if(xmlParser.getAttributeLocalName(i).equals(ATTRIBUTE_THREAD_TYPE)) {
+					ThreadType type = ThreadType.valueOf(xmlParser.getAttributeValue(i));
+					working = new WorkingPhase(type);
+				}
+			}
+			while(xmlParser.hasNext()) {
+				switch(xmlParser.getEventType()) {
+					case XMLStreamConstants.START_ELEMENT:
+						if(xmlParser.getLocalName().equals(ELEMENT_RULE_REGEX)) {
+							Rule regex = parseRegexRule(xmlParser);
+							working.addRule(regex);
+						} else if(xmlParser.getLocalName().equals(ELEMENT_RULE_SUPERTYPE)) {
+							Rule supertype = parseSupertypeRule(xmlParser);
+							working.addRule(supertype);
+						} else if(xmlParser.getLocalName().equals(ELEMENT_RULE_BLOCK)) {
+							Rule block = parseBlockRule(xmlParser);
+							working.addRule(block);
+						}
+						break;
+					case XMLStreamConstants.END_ELEMENT:
+						if(xmlParser.getLocalName().equals(ELEMENT_WORKING_PHASE)) {
+							return working;
+						}
+						break;
+				}
+				xmlParser.next();
+			}
+		} catch(XMLStreamException e) {
+		}
+		return null;
+	}
+	
+	/**
+	 * Parses an explicit declaration element.
+	 * 
+	 * @param xmlParser the xml parser.
+	 * @return the parsed explicit declaration.
+	 */
+	private ExplicitDeclaration parseExplicitDeclaration(XMLStreamReader xmlParser) {
+		try {
+			String className = null;
+			for(int i=0; i<xmlParser.getAttributeCount(); i++) {
+				if(xmlParser.getAttributeLocalName(i).equals(ATTRIBUTE_EXPLICIT_DECLARATION_FOR_ALL)) {
+					className = xmlParser.getAttributeValue(i);
+				}
+			}
+			ExplicitDeclaration declaration;
+			if(className==null) {
+				declaration = new ExplicitDeclaration();
+			} else {
+				declaration = new ExplicitDeclaration();
+			}
+			xmlParser.next();
+			while(xmlParser.hasNext()) {
+				switch(xmlParser.getEventType()) {
+					case XMLStreamConstants.START_ELEMENT:
+						if(xmlParser.getLocalName().equals(ELEMENT_METHOD_CALL)) {
+							Call call = parseMethodCall(xmlParser);
+							declaration.addCall(call);
+						} else if(xmlParser.getLocalName().equals(ELEMENT_STATIC_METHOD_CALL)) {
+							Call call = parseStaticMethodCall(xmlParser);
+							declaration.addCall(call);
+						} else if(xmlParser.getLocalName().equals(ELEMENT_EXPLICIT_DECLARATION)) {
+							ExplicitDeclaration innerDeclaration = parseExplicitDeclaration(xmlParser);
+							declaration.addExplicitDeclaration(innerDeclaration);
+						}
+						break;
+					case XMLStreamConstants.END_ELEMENT:
+						return declaration;
+				}
+				xmlParser.next();
+			}
+		} catch(XMLStreamException e) {
+		}
+		return null;
+	}
+	
+	/**
+	 * Parses a method call.
+	 * 
+	 * @param xmlParser the xml parser.
+	 * @return the parsed method call.
+	 */
+	private Call parseMethodCall(XMLStreamReader xmlParser) {
+		try {
+			while(xmlParser.hasNext()) {
+				switch(xmlParser.getEventType()) {
+					case XMLStreamConstants.CHARACTERS:
+						return new Method(xmlParser.getText());
+				}
+				xmlParser.next();
+			}
+		} catch(XMLStreamException e) {
+		}
+		return null;
+	}
+	
+	/**
+	 * Parses a static method call.
+	 * 
+	 * @param xmlParser the xml parser.
+	 * @return the parsed static method call.
+	 */
+	private Call parseStaticMethodCall(XMLStreamReader xmlParser) {
+		try {
+			while(xmlParser.hasNext()) {
+				switch(xmlParser.getEventType()) {
+					case XMLStreamConstants.CHARACTERS:
+						String[] splittedText = xmlParser.getText().split(" ");
+						return new StaticMethod(splittedText[0], splittedText[1]);
+				}
+				xmlParser.next();
+			}
+		} catch(XMLStreamException e) {
+		}
+		return null;
+	}
+	
+	/**
+	 * Parses a regular expression rule element.
+	 * 
+	 * @param xmlParser the xml parser.
+	 * @return the parsed regular expression rule.
+	 */
+	private Rule parseRegexRule(XMLStreamReader xmlParser) {
+		try {
+			while(xmlParser.hasNext()) {
+				switch(xmlParser.getEventType()) {
+					case XMLStreamConstants.CHARACTERS:
+						return new Regex(xmlParser.getText());
+				}
+				xmlParser.next();
+			}
+		} catch(XMLStreamException e) {
+		}
+		return null;
+	}
+	
+	/**
+	 * Parses the supertype rule element.
+	 * 
+	 * @param xmlParser the xml parser.
+	 * @return the parsed supertype rule.
+	 */
+	private Rule parseSupertypeRule(XMLStreamReader xmlParser) {
+		try {
+			while(xmlParser.hasNext()) {
+				switch(xmlParser.getEventType()) {
+					case XMLStreamConstants.CHARACTERS:
+						return new Supertype(xmlParser.getText());
+				}
+				xmlParser.next();
+			}
+		} catch(XMLStreamException e) {
+		}
+		return null;
+	}
+	
+	/**
+	 * Parses the block rule element.
+	 * 
+	 * @param xmlParser the xml parser.
+	 * @return the parsed block rule.
+	 */
+	private Block parseBlockRule(XMLStreamReader xmlParser) {
+		try {
+			BlockQuantor quantor = null;
+			String className = null;
+			for(int i=0; i<xmlParser.getAttributeCount(); i++) {
+				String attributeName = xmlParser.getAttributeLocalName(i);
+				if(attributeName.equals(ATTRIBUTE_BLOCK_QUANTOR)) {
+					quantor = BlockQuantor.valueOf(xmlParser.getAttributeValue(i));
+				} else if(attributeName.equals(ATTRIBUTE_BLOCK_CLASS)) {
+					className = xmlParser.getAttributeValue(i);
+				}
+			}
+			xmlParser.next();
+			Block innerBlock = null;
+			ExplicitDeclaration declaration = null;
+			while(xmlParser.hasNext()) {
+				switch(xmlParser.getEventType()) {
+					case XMLStreamConstants.START_ELEMENT:
+						if(xmlParser.getLocalName().equals(ELEMENT_RULE_BLOCK)) {
+							innerBlock = parseBlockRule(xmlParser);
+						} else if(xmlParser.getLocalName().equals(ELEMENT_EXPLICIT_DECLARATION)) {
+							declaration = parseExplicitDeclaration(xmlParser);
+						}
+						break;
+					case XMLStreamConstants.END_ELEMENT:
+						Block block = null;
+						if(innerBlock==null) {
+							block = new Block(quantor, className, innerBlock);
+						} else {
+							block = new Block(quantor, className, declaration);
+						}
+						return block;
+				}
+				xmlParser.next();
+			}
+		} catch(XMLStreamException e) {
+		}
 		return null;
 	}
 }
