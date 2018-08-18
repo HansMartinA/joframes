@@ -9,6 +9,7 @@ import edu.kit.ipd.pp.joframes.ast.base.EndPhase;
 import edu.kit.ipd.pp.joframes.ast.base.ExplicitDeclaration;
 import edu.kit.ipd.pp.joframes.ast.base.Framework;
 import edu.kit.ipd.pp.joframes.ast.base.Method;
+import edu.kit.ipd.pp.joframes.ast.base.ResourceLoader;
 import edu.kit.ipd.pp.joframes.ast.base.Rule;
 import edu.kit.ipd.pp.joframes.ast.base.StartPhase;
 import edu.kit.ipd.pp.joframes.ast.base.StaticMethod;
@@ -150,6 +151,9 @@ class FrameworkSpecificationParser {
 						} else if(elementName.equals(ELEMENT_WORKING_PHASE)) {
 							WorkingPhase working = parseWorkingPhase(xmlParser);
 							framework.addWorkingPhase(working);
+						} else if(elementName.equals(ELEMENT_RESOURCE_LOADER)) {
+							ResourceLoader loader = parseResourceLoader(xmlParser);
+							framework.setResourceLoader(loader);
 						}
 						break;
 					case XMLStreamConstants.END_ELEMENT:
@@ -157,6 +161,26 @@ class FrameworkSpecificationParser {
 							return framework;
 						}
 						break;
+				}
+				xmlParser.next();
+			}
+		} catch(XMLStreamException e) {
+		}
+		return null;
+	}
+	
+	/**
+	 * Parses the resource loader element.
+	 * 
+	 * @param xmlParser the xml parser.
+	 * @return the parsed resource loader.
+	 */
+	private ResourceLoader parseResourceLoader(XMLStreamReader xmlParser) {
+		try {
+			while(xmlParser.hasNext()) {
+				switch(xmlParser.getEventType()) {
+					case XMLStreamConstants.CHARACTERS:
+						return new ResourceLoader(xmlParser.getText());
 				}
 				xmlParser.next();
 			}

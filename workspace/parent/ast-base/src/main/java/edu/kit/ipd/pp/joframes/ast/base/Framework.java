@@ -13,6 +13,10 @@ public class Framework implements AstBaseClass {
 	 */
 	private String name;
 	/**
+	 * Stores the resource loader for the framework.
+	 */
+	private ResourceLoader resourceLoader;
+	/**
 	 * Stores the start phase of the framework.
 	 */
 	private StartPhase start;
@@ -78,6 +82,24 @@ public class Framework implements AstBaseClass {
 	 */
 	public void setEndPhase(EndPhase end) {
 		this.end = end;
+	}
+	
+	/**
+	 * Returns the resource loader for the framework.
+	 * 
+	 * @return the resource loader.
+	 */
+	public ResourceLoader getResourceLoader() {
+		return resourceLoader;
+	}
+	
+	/**
+	 * Sets the resource loader for the framework.
+	 * 
+	 * @param loader the resource loader.
+	 */
+	public void setResourceLoader(ResourceLoader loader) {
+		resourceLoader = loader;
 	}
 	
 	/**
