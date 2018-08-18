@@ -15,13 +15,21 @@ import edu.kit.ipd.pp.joframes.ast.base.StartPhase;
 import edu.kit.ipd.pp.joframes.ast.base.StaticMethod;
 import edu.kit.ipd.pp.joframes.ast.base.ThreadType;
 import edu.kit.ipd.pp.joframes.ast.base.WorkingPhase;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.IOException;
+import javax.xml.XMLConstants;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
+import javax.xml.transform.Source;
+import javax.xml.transform.stream.StreamSource;
+import javax.xml.validation.Schema;
+import javax.xml.validation.SchemaFactory;
+import javax.xml.validation.Validator;
+import org.xml.sax.SAXException;
 
 /**
  * This class parses a framework specification and generates an abstract syntax tree out of it.
@@ -101,6 +109,18 @@ class FrameworkSpecificationParser {
 	 * @return the parsed framework specification as abstract syntax tree.
 	 */
 	Framework parse(String file) {
+		Source xmlFile = new StreamSource(new File(file));
+		SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+		try {
+			Schema schema = schemaFactory.newSchema(getClass().getClassLoader()
+					.getResource("framework_specification_language_model.xsd"));
+			Validator validator = schema.newValidator();
+			validator.validate(xmlFile);
+		} catch(SAXException e) {
+			System.out.println("The provided xml file is not valid: "+e.getLocalizedMessage());
+			System.exit(1);
+		} catch(IOException e) {
+		}
 		Framework framework = null;
 		try(InputStream in = new FileInputStream(file)) {
 			XMLInputFactory factory = XMLInputFactory.newInstance();
