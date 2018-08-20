@@ -91,9 +91,9 @@ public class FrameworkSpecificationParserTest {
 		decl = (ExplicitDeclaration)startDeclaration.getCallOrDeclaration(2);
 		assertEquals(SERVLET, decl.getClassName());
 		assertEquals(2, decl.getNumberOfCallsAndDeclarations());
-		assertEquals(CONSTRUCTOR, ((Call)startDeclaration.getCallOrDeclaration(0)).getSignature());
+		assertEquals(CONSTRUCTOR, ((Call)decl.getCallOrDeclaration(0)).getSignature());
 		assertEquals("init(Ljavax/servlet/ServletConfig;)V",
-				((Call)startDeclaration.getCallOrDeclaration(1)).getSignature());
+				((Call)decl.getCallOrDeclaration(1)).getSignature());
 		ExplicitDeclaration endDeclaration = framework.getEndPhase().getEnd();
 		assertNull(endDeclaration.getClassName());
 		assertEquals(2, endDeclaration.getNumberOfCallsAndDeclarations());
@@ -161,6 +161,8 @@ public class FrameworkSpecificationParserTest {
 	@Test
 	public void testCompleteSpecification() {
 		parseFramework("CompleteSpec");
+		assertNotNull(framework.getResourceLoader());
+		assertEquals("Test.class", framework.getResourceLoader().getClassName());
 		assertEquals(3, framework.getStartPhase().getDeclarations().size());
 		List<WorkingPhase> workingPhases = framework.getWorkingPhases();
 		assertEquals(3, workingPhases.size());
