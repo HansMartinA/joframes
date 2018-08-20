@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<framework-specification
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="framework_specification_language_model.xsd"
+	xmlns="fwspec" name="CompleteSpec">
+	<resource-loader>Test.class</resource-loader>
+	<phases>
+		<start>
+			<explicit-declaration for_all="Ljava/lang/String">
+				<method-call>Constructor</method-call>
+			</explicit-declaration>
+			<explicit-declaration for_all="Ljava/util/EventListener">
+			    <method-call>Constructor</method-call>
+			</explicit-declaration>
+			<explicit-declaration for_all="Ljava/lang/Runtime">
+			    <method-call>Constructor</method-call>
+			</explicit-declaration>
+		</start>
+		<end>
+			<explicit-declaration for_all="Ljava/lang/String">
+				<explicit-declaration for_all="Ljava/lang/String">
+				    <explicit-declaration for_all="Ljava/lang/String">
+				        <explicit-declaration for_all="Ljava/lang/String">
+				            <method-call>getCharAt(I)C</method-call>
+				        </explicit-declaration>
+				    </explicit-declaration>
+				</explicit-declaration>
+			</explicit-declaration>
+		</end>
+		<working-phases>
+			<working threads="multi">
+				<rule-block quantor="for_all" class="Ljavax/swing/JButton">
+					<explicit-declaration>
+						<method-call>addActionListener(Ljava/awt/event/ActionListener;)V</method-call>
+						<method-call>addActionListener(Ljava/awt/event/ActionListener;)V</method-call>
+						<explicit-declaration for_all="Ljavax/swing/JLabel">
+						     <method-call>Constructor</method-call>
+						</explicit-declaration>
+					</explicit-declaration>
+				</rule-block>
+			</working>
+			<working threads="single">
+			    <rule-regex>.*</rule-regex>
+			    <rule-supertype>Ljava/lang/Object</rule-supertype>
+			    <rule-regex>.*</rule-regex>
+			    <rule-block quantor="for_all" class="Ljava/lang/String">
+			        <rule-block quantor="for_all" class="Ljava/lang/String">
+			            <rule-block quantor="for_all" class="Ljava/lang/String">
+			                <explicit-declaration>
+			                    <static-call>Ljava/lang/Runtime getRuntime()Ljava/lang/Runtime</static-call>
+			                    <explicit-declaration for_all="Ljava/lang/Object">
+			                    </explicit-declaration>
+			                    <method-call>getCharAt(I)C</method-call>
+			                </explicit-declaration>
+			            </rule-block>
+			        </rule-block>
+			    </rule-block>
+			    <rule-supertype>Ljavax/swing/JFrame</rule-supertype>
+			    <rule-supertype>Ljava/util/EventListener</rule-supertype>
+			</working>
+			<working threads="multi">
+			</working>
+		</working-phases>
+	</phases>
+</framework-specification>

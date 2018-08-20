@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<framework-specification
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="framework_specification_language_model.xsd"
+	xmlns="fwspec" name="Servlets">
+	<phases>
+		<start>
+			<explicit-declaration>
+				<explicit-declaration for_all="Ljava/util/EventListener">
+					<method-call>Constructor</method-call>
+				</explicit-declaration>
+				<explicit-declaration
+					for_all="Ljavax/servlet/ServletContextListener">
+					<method-call>contextInitialized(Ljavax/servlet/ServletContextEvent;)V
+					</method-call>
+				</explicit-declaration>
+				<explicit-declaration for_all="Ljavax/servlet/Servlet">
+					<method-call>Constructor</method-call>
+					<method-call>init(Ljavax/servlet/ServletConfig;)V</method-call>
+				</explicit-declaration>
+			</explicit-declaration>
+		</start>
+		<end>
+			<explicit-declaration>
+				<explicit-declaration for_all="Ljavax/servlet/Servlet">
+					<method-call>destroy()V</method-call>
+				</explicit-declaration>
+				<explicit-declaration
+					for_all="Ljavax/servlet/ServletContextListener">
+					<method-call>contextDestroyed(Ljavax/servlet/ServletContextEvent;)V
+					</method-call>
+				</explicit-declaration>
+			</explicit-declaration>
+		</end>
+		<working-phases>
+			<working threads="multi">
+				<rule-block quantor="for_all" class="Ljavax/servlet/Servlet">
+					<explicit-declaration>
+						<explicit-declaration
+							for_all="Ljavax/servlet/ServletRequestListener">
+							<method-call>requestInitialized(Ljavax/servlet/ServletRequestEvent;)V
+							</method-call>
+						</explicit-declaration>
+						<method-call>service(Ljavax/servlet/ServletRequest;Ljavax/servlet/ServletResponse;)V
+						</method-call>
+						<explicit-declaration
+							for_all="Ljavax/servlet/ServletRequestListener">
+							<method-call>requestDestroyed(Ljavax/servlet/ServletRequestEvent;)V
+							</method-call>
+						</explicit-declaration>
+					</explicit-declaration>
+				</rule-block>
+			</working>
+		</working-phases>
+	</phases>
+</framework-specification>
