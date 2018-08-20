@@ -38,7 +38,7 @@
 										<xsd:element name="working" maxOccurs="unbounded">
 											<xsd:complexType>
 												<xsd:sequence>
-													<xsd:choice maxOccurs="unbounded">
+													<xsd:choice minOccurs="0" maxOccurs="unbounded">
 														<xsd:element name="rule-regex"
 															type="xs:string" />
 														<xsd:element name="rule-supertype"
@@ -86,7 +86,7 @@
 	</xsd:complexType>
 	<xsd:complexType name="explicitDeclarationType">
 		<xsd:sequence>
-			<xsd:choice maxOccurs="unbounded">
+			<xsd:choice minOccurs="0" maxOccurs="unbounded">
 				<xsd:element name="method-call" type="xs:string" />
 				<xsd:element name="explicit-declaration"
 					type="explicitDeclarationType" />
