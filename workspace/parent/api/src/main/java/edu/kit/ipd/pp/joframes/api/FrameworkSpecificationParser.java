@@ -323,7 +323,7 @@ class FrameworkSpecificationParser {
 			if(className==null) {
 				declaration = new ExplicitDeclaration();
 			} else {
-				declaration = new ExplicitDeclaration();
+				declaration = new ExplicitDeclaration(className);
 			}
 			xmlParser.next();
 			while(xmlParser.hasNext()) {
