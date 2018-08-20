@@ -3,4 +3,5 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="framework_specification_language_model.xsd"
 	xmlns="fwspec" name="empty-spec">
+	<!-- Here, the whole content is left out. -->
 </framework-specification>

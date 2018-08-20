@@ -16,6 +16,7 @@
 		<working-phases>
 			<working threads="multi">
 				<rule-block quantor="for_all" class="Ljava/lang/String">
+				    <!-- No content: a block rule has to have content. -->
 				</rule-block>
 			</working>
 			<working threads="single">
