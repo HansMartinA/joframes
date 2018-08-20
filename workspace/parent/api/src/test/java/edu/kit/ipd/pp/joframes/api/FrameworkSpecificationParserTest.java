@@ -57,7 +57,7 @@ public class FrameworkSpecificationParserTest {
 	@Test
 	public void testServletSpecification() {
 		parseFramework("Servlets");
-		assertEquals(1, framework.getStartPhase().getDeclarations());
+		assertEquals(1, framework.getStartPhase().getDeclarations().size());
 		ExplicitDeclaration startDeclaration = null;
 		for(ExplicitDeclaration dec : framework.getStartPhase().getDeclarations()) {
 			startDeclaration = dec;
