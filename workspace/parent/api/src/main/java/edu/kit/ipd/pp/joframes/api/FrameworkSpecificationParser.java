@@ -341,7 +341,10 @@ class FrameworkSpecificationParser {
 						}
 						break;
 					case XMLStreamConstants.END_ELEMENT:
-						return declaration;
+						if(xmlParser.getLocalName().equals(ELEMENT_EXPLICIT_DECLARATION)) {
+							return declaration;
+						}
+						break;
 				}
 				xmlParser.next();
 			}
@@ -462,13 +465,16 @@ class FrameworkSpecificationParser {
 						}
 						break;
 					case XMLStreamConstants.END_ELEMENT:
-						Block block = null;
-						if(innerBlock==null) {
-							block = new Block(quantor, className, innerBlock);
-						} else {
-							block = new Block(quantor, className, declaration);
+						if(xmlParser.getLocalName().equals(ELEMENT_RULE_BLOCK)) {
+							Block block = null;
+							if(innerBlock==null) {
+								block = new Block(quantor, className, innerBlock);
+							} else {
+								block = new Block(quantor, className, declaration);
+							}
+							return block;
 						}
-						return block;
+						break;
 				}
 				xmlParser.next();
 			}
