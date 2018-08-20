@@ -200,7 +200,7 @@ class FrameworkSpecificationParser {
 			while(xmlParser.hasNext()) {
 				switch(xmlParser.getEventType()) {
 					case XMLStreamConstants.CHARACTERS:
-						return new ResourceLoader(xmlParser.getText());
+						return new ResourceLoader(xmlParser.getText().trim());
 				}
 				xmlParser.next();
 			}
@@ -364,7 +364,7 @@ class FrameworkSpecificationParser {
 			while(xmlParser.hasNext()) {
 				switch(xmlParser.getEventType()) {
 					case XMLStreamConstants.CHARACTERS:
-						return new Method(xmlParser.getText());
+						return new Method(xmlParser.getText().trim());
 				}
 				xmlParser.next();
 			}
@@ -384,7 +384,7 @@ class FrameworkSpecificationParser {
 			while(xmlParser.hasNext()) {
 				switch(xmlParser.getEventType()) {
 					case XMLStreamConstants.CHARACTERS:
-						String[] splittedText = xmlParser.getText().split(" ");
+						String[] splittedText = xmlParser.getText().trim().split(" ");
 						return new StaticMethod(splittedText[0], splittedText[1]);
 				}
 				xmlParser.next();
@@ -405,7 +405,7 @@ class FrameworkSpecificationParser {
 			while(xmlParser.hasNext()) {
 				switch(xmlParser.getEventType()) {
 					case XMLStreamConstants.CHARACTERS:
-						return new Regex(xmlParser.getText());
+						return new Regex(xmlParser.getText().trim());
 				}
 				xmlParser.next();
 			}
@@ -425,7 +425,7 @@ class FrameworkSpecificationParser {
 			while(xmlParser.hasNext()) {
 				switch(xmlParser.getEventType()) {
 					case XMLStreamConstants.CHARACTERS:
-						return new Supertype(xmlParser.getText());
+						return new Supertype(xmlParser.getText().trim());
 				}
 				xmlParser.next();
 			}
