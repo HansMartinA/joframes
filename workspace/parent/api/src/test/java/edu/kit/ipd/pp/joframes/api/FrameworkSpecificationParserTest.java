@@ -37,11 +37,26 @@ public class FrameworkSpecificationParserTest {
 	 * Stores the generated test ast.
 	 */
 	private Framework framework;
+	/**
+	 * Constant name for the constructor used in a framework specification.
+	 */
 	private static final String CONSTRUCTOR = "Constructor";
+	/**
+	 * Constant name for the EventListener interface.
+	 */
 	private static final String EVENT_LISTENER = "Ljava/util/EventListener";
-	private static final String SERVLET = "Ljavax/swing/Servlet";
-	private static final String SERVLET_CONTEXT_LISTENER = "Ljavax/swing/ServletContextListener";
-	private static final String SERVLET_REQUEST_LISTENER = "Ljavax/swing/ServletRequestListener";
+	/**
+	 * Constant name of the Servlet class.
+	 */
+	private static final String SERVLET = "Ljavax/servlet/Servlet";
+	/**
+	 * Constant name of the ServletContextListener interface.
+	 */
+	private static final String SERVLET_CONTEXT_LISTENER = "Ljavax/servlet/ServletContextListener";
+	/**
+	 * Constant name of the ServletRequestListener interface.
+	 */
+	private static final String SERVLET_REQUEST_LISTENER = "Ljavax/servlet/ServletRequestListener";
 	
 	/**
 	 * Sets all test resources up.
