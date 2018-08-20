@@ -47,7 +47,7 @@
 			        <rule-block quantor="for_all" class="Ljava/lang/String">
 			            <rule-block quantor="for_all" class="Ljava/lang/String">
 			                <explicit-declaration>
-			                    <static-call>Ljava/lang/Runtime getRuntime()Ljava/lang/Runtime</static-call>
+			                    <static-call>Ljava/lang/Runtime getRuntime()Ljava/lang/Runtime;s</static-call>
 			                    <explicit-declaration for_all="Ljava/lang/Object">
 			                    </explicit-declaration>
 			                    <method-call>getCharAt(I)C</method-call>
