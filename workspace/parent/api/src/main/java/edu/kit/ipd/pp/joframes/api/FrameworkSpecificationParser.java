@@ -274,7 +274,7 @@ class FrameworkSpecificationParser {
 			WorkingPhase working = null;
 			for(int i=0; i<xmlParser.getAttributeCount(); i++) {
 				if(xmlParser.getAttributeLocalName(i).equals(ATTRIBUTE_THREAD_TYPE)) {
-					ThreadType type = ThreadType.valueOf(xmlParser.getAttributeValue(i));
+					ThreadType type = ThreadType.valueOf(xmlParser.getAttributeValue(i).toUpperCase());
 					working = new WorkingPhase(type);
 				}
 			}
@@ -444,7 +444,7 @@ class FrameworkSpecificationParser {
 			for(int i=0; i<xmlParser.getAttributeCount(); i++) {
 				String attributeName = xmlParser.getAttributeLocalName(i);
 				if(attributeName.equals(ATTRIBUTE_BLOCK_QUANTOR)) {
-					quantor = BlockQuantor.valueOf(xmlParser.getAttributeValue(i));
+					quantor = BlockQuantor.valueOf(xmlParser.getAttributeValue(i).toUpperCase());
 				} else if(attributeName.equals(ATTRIBUTE_BLOCK_CLASS)) {
 					className = xmlParser.getAttributeValue(i);
 				}
