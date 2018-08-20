@@ -1,6 +1,7 @@
 package edu.kit.ipd.pp.joframes.ast.base;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Represents a specified framework.
@@ -109,5 +110,15 @@ public class Framework implements AstBaseClass {
 	 */
 	public void addWorkingPhase(WorkingPhase working) {
 		workingPhases.add(working);
+	}
+	
+	/**
+	 * Returns a list of all added working phases. The order of the phases is considered to be their order within the
+	 * framework.
+	 * 
+	 * @return the list.
+	 */
+	public List<WorkingPhase> getWorkingPhases() {
+		return (List<WorkingPhase>)workingPhases.clone();
 	}
 }

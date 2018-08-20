@@ -60,4 +60,24 @@ public class ExplicitDeclaration implements AstBaseClass {
 	public void addExplicitDeclaration(ExplicitDeclaration declaration) {
 		calls.add(declaration);
 	}
+	
+	/**
+	 * Returns the number of added method and static method calls and explicit declarations.
+	 * 
+	 * @return the number.
+	 */
+	public int getNumberOfCallsAndDeclarations() {
+		return calls.size();
+	}
+	
+	/**
+	 * Returns an added method or static method call or explicit declaration. 
+	 * 
+	 * @param number the number of the call or explicit declaration to return. Must be within 0 and
+	 *               getNumberOfCallsAndDeclarations().
+	 * @return the call or explicit declaration.
+	 */
+	public AstBaseClass getCallOrDeclaration(int number) {
+		return calls.get(number);
+	}
 }

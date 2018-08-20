@@ -1,6 +1,7 @@
 package edu.kit.ipd.pp.joframes.ast.base;
 
 import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Represents a working phase in a framework.
@@ -43,5 +44,24 @@ public class WorkingPhase implements AstBaseClass {
 	 */
 	public void addRule(Rule rule) {
 		rules.add(rule);
+	}
+	
+	/**
+	 * Removes a rule.
+	 * 
+	 * @param rule the rule to be removed.
+	 */
+	public void removeRule(Rule rule) {
+		rules.remove(rule);
+	}
+	
+	/**
+	 * Returns the set of added rules. Modifications to the set are not reflected in this working phase, but
+	 * modifications to the rules.
+	 * 
+	 * @return the set.
+	 */
+	public Set<Rule> getRules() {
+		return (Set<Rule>)rules.clone();
 	}
 }
