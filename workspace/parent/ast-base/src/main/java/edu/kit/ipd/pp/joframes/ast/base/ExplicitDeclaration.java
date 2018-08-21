@@ -1,5 +1,6 @@
 package edu.kit.ipd.pp.joframes.ast.base;
 
+import com.ibm.wala.classLoader.IClass;
 import java.util.ArrayList;
 
 /**
@@ -12,6 +13,10 @@ public class ExplicitDeclaration implements AstBaseClass {
 	 * Stores the optional class name associated with this explicit declaration.
 	 */
 	private String className;
+	/**
+	 * Stores the class corresponding to the class name.
+	 */
+	private IClass correspondingClass;
 	/**
 	 * Stores all calls related to this explicit declaration.
 	 */
@@ -41,6 +46,24 @@ public class ExplicitDeclaration implements AstBaseClass {
 	 */
 	public String getClassName() {
 		return className;
+	}
+	
+	/**
+	 * Sets the class corresponding to the contained class name.
+	 * 
+	 * @param correspondingClass the corresponding class.
+	 */
+	public void setIClass(IClass correspondingClass) {
+		this.correspondingClass = correspondingClass;
+	}
+	
+	/**
+	 * Returns the class corresponding to the contained class name.
+	 * 
+	 * @return the corresponding class or null if the class name is null.
+	 */
+	public IClass getIClass() {
+		return correspondingClass;
 	}
 	
 	/**

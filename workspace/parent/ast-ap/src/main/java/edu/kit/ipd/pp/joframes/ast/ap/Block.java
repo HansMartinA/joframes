@@ -1,5 +1,6 @@
 package edu.kit.ipd.pp.joframes.ast.ap;
 
+import com.ibm.wala.classLoader.IClass;
 import edu.kit.ipd.pp.joframes.ast.base.ExplicitDeclaration;
 import edu.kit.ipd.pp.joframes.ast.base.Rule;
 
@@ -17,6 +18,10 @@ public class Block extends Rule {
 	 * Stores the class name associated with this block.
 	 */
 	private String className;
+	/**
+	 * Stores the class corresponding to the class name.
+	 */
+	private IClass correspondingClass;
 	/**
 	 * Stores the next block within this block.
 	 */
@@ -68,6 +73,24 @@ public class Block extends Rule {
 	 */
 	public String getClassName() {
 		return className;
+	}
+	
+	/**
+	 * Sets the class corresponding to the contained class name.
+	 * 
+	 * @param correspondingClass the corresponding class.
+	 */
+	public void setIClass(IClass correspondingClass) {
+		this.correspondingClass = correspondingClass;
+	}
+	
+	/**
+	 * Returns the class corresponding to the contained class name.
+	 * 
+	 * @return the corresponding class.
+	 */
+	public IClass getIClass() {
+		return correspondingClass;
 	}
 	
 	/**
