@@ -467,7 +467,7 @@ class FrameworkSpecificationParser {
 					case XMLStreamConstants.END_ELEMENT:
 						if(xmlParser.getLocalName().equals(ELEMENT_RULE_BLOCK)) {
 							Block block = null;
-							if(innerBlock==null) {
+							if(innerBlock!=null) {
 								block = new Block(quantor, className, innerBlock);
 							} else {
 								block = new Block(quantor, className, declaration);
