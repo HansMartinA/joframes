@@ -1,4 +1,4 @@
-package edu.kit.ipd.pp.joframes.api;
+package edu.kit.ipd.pp.joframes.api.exceptions;
 
 /**
  * Exception that is thrown when the creation of the class hierarchy fails.

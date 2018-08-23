@@ -1,4 +1,4 @@
-package edu.kit.ipd.pp.joframes.api;
+package edu.kit.ipd.pp.joframes.api.exceptions;
 
 /**
  * Exception that is thrown when the parsing of a framework specification fails.

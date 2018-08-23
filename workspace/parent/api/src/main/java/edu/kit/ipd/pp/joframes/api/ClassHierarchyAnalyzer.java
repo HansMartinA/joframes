@@ -5,6 +5,7 @@ import com.ibm.wala.ipa.cha.ClassHierarchy;
 import com.ibm.wala.ipa.cha.ClassHierarchyException;
 import com.ibm.wala.ipa.cha.ClassHierarchyFactory;
 import com.ibm.wala.util.config.AnalysisScopeReader;
+import edu.kit.ipd.pp.joframes.api.exceptions.ClassHierarchyCreationException;
 import edu.kit.ipd.pp.joframes.ast.base.Framework;
 import java.io.File;
 import java.io.IOException;

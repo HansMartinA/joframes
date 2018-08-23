@@ -1,5 +1,6 @@
 package edu.kit.ipd.pp.joframes.api;
 
+import edu.kit.ipd.pp.joframes.api.exceptions.ParseException;
 import edu.kit.ipd.pp.joframes.ast.ap.Block;
 import edu.kit.ipd.pp.joframes.ast.ap.BlockQuantor;
 import edu.kit.ipd.pp.joframes.ast.ap.Regex;
