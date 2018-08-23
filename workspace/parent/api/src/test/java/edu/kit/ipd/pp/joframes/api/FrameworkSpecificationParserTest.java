@@ -14,7 +14,6 @@ import edu.kit.ipd.pp.joframes.ast.base.ThreadType;
 import edu.kit.ipd.pp.joframes.ast.base.WorkingPhase;
 import java.util.List;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -68,9 +67,11 @@ public class FrameworkSpecificationParserTest {
 	
 	/**
 	 * Tests the parsing of the servlet specification.
+	 * 
+	 * @throws ParseException when parsing fails.
 	 */
 	@Test
-	public void testServletSpecification() {
+	public void testServletSpecification() throws ParseException {
 		parseFramework("Servlets");
 		assertEquals(1, framework.getStartPhase().getDeclarations().size());
 		ExplicitDeclaration startDeclaration = null;
@@ -136,30 +137,32 @@ public class FrameworkSpecificationParserTest {
 	}
 	
 	/**
-	 * Tests an invalid (empty root element) specification. This test case is ignored because an invalid specification
-	 * leads to a termination of the jvm.
+	 * Tests an invalid (empty root element) specification.
+	 * 
+	 * @throws ParseException when parsing fails (here, it should fail).
 	 */
-	@Test
-	@Ignore
-	public void testEmptySpecification() {
+	@Test(expected=ParseException.class)
+	public void testEmptySpecification() throws ParseException {
 		parseFramework("EmptySpec");
 	}
 	
 	/**
-	 * Tests an invalid specification with an empty block rule. This test case is ignored because an invalid
-	 * specification leads to a termination of the jvm. 
+	 * Tests an invalid specification with an empty block rule.
+	 * 
+	 * @throws ParseException when parsing fails (here, it should fail).
 	 */
-	@Test
-	@Ignore
-	public void testInvalidSpecification() {
+	@Test(expected=ParseException.class)
+	public void testInvalidSpecification() throws ParseException {
 		parseFramework("InvalidSpec");
 	}
 	
 	/**
 	 * Tests a test specification which uses all elements.
+	 * 
+	 * @throws ParseException when parsing fails.
 	 */
 	@Test
-	public void testCompleteSpecification() {
+	public void testCompleteSpecification() throws ParseException {
 		parseFramework("CompleteSpec");
 		assertNotNull(framework.getResourceLoader());
 		assertEquals("Test.class", framework.getResourceLoader().getClassName());
@@ -197,8 +200,9 @@ public class FrameworkSpecificationParserTest {
 	 * Does the actual parsing of a specification and performs basic tests.
 	 * 
 	 * @param fileName name of the specification file.
+	 * @throws ParseException when parsing fails.
 	 */
-	private void parseFramework(String fileName) {
+	private void parseFramework(String fileName) throws ParseException {
 		framework = parser.parse("src/test/resources/"+fileName+".xml");
 		assertNotNull(framework);
 		assertNotNull(framework.getStartPhase());
