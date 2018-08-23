@@ -1,0 +1,9 @@
+# This file includes regular expressions for default java packages and classes that will be ignored when the class
+# hierarchy is constructed. 
+java/nio/.*
+java/net/.*
+com/sun/.*
+sun/.*
+apple/awt/.*
+com/apple/.*
+org/omg/.*
