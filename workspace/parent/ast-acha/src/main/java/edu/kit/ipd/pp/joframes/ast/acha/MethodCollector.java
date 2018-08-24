@@ -2,6 +2,7 @@ package edu.kit.ipd.pp.joframes.ast.acha;
 
 import com.ibm.wala.classLoader.IMethod;
 import edu.kit.ipd.pp.joframes.ast.base.Rule;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -30,6 +31,15 @@ public class MethodCollector extends Rule {
 	 */
 	public void addMethod(IMethod method) {
 		methods.add(method);
+	}
+	
+	/**
+	 * Adds all methods out of a collection to this collection.
+	 * 
+	 * @param methods the collection with the methods to add.
+	 */
+	public void addAllMethods(Collection<IMethod> methods) {
+		methods.addAll(methods);
 	}
 	
 	/**
