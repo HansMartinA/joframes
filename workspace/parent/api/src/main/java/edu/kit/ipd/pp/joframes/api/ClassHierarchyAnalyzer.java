@@ -50,9 +50,9 @@ class ClassHierarchyAnalyzer {
 	 */
 	private final static String CONSTRUCTOR = "Constructor";
 	/**
-	 * Stores the name of the framework that is currently analyzed.
+	 * Stores the wrapper of the framework.
 	 */
-	private String frameworkName;
+	private FrameworkWrapper wrapper;
 	/**
 	 * Stores the extension class loader.
 	 */
@@ -70,13 +70,15 @@ class ClassHierarchyAnalyzer {
 	 * @param applicationJars list of all jar files containing the application classes.
 	 * @throws ClassHierarchyCreationException when the creation of the class hierarchy fails.
 	 */
-	void analyzeClassHierarchy(Framework framework, String[] frameworkJars, String[] applicationJars) throws
+	FrameworkWrapper analyzeClassHierarchy(Framework framework, String[] frameworkJars, String[] applicationJars) throws
 		ClassHierarchyCreationException {
+		wrapper = new FrameworkWrapper(framework);
 		ClassHierarchy hierarchy = makeClassHierarchy(frameworkJars, applicationJars);
-		frameworkName = framework.getName();
 		extensionLoader = hierarchy.getScope().getExtensionLoader();
 		applicationLoader = hierarchy.getScope().getApplicationLoader();
-		analyzeFramework(hierarchy, framework);
+		analyzeFramework(hierarchy);
+		
+		return wrapper;
 	}
 	
 	/**
@@ -112,14 +114,13 @@ class ClassHierarchyAnalyzer {
 	 * Analyzes the framework and its classes.
 	 * 
 	 * @param hierarchy the class hierarchy.
-	 * @param framework the framework.
 	 */
-	private void analyzeFramework(ClassHierarchy hierarchy, Framework framework) {
-		for(ExplicitDeclaration declaration : framework.getStartPhase().getDeclarations()) {
+	private void analyzeFramework(ClassHierarchy hierarchy) {
+		for(ExplicitDeclaration declaration : wrapper.getFramework().getStartPhase().getDeclarations()) {
 			analyzeForExplicitDeclaration(hierarchy, declaration, null);
 		}
-		analyzeForExplicitDeclaration(hierarchy, framework.getEndPhase().getEnd(), null);
-		for(WorkingPhase working : framework.getWorkingPhases()) {
+		analyzeForExplicitDeclaration(hierarchy, wrapper.getFramework().getEndPhase().getEnd(), null);
+		for(WorkingPhase working : wrapper.getFramework().getWorkingPhases()) {
 			analyzeForWorkingPhase(hierarchy, working);
 		}
 	}
@@ -137,6 +138,7 @@ class ClassHierarchyAnalyzer {
 			boundClass = hierarchy.lookupClass(TypeReference.findOrCreate(extensionLoader,
 					declaration.getClassName()));
 			declaration.setIClass(boundClass);
+			wrapper.addFrameworkClass(boundClass);
 		}
 		for(int i=0; i<declaration.getNumberOfCallsAndDeclarations(); i++) {
 			AstBaseClass abc = declaration.getCallOrDeclaration(i);
@@ -196,6 +198,7 @@ class ClassHierarchyAnalyzer {
 		IClass blockClass = hierarchy.lookupClass(TypeReference.findOrCreate(extensionLoader,
 				block.getClassName()));
 		block.setIClass(blockClass);
+		wrapper.addFrameworkClass(blockClass);
 		if(block.getInnerBlock()==null) {
 			analyzeForExplicitDeclaration(hierarchy, block.getDeclaration(), blockClass);
 		} else {
@@ -218,10 +221,11 @@ class ClassHierarchyAnalyzer {
 		while(!types.isEmpty()) {
 			IClass type = types.poll();
 			types.addAll(hierarchy.getImmediateSubclasses(type));
-			if(isClassInFramework(type, frameworkName)) {
+			if(isClassInFramework(type)) {
 				for(IMethod method : type.getDeclaredMethods()) {
 					if(method.getName().toString().matches(regex)) {
 						collector.addMethod(method);
+						wrapper.addFrameworkClass(method.getDeclaringClass());
 					}
 				}
 			}
@@ -234,17 +238,16 @@ class ClassHierarchyAnalyzer {
 	 * on their package name. 
 	 * 
 	 * @param cl the class that will be checked.
-	 * @param frameworkName the framework name.
 	 * @return true if the class belongs to the framework. false otherwise.
 	 */
-	private boolean isClassInFramework(IClass cl, String frameworkName) {
+	private boolean isClassInFramework(IClass cl) {
 		if(cl.getClassLoader().getReference()==applicationLoader) {
 			return false;
 		}
 		String packageName = cl.getName().getPackage().toString();
-		if(frameworkName.equals(SWING)) {
+		if(wrapper.getFramework().getName().equals(SWING)) {
 			return packageName.contains(SWING.toLowerCase()) || packageName.contains(AWT);
-		} else if(frameworkName.equals(JAVAFX)) {
+		} else if(wrapper.getFramework().getName().equals(JAVAFX)) {
 			return packageName.contains(JAVAFX.toLowerCase());
 		} else {
 			return cl.getClassLoader().getReference()==extensionLoader;
