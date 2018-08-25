@@ -64,7 +64,7 @@ class FrameworkWrapper {
 	 * 
 	 * @return the set with the framework classes.
 	 */
-	Set<IClass> getFrameworkClass() {
+	Set<IClass> getFrameworkClasses() {
 		return frameworkClassesToClasses.keySet();
 	}
 	

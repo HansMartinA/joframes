@@ -77,7 +77,7 @@ class ClassHierarchyAnalyzer {
 		extensionLoader = hierarchy.getScope().getExtensionLoader();
 		applicationLoader = hierarchy.getScope().getApplicationLoader();
 		analyzeFramework(hierarchy);
-		
+		analyzeApplication(hierarchy);
 		return wrapper;
 	}
 	
@@ -251,6 +251,23 @@ class ClassHierarchyAnalyzer {
 			return packageName.contains(JAVAFX.toLowerCase());
 		} else {
 			return cl.getClassLoader().getReference()==extensionLoader;
+		}
+	}
+	
+	/**
+	 * Analyzes the class hierarchy for application classes that are subclasses of identified framework classes.
+	 * 
+	 * @param hierarchy the class hierarchy.
+	 */
+	private void analyzeApplication(ClassHierarchy hierarchy) {
+		ArrayDeque<IClass> classesToAnalyze = new ArrayDeque<>();
+		classesToAnalyze.addAll(wrapper.getFrameworkClasses());
+		while(!classesToAnalyze.isEmpty()) {
+			IClass nextClass = classesToAnalyze.poll();
+			classesToAnalyze.addAll(hierarchy.getImmediateSubclasses(nextClass));
+			if(nextClass.getClassLoader().getReference()==applicationLoader) {
+				wrapper.addApplicationClass(nextClass);
+			}
 		}
 	}
 }
