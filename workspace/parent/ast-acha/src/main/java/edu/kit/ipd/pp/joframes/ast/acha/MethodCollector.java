@@ -39,7 +39,7 @@ public class MethodCollector extends Rule {
 	 * @param methods the collection with the methods to add.
 	 */
 	public void addAllMethods(Collection<IMethod> methods) {
-		methods.addAll(methods);
+		this.methods.addAll(methods);
 	}
 	
 	/**
