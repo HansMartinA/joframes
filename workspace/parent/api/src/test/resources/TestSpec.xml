@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<framework-specification
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="framework_specification_language_model.xsd"
+	xmlns="fwspec" name="Test-Application">
+	<phases>
+		<start>
+			<explicit-declaration
+				for_all="Ledu/kit/ipd/pp/joframes/api/test/framework/A">
+				<method-call>Constructor</method-call>
+				<method-call>init()V</method-call>
+				<method-call>start()V</method-call>
+			</explicit-declaration>
+		</start>
+		<end>
+			<explicit-declaration
+				for_all="Ledu/kit/ipd/pp/joframes/api/test/framework/A">
+				<method-call>destroy()V</method-call>
+			</explicit-declaration>
+		</end>
+		<working-phases>
+			<working threads="multi">
+				<rule-regex>doSomething.*</rule-regex>
+				<rule-supertype>Ljava/util/EventListener</rule-supertype>
+			</working>
+			<working threads="single">
+				<rule-supertype>Ljava/util/EventListener</rule-supertype>
+				<rule-block quantor="for_all"
+					class="Ledu/kit/ipd/pp/joframes/api/test/framework/BlockA">
+					<rule-block quantor="for_all"
+						class="Ledu/kit/ipd/pp/joframes/api/test/framework/BlockB">
+						<explicit-declaration>
+							<explicit-declaration
+								for_all="Ledu/kit/ipd/pp/joframes/api/test/framework/BlockC">
+								<method-call>biz()V</method-call>
+							</explicit-declaration>
+						</explicit-declaration>
+					</rule-block>
+				</rule-block>
+			</working>
+		</working-phases>
+	</phases>
+</framework-specification>

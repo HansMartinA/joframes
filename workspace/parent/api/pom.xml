@@ -27,5 +27,11 @@
   		<artifactId>language-syntax</artifactId>
   		<version>0.0.0</version>
   	</dependency>
+  	<dependency>
+  		<groupId>framework</groupId>
+  		<artifactId>api-test-data</artifactId>
+  		<version>1.0</version>
+  		<scope>test</scope>
+  	</dependency>
   </dependencies>
 </project>
