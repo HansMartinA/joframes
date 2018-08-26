@@ -53,7 +53,10 @@ class FrameworkWrapper {
 	 */
 	void addFrameworkClass(IClass frameworkClass) {
 		try {
-			Class<?> javaClass = Class.forName(frameworkClass.getName().toUnicodeString());
+			// WALA classes put the class name out as Bytecode names, but Class.forName requires fully qualified class
+			// names. Therefore, the Bytecode name is converted to a fully qualified class name.
+			Class<?> javaClass = Class.forName(frameworkClass.getName().toUnicodeString()
+					.substring(1).replace("/", "."));
 			frameworkClassesToClasses.put(frameworkClass, javaClass);
 		} catch(ClassNotFoundException e) {
 		}
