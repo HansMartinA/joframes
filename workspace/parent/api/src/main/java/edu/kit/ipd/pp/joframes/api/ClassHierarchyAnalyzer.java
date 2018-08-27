@@ -25,6 +25,7 @@ import edu.kit.ipd.pp.joframes.ast.base.WorkingPhase;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayDeque;
+import java.util.Iterator;
 import java.util.jar.JarFile;
 
 /**
@@ -172,13 +173,12 @@ class ClassHierarchyAnalyzer {
 		for(Rule r : working.getRules()) {
 			if(r.getClass()==Regex.class) {
 				Regex rr = (Regex)r;
-				analyzeWithRegex(hierarchy, hierarchy.getRootClass(), rr.getRegularExpression(), methods);
+				analyzeForRegexRule(hierarchy, rr.getRegularExpression(), methods);
 				working.removeRule(r);
 			} else if(r.getClass()==Supertype.class) {
 				Supertype st = (Supertype)r;
 				IClass type = hierarchy.lookupClass(TypeReference.findOrCreate(extensionLoader, st.getSuperType()));
-				methods.addAllMethods(type.getDeclaredMethods());
-				analyzeWithRegex(hierarchy, type, ".*", methods);
+				analyzeForSupertypeRule(hierarchy, type, methods);
 				working.removeRule(r);
 			} else if(r.getClass()==Block.class) {
 				analyzeForBlock(hierarchy, (Block)r);
@@ -206,26 +206,54 @@ class ClassHierarchyAnalyzer {
 	}
 	
 	/**
-	 * Analyzes the class hierarchy, to be specific framework classes and their methods, with a regular expression
-	 * and adds matching methods to a method collection.
+	 * Analyzes the class hierarchy, to be specific framework classes and their methods, with a regular expression from
+	 * a regex rule and adds matching methods to a method collection.
 	 * 
 	 * @param hierarchy the class hierarchy.
-	 * @param root the root class with which the analysis starts. Must not be out of the framework.
 	 * @param regex the regular expression which is matched against method names.
 	 * @param collector the method collection.
 	 */
-	private void analyzeWithRegex(ClassHierarchy hierarchy, IClass root, String regex, MethodCollector collector) {
-		ArrayDeque<IClass> types = new ArrayDeque<>();
-		types.add(root);
-		while(!types.isEmpty()) {
-			IClass type = types.poll();
-			types.addAll(hierarchy.getImmediateSubclasses(type));
+	private void analyzeForRegexRule(ClassHierarchy hierarchy, String regex, MethodCollector collector) {
+		Iterator<IClass> iterator = hierarchy.iterator();
+		while(iterator.hasNext()) {
+			IClass type = iterator.next();
 			if(isClassInFramework(type)) {
 				for(IMethod method : type.getDeclaredMethods()) {
 					if(method.getName().toString().matches(regex)) {
 						collector.addMethod(method);
 						wrapper.addFrameworkClass(method.getDeclaringClass());
 					}
+				}
+			}
+		}
+	}
+	
+	/**
+	 * Analyzes the class hierarchy for the supertype rule.
+	 * 
+	 * @param hierarchy the class hierarchy.
+	 * @param supertype the supertype.
+	 * @param collector the method collection.
+	 */
+	private void analyzeForSupertypeRule(ClassHierarchy hierarchy, IClass supertype, MethodCollector collector) {
+		collector.addAllMethods(supertype.getDeclaredMethods());
+		wrapper.addFrameworkClass(supertype);
+		if(supertype.isInterface()) {
+			for(IClass cl : hierarchy.getImplementors(supertype.getReference())) {
+				if(isClassInFramework(cl)) {
+					collector.addAllMethods(cl.getDeclaredMethods());
+					wrapper.addFrameworkClass(cl);
+				}
+			}
+		} else {
+			ArrayDeque<IClass> types = new ArrayDeque<>();
+			types.add(supertype);
+			while(!types.isEmpty()) {
+				IClass type = types.poll();
+				types.addAll(hierarchy.getImmediateSubclasses(type));
+				if(isClassInFramework(type)) {
+					collector.addAllMethods(type.getDeclaredMethods());
+					wrapper.addFrameworkClass(type);
 				}
 			}
 		}
