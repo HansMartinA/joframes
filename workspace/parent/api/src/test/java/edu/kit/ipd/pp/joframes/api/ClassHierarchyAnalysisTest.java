@@ -58,7 +58,7 @@ public class ClassHierarchyAnalysisTest {
 		analyzeClassHierarchy("src/test/resources/TestSpec.xml", new String[]
 				{"src/test/resources/api-test-data-1.0.jar"}, new String[]
 						{"src/test/resources/api-test-data-1.0-tests.jar"});
-		assertEquals(9, wrapper.getFrameworkClasses().size());
+		assertEquals(10, wrapper.getFrameworkClasses().size());
 		Set<?> set = convertToStringSet(wrapper.getFrameworkClasses());
 		assertTrue(set.contains(PACKAGE_FRAMEWORK+"A"));
 		assertTrue(set.contains(PACKAGE_FRAMEWORK+"AEventListener"));
@@ -69,28 +69,7 @@ public class ClassHierarchyAnalysisTest {
 		assertTrue(set.contains(PACKAGE_FRAMEWORK+"BlockC"));
 		assertTrue(set.contains(PACKAGE_FRAMEWORK+"Random"));
 		assertTrue(set.contains(PACKAGE_FRAMEWORK+"SubRandom"));
-		set = wrapper.getClasses();
-		assertTrue(set.contains(A.class));
-		assertTrue(set.contains(AEventListener.class));
-		assertTrue(set.contains(BEventListener.class));
-		assertTrue(set.contains(AAEventListener.class));
-		assertTrue(set.contains(BlockA.class));
-		assertTrue(set.contains(BlockB.class));
-		assertTrue(set.contains(BlockC.class));
-		assertTrue(set.contains(Random.class));
-		assertTrue(set.contains(SubRandom.class));
-		assertEquals(10, wrapper.getApplicationClasses());
-		set = convertToStringSet(wrapper.getApplicationClasses());
-		assertTrue(set.contains(PACKAGE_APPLICATION+"B"));
-		assertTrue(set.contains(PACKAGE_APPLICATION+"AEventListenerImpl"));
-		assertTrue(set.contains(PACKAGE_APPLICATION+"BEventListenerImpl"));
-		assertTrue(set.contains(PACKAGE_APPLICATION+"AAEventListenerImpl"));
-		assertTrue(set.contains(PACKAGE_APPLICATION+"AABEventListenerImpl"));
-		assertTrue(set.contains(PACKAGE_APPLICATION+"SubBlockA"));
-		assertTrue(set.contains(PACKAGE_APPLICATION+"SubBlockB"));
-		assertTrue(set.contains(PACKAGE_APPLICATION+"SubBlockC"));
-		assertTrue(set.contains(PACKAGE_APPLICATION+"AppRandom"));
-		assertTrue(set.contains(PACKAGE_APPLICATION+"AppSubRandom"));
+		assertTrue(set.contains("Ljava/util/EventListener"));
 	}
 	
 	/**
@@ -112,8 +91,6 @@ public class ClassHierarchyAnalysisTest {
 		assertNotNull(wrapper.getFramework());
 		assertEquals(framework, wrapper.getFramework());
 		assertNotNull(wrapper.getFrameworkClasses());
-		assertNotNull(wrapper.getApplicationClasses());
-		assertNotNull(wrapper.getClasses());
 	}
 	
 	/**

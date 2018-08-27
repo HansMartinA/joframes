@@ -2,9 +2,7 @@ package edu.kit.ipd.pp.joframes.api;
 
 import com.ibm.wala.classLoader.IClass;
 import edu.kit.ipd.pp.joframes.ast.base.Framework;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map.Entry;
 import java.util.Set;
 
 /**
@@ -18,13 +16,9 @@ class FrameworkWrapper {
 	 */
 	private Framework framework;
 	/**
-	 * Stores a map from framework classes in form of WALA classes to actual Java classes.
+	 * Stores the framework classes found during the class hierarchy analysis.
 	 */
-	private HashMap<IClass, Class<?>> frameworkClassesToClasses;
-	/**
-	 * Stores a set of application classes corresponding to the framework classes as application subclasses.
-	 */
-	private HashSet<IClass> applicationClasses;
+	private HashSet<IClass> frameworkClasses;
 	
 	/**
 	 * Creates a new instance.
@@ -33,8 +27,7 @@ class FrameworkWrapper {
 	 */
 	FrameworkWrapper(Framework framework) {
 		this.framework = framework;
-		frameworkClassesToClasses = new HashMap<>();
-		applicationClasses = new HashSet<>();
+		frameworkClasses = new HashSet<>();
 	}
 	
 	/**
@@ -52,14 +45,7 @@ class FrameworkWrapper {
 	 * @param frameworkClass the framework class.
 	 */
 	void addFrameworkClass(IClass frameworkClass) {
-		try {
-			// WALA classes put the class name out as Bytecode names, but Class.forName requires fully qualified class
-			// names. Therefore, the Bytecode name is converted to a fully qualified class name.
-			Class<?> javaClass = Class.forName(frameworkClass.getName().toUnicodeString()
-					.substring(1).replace("/", "."));
-			frameworkClassesToClasses.put(frameworkClass, javaClass);
-		} catch(ClassNotFoundException e) {
-		}
+		frameworkClasses.add(frameworkClass);
 	}
 	
 	/**
@@ -68,37 +54,6 @@ class FrameworkWrapper {
 	 * @return the set with the framework classes.
 	 */
 	Set<IClass> getFrameworkClasses() {
-		return frameworkClassesToClasses.keySet();
-	}
-	
-	/**
-	 * Returns the framework classes in form of Java classes.
-	 * 
-	 * @return the set with the framework classes.
-	 */
-	Set<Class<?>> getClasses() {
-		HashSet<Class<?>> classes = new HashSet<>();
-		for(Entry<?, Class<?>> entry : frameworkClassesToClasses.entrySet()) {
-			classes.add(entry.getValue());
-		}
-		return classes;
-	}
-	
-	/**
-	 * Adds an application class.
-	 * 
-	 * @param appClass the application class.
-	 */
-	void addApplicationClass(IClass appClass) {
-		applicationClasses.add(appClass);
-	}
-	
-	/**
-	 * Returns the application subclasses of the framework classes.
-	 * 
-	 * @return the set with the application classes.
-	 */
-	Set<IClass> getApplicationClasses() {
-		return (Set<IClass>)applicationClasses.clone();
+		return (Set<IClass>)frameworkClasses.clone();
 	}
 }
