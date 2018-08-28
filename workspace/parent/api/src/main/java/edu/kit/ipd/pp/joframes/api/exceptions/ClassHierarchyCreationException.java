@@ -10,6 +10,15 @@ public class ClassHierarchyCreationException extends Exception {
 	 * Creates a new instance.
 	 * 
 	 * @param message message of the exception.
+	 */
+	public ClassHierarchyCreationException(String message) {
+		super(message);
+	}
+	
+	/**
+	 * Creates a new instance.
+	 * 
+	 * @param message message of the exception.
 	 * @param cause cause of the exception.
 	 */
 	public ClassHierarchyCreationException(String message, Throwable cause) {

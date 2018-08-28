@@ -95,10 +95,18 @@ class ClassHierarchyAnalyzer {
 			AnalysisScope scope = AnalysisScopeReader.makePrimordialScope(new File("cha-exclusions.txt"));
 			if(frameworkJars!=null) {
 				for(String fwJar : frameworkJars) {
+					if(!new File(fwJar).exists()) {
+						throw new ClassHierarchyCreationException("The given framework jar file ("+fwJar+") does not "
+								+"exist.");
+					}
 					scope.addToScope(scope.getExtensionLoader(), new JarFile(fwJar));
 				}
 			}
 			for(String appJar : applicationJars) {
+				if(!new File(appJar).exists()) {
+					throw new ClassHierarchyCreationException("The given application jar file ("+appJar+") does not "
+							+"exist.");
+				}
 				scope.addToScope(scope.getApplicationLoader(), new JarFile(appJar));
 			}
 			return ClassHierarchyFactory.make(scope);
