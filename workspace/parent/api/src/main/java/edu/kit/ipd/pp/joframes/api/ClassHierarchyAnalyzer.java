@@ -93,7 +93,10 @@ class ClassHierarchyAnalyzer {
 		ClassHierarchyCreationException {
 		try {
 			AnalysisScope scope = AnalysisScopeReader.makePrimordialScope(new File("cha-exclusions.txt"));
-			if(frameworkJars!=null) {
+			if(!wrapper.getFramework().getName().equals(SWING) && !wrapper.getFramework().getName().equals(JAVAFX)) {
+				if(frameworkJars.length==0) {
+					throw new ClassHierarchyCreationException("There are no framework jar files.");
+				}
 				for(String fwJar : frameworkJars) {
 					if(!new File(fwJar).exists()) {
 						throw new ClassHierarchyCreationException("The given framework jar file ("+fwJar+") does not "
@@ -101,6 +104,9 @@ class ClassHierarchyAnalyzer {
 					}
 					scope.addToScope(scope.getExtensionLoader(), new JarFile(fwJar));
 				}
+			}
+			if(applicationJars.length==0) {
+				throw new ClassHierarchyCreationException("There are no application jar files.");
 			}
 			for(String appJar : applicationJars) {
 				if(!new File(appJar).exists()) {
