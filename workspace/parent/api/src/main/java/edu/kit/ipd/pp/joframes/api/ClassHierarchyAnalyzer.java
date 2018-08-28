@@ -150,7 +150,7 @@ class ClassHierarchyAnalyzer {
 				if(method.getSignature().equals(CONSTRUCTOR)) {
 					m = boundClass.getMethod(Selector.make("<init>()V"));
 				} else {
-					boundClass.getMethod(Selector.make(method.getSignature()));
+					m = boundClass.getMethod(Selector.make(method.getSignature()));
 				}
 				method.setMethod(m);
 			} else if(abc.getClass()==StaticMethod.class) {
