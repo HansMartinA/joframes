@@ -189,6 +189,9 @@ public class ClassHierarchyAnalysisTest {
 				assertNotNull(m.getMethod());
 				if(m.getSignature().equals("Constructor")) {
 					assertTrue(m.getMethod().getSignature().endsWith("<init>()V"));
+					for(IClass cl : declaration.getApplicationClasses()) {
+						assertTrue(cl.getClassHierarchy().isSubclassOf(cl, declaration.getIClass()));
+					}
 				} else {
 					assertTrue(m.getMethod().getSignature().endsWith(m.getSignature()));
 				}

@@ -163,6 +163,23 @@ class ClassHierarchyAnalyzer {
 				IMethod m = null;
 				if(method.getSignature().equals(CONSTRUCTOR)) {
 					m = boundClass.getMethod(Selector.make("<init>()V"));
+					if(boundClass.isInterface()) {
+						for(IClass cl : hierarchy.getImplementors(boundClass.getReference())) {
+							if(cl.getClassLoader().getReference()==applicationLoader) {
+								declaration.addApplicationClass(cl);
+							}
+						}
+					} else {
+						ArrayDeque<IClass> subclasses = new ArrayDeque<>();
+						subclasses.addAll(hierarchy.getImmediateSubclasses(boundClass));
+						while(!subclasses.isEmpty()) {
+							IClass cl = subclasses.poll();
+							subclasses.addAll(hierarchy.getImmediateSubclasses(cl));
+							if(cl.getClassLoader().getReference()==applicationLoader) {
+								declaration.addApplicationClass(cl);
+							}
+						}
+					}
 				} else {
 					m = boundClass.getMethod(Selector.make(method.getSignature()));
 				}

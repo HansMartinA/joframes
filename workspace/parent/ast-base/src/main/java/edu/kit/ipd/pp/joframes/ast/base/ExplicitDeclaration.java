@@ -2,6 +2,8 @@ package edu.kit.ipd.pp.joframes.ast.base;
 
 import com.ibm.wala.classLoader.IClass;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Represents a sequence of method calls.
@@ -18,6 +20,10 @@ public class ExplicitDeclaration implements AstBaseClass {
 	 */
 	private IClass correspondingClass;
 	/**
+	 * Stores all application classes that are subclasses of the correspondingClass.
+	 */
+	private HashSet<IClass> applicationClasses;
+	/**
 	 * Stores all calls related to this explicit declaration.
 	 */
 	private ArrayList<AstBaseClass> calls;
@@ -27,6 +33,7 @@ public class ExplicitDeclaration implements AstBaseClass {
 	 */
 	public ExplicitDeclaration() {
 		calls = new ArrayList<>();
+		applicationClasses = new HashSet<>();
 	}
 	
 	/**
@@ -64,6 +71,25 @@ public class ExplicitDeclaration implements AstBaseClass {
 	 */
 	public IClass getIClass() {
 		return correspondingClass;
+	}
+	
+	/**
+	 * Adds an application class which is a subclass to the corresponding class of this explicit declaration.
+	 * 
+	 * @param cl the application class.
+	 */
+	public void addApplicationClass(IClass cl) {
+		applicationClasses.add(cl);
+	}
+	
+	/**
+	 * Returns a set of all application classes that are subclasses of the corresponding class of this explicit
+	 * declaration.
+	 * 
+	 * @return the set of all application classes.
+	 */
+	public Set<IClass> getApplicationClasses() {
+		return (Set<IClass>)applicationClasses.clone();
 	}
 	
 	/**
