@@ -1,5 +1,10 @@
 package edu.kit.ipd.pp.joframes.api;
 
+import com.ibm.wala.classLoader.IClass;
+import com.ibm.wala.shrikeBT.ConstantInstruction;
+import com.ibm.wala.shrikeBT.IInvokeInstruction;
+import com.ibm.wala.shrikeBT.InvokeInstruction;
+import com.ibm.wala.shrikeBT.MethodEditor;
 import com.ibm.wala.shrikeBT.shrikeCT.ClassInstrumenter;
 import com.ibm.wala.shrikeBT.shrikeCT.OfflineInstrumenter;
 import com.ibm.wala.shrikeCT.InvalidClassFileException;
@@ -30,6 +35,22 @@ class BytecodeInstrumenter {
 	 * Name of the ArtifcialClass class.
 	 */
 	private static final String AC_NAME = "ArtificialClass.class";
+	/**
+	 * Name of the static initializer method.
+	 */
+	private static final String CLINIT = "<clinit>";
+	/**
+	 * Name of the method in which the start phase instructions are put.
+	 */
+	private static final String START = "start";
+	/**
+	 * Name of the method in which the working phase instructions are put.
+	 */
+	private static final String WORKING = "working";
+	/**
+	 * Name of the method in which the end phase instructions are put.
+	 */
+	private static final String END = "end";
 	
 	/**
 	 * Instruments the bytecode for a specific framework and application.
@@ -58,7 +79,31 @@ class BytecodeInstrumenter {
 			for(int i=0; i<offInstr.getNumInputClasses(); i++) {
 				ClassInstrumenter clInstr = offInstr.nextClass();
 				if(clInstr.getInputName().endsWith(PACKAGE+IC_NAME)) {
-					
+					clInstr.visitMethods(data -> {
+						if(data.getName().equals(CLINIT)) {
+							MethodEditor editor = new MethodEditor(data);
+							editor.beginPass();
+							editor.insertAfterBody(new MethodEditor.Patch() {
+								@Override
+								public void emitTo(MethodEditor.Output w) {
+									for(IClass cl : wrapper.getFrameworkClasses()) {
+										// WALA classes stores class names in the bytecode format, but the used method
+										// Class.forName requires a full-qualified class name. Therefore, the bytecode
+										// name is converted to a fully qualified class name.
+										w.emit(ConstantInstruction.makeString(cl.getName().toString()
+												.substring(1).replace("/", ".")));
+										w.emit(InvokeInstruction.make("(Ljava/lang/String;)Ljava/lang/Class;",
+												"Ljava/lang/Class", "forName", IInvokeInstruction.Dispatch.STATIC));
+										w.emit(InvokeInstruction.make("(Ljava/lang/Class;)V",
+												"L"+PACKAGE+"InstanceCollector", "addClass",
+												IInvokeInstruction.Dispatch.STATIC));
+									}
+								}
+							});
+							editor.applyPatches();
+							editor.endPass();
+						}
+					});
 					clInstr.emitClass();
 					break;
 				}
