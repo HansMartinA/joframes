@@ -1,6 +1,7 @@
 package edu.kit.ipd.pp.joframes.api;
 
 import com.ibm.wala.classLoader.IClass;
+import com.ibm.wala.ipa.cha.ClassHierarchy;
 import edu.kit.ipd.pp.joframes.ast.base.Framework;
 import java.util.HashSet;
 import java.util.Set;
@@ -11,10 +12,14 @@ import java.util.Set;
  * @author Martin Armbruster
  */
 class FrameworkWrapper {
-	/*
+	/**
 	 * Stores the actual framework.
 	 */
 	private Framework framework;
+	/**
+	 * Stores the class hierarchy associated with the framework and application.
+	 */
+	private ClassHierarchy hierarchy;
 	/**
 	 * Stores the framework classes found during the class hierarchy analysis.
 	 */
@@ -37,6 +42,24 @@ class FrameworkWrapper {
 	 */
 	Framework getFramework() {
 		return framework;
+	}
+	
+	/**
+	 * Sets the class hierarchy to wrap.
+	 * 
+	 * @param hierarchy the class hierarchy.
+	 */
+	public void setClassHierarchy(ClassHierarchy hierarchy) {
+		this.hierarchy = hierarchy;
+	}
+	
+	/**
+	 * Returns the wrapped class hierarchy.
+	 * 
+	 * @return the class hierarchy.
+	 */
+	public ClassHierarchy getClassHierarchy() {
+		return hierarchy;
 	}
 	
 	/**

@@ -2,12 +2,14 @@ package edu.kit.ipd.pp.joframes.api;
 
 import com.ibm.wala.classLoader.IClass;
 import com.ibm.wala.shrikeBT.ConstantInstruction;
+import com.ibm.wala.shrikeBT.DupInstruction;
 import com.ibm.wala.shrikeBT.IInvokeInstruction;
 import com.ibm.wala.shrikeBT.InvokeInstruction;
 import com.ibm.wala.shrikeBT.MethodEditor;
 import com.ibm.wala.shrikeBT.shrikeCT.ClassInstrumenter;
 import com.ibm.wala.shrikeBT.shrikeCT.OfflineInstrumenter;
 import com.ibm.wala.shrikeCT.InvalidClassFileException;
+import com.ibm.wala.types.TypeReference;
 
 import edu.kit.ipd.pp.joframes.api.exceptions.InstrumenterException;
 import java.io.File;
@@ -36,6 +38,10 @@ class BytecodeInstrumenter {
 	 */
 	private static final String AC_NAME = "ArtificialClass.class";
 	/**
+	 * Name of a constructor in bytecode.
+	 */
+	private static final String INIT = "<init>";
+	/**
 	 * Name of the static initializer method.
 	 */
 	private static final String CLINIT = "<clinit>";
@@ -51,6 +57,10 @@ class BytecodeInstrumenter {
 	 * Name of the method in which the end phase instructions are put.
 	 */
 	private static final String END = "end";
+	/**
+	 * Stores the wrapper for the framework.
+	 */
+	private FrameworkWrapper wrapper;
 	
 	/**
 	 * Instruments the bytecode for a specific framework and application.
@@ -59,6 +69,7 @@ class BytecodeInstrumenter {
 	 * @param applicationJars paths to the jar files containing the application classes.
 	 */
 	void instrumentBytecode(FrameworkWrapper wrapper, String[] applicationJars) throws InstrumenterException {
+		this.wrapper = wrapper;
 		try {
 			OfflineInstrumenter offInstr = new OfflineInstrumenter();
 			offInstr.setPassUnmodifiedClasses(true);
@@ -109,7 +120,36 @@ class BytecodeInstrumenter {
 				}
 			}
 			offInstr.beginTraversal();
-			
+			for(int i=0; i<offInstr.getNumInputClasses(); i++) {
+				ClassInstrumenter clInstr = offInstr.nextClass();
+				clInstr.visitMethods(data -> {
+					MethodEditor editor = new MethodEditor(data);
+					if(editor.getData().getClassType().contains(PACKAGE)) {
+						return;
+					}
+					editor.beginPass();
+					editor.visitInstructions(new MethodEditor.Visitor() {
+						@Override
+						public void visitInvoke(IInvokeInstruction instruction) {
+							if(instruction.getMethodName().equals(INIT)
+									&&isSubclassOfFrameworkClasses(instruction.getClassType())) {
+								this.insertAfter(new MethodEditor.Patch() {
+									@Override
+									public void emitTo(MethodEditor.Output w) {
+										w.emit(DupInstruction.make(0));
+										w.emit(InvokeInstruction.make("(Ljava/lang/Object;)V",
+												"L"+PACKAGE+"InstanceCollector", "addInstance",
+												IInvokeInstruction.Dispatch.STATIC));
+									}
+								});
+							}
+						}
+					});
+					editor.applyPatches();
+					editor.endPass();
+				});
+				clInstr.emitClass();
+			}
 			offInstr.beginTraversal();
 			for(int i=0; i<offInstr.getNumInputClasses(); i++) {
 				ClassInstrumenter clInstr = offInstr.nextClass();
@@ -124,5 +164,22 @@ class BytecodeInstrumenter {
 		} catch(InvalidClassFileException e) {
 			throw new InstrumenterException("Bytcode instrumentation resulted in an invalid class.", e);
 		}
+	}
+	
+	/**
+	 * Checks if a class is a subclass of a framework class.
+	 * 
+	 * @param className name of the class that is checked.
+	 * @return true if the class is a subclass of a framework class. false otherwise.
+	 */
+	private boolean isSubclassOfFrameworkClasses(String className) {
+		IClass subclass = wrapper.getClassHierarchy().lookupClass(TypeReference.findOrCreate
+				(wrapper.getClassHierarchy().getScope().getApplicationLoader(), className));
+		for(IClass cl : wrapper.getFrameworkClasses()) {
+			if(wrapper.getClassHierarchy().isSubclassOf(subclass, cl)) {
+				return true;
+			}
+		}
+		return false;
 	}
 }
