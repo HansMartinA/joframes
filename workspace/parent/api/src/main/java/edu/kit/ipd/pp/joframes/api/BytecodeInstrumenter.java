@@ -26,9 +26,12 @@ import com.ibm.wala.shrikeBT.shrikeCT.OfflineInstrumenter;
 import com.ibm.wala.shrikeCT.InvalidClassFileException;
 import com.ibm.wala.types.TypeReference;
 import edu.kit.ipd.pp.joframes.api.exceptions.InstrumenterException;
+import edu.kit.ipd.pp.joframes.ast.acha.MethodCollector;
+import edu.kit.ipd.pp.joframes.ast.ap.Block;
 import edu.kit.ipd.pp.joframes.ast.base.AstBaseClass;
 import edu.kit.ipd.pp.joframes.ast.base.ExplicitDeclaration;
 import edu.kit.ipd.pp.joframes.ast.base.Method;
+import edu.kit.ipd.pp.joframes.ast.base.Rule;
 import edu.kit.ipd.pp.joframes.ast.base.StaticMethod;
 import edu.kit.ipd.pp.joframes.ast.base.ThreadType;
 import edu.kit.ipd.pp.joframes.ast.base.WorkingPhase;
@@ -67,7 +70,7 @@ class BytecodeInstrumenter {
 	/**
 	 * Name of the WorkingWorker class within the artificial class.
 	 */
-	private static final String AC_WW_NAME = "ArtificialClass$1.class";
+	private static final String AC_WW_NAME = "ArtificialClass$WorkingWorker.class";
 	/**
 	 * Bytecode name of the WorkingWorker class within the ArtificialClass class.
 	 */
@@ -581,7 +584,20 @@ class BytecodeInstrumenter {
 	 * @param working the working phase.
 	 */
 	private void instrumentActualWorkingPhaseContent(MethodEditor editor, WorkingPhase working) {
-		
+		NonDeterministicLoopInstrumenter loop = new NonDeterministicLoopInstrumenter();
+		NonDeterministicIfInstrumenter ifInstr = new NonDeterministicIfInstrumenter();
+		loop.instrumentLoopBeginning(editor);
+		// Create bytecode for counting the maximum of cases.
+		ifInstr.instrumentBeginning(editor, 0);
+		for(Rule r : working.getRules()) {
+			if(r.getClass()==MethodCollector.class) {
+				
+			} else if(r.getClass()==Block.class) {
+				
+			}
+		}
+		ifInstr.instrumentEnd(editor);
+		loop.instrumentLoopEnd(editor);
 	}
 	
 	/**
@@ -649,7 +665,7 @@ class BytecodeInstrumenter {
 					w.emit(InvokeInstruction.make("()D", "Ljava/lang/Math", "random",
 							IInvokeInstruction.Dispatch.STATIC));
 					w.emit(LoadInstruction.make("D", maxCasesIndex));
-					w.emit(BinaryOpInstruction.make("D", IBinaryOpInstruction.Operator.ADD));
+					w.emit(BinaryOpInstruction.make("D", IBinaryOpInstruction.Operator.MUL));
 					w.emit(CheckCastInstruction.make("I"));
 					w.emit(StoreInstruction.make("I", randomIndex));
 				}
@@ -690,6 +706,74 @@ class BytecodeInstrumenter {
 				@Override
 				public void emitTo(MethodEditor.Output w) {
 					w.emitLabel(allocatedCaseLabels.get(caseCounter));
+				}
+			});
+		}
+	}
+	
+	/**
+	 * Instruments bytecode with a non-deterministic loop.
+	 * 
+	 * @author Martin Armbruster
+	 */
+	private class NonDeterministicLoopInstrumenter {
+		/**
+		 * Stores the index where the loop counter is stored.
+		 */
+		private int loopIndex;
+		/**
+		 * Stores the label where the loop begins.
+		 */
+		private int beginLabel;
+		/**
+		 * Stores the label where the loop ends.
+		 */
+		private int endLabel;
+		
+		/**
+		 * Instruments the bytecode with the beginning of the loop.
+		 * 
+		 * @param editor the editor for bytecode instrumentation.
+		 */
+		private void instrumentLoopBeginning(MethodEditor editor) {
+			loopIndex = getNextLocalIndex();
+			int randomIndex = getNextLocalIndex();
+			beginLabel = editor.allocateLabel();
+			endLabel = editor.allocateLabel();
+			editor.insertAfterBody(new MethodEditor.Patch() {
+				@Override
+				public void emitTo(MethodEditor.Output w) {
+					w.emit(InvokeInstruction.make("()D", "Ljava/lang/Math", "random",
+							IInvokeInstruction.Dispatch.STATIC));
+					w.emit(ConstantInstruction.make(1000000.0));
+					w.emit(BinaryOpInstruction.make("D", IBinaryOpInstruction.Operator.MUL));
+					w.emit(CheckCastInstruction.make("I"));
+					w.emit(StoreInstruction.make("I", randomIndex));
+					w.emit(ConstantInstruction.make(0));
+					w.emit(StoreInstruction.make("I", loopIndex));
+					w.emitLabel(beginLabel);
+					w.emit(LoadInstruction.make("I", loopIndex));
+					w.emit(LoadInstruction.make("I", randomIndex));
+					w.emit(ConditionalBranchInstruction.make("I", IConditionalBranchInstruction.Operator.LT, endLabel));
+				}
+			});
+		}
+		
+		/**
+		 * Instruments the bytecode with th end of the loop.
+		 * 
+		 * @param editor the editor for bytecode instrumentation.
+		 */
+		private void instrumentLoopEnd(MethodEditor editor) {
+			editor.insertAfterBody(new MethodEditor.Patch() {
+				@Override
+				public void emitTo(MethodEditor.Output w) {
+					w.emit(LoadInstruction.make("I", loopIndex));
+					w.emit(ConstantInstruction.make(1));
+					w.emit(BinaryOpInstruction.make("I", IBinaryOpInstruction.Operator.ADD));
+					w.emit(StoreInstruction.make("I", loopIndex));
+					w.emit(GotoInstruction.make(beginLabel));
+					w.emitLabel(endLabel);
 				}
 			});
 		}
