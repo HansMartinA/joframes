@@ -53,6 +53,10 @@ class BytecodeInstrumenter {
 	 */
 	private static final String AC_NAME = "ArtificialClass.class";
 	/**
+	 * Name of the WorkingWorker class within the artificial class.
+	 */
+	private static final String AC_WW_NAME = "ArtificialClass$1.class";
+	/**
 	 * Name of a constructor in bytecode.
 	 */
 	private static final String INIT = "<init>";
@@ -99,11 +103,13 @@ class BytecodeInstrumenter {
 			// At the first try to load the external api classes, they are searched in the jar file corresponding to
 			// this application. Otherwise, it is assumed that they are used in the eclipse project.
 			if(!offInstr.addInputElement(new File("."), OWN_JAR_FILE+IC_NAME)) {
-				String path = "target/classes/"+PACKAGE;
+				String path = "../api-external/target/classes/"+PACKAGE;
 				offInstr.addInputClass(new File(path+IC_NAME), new File(path+IC_NAME));
 				offInstr.addInputClass(new File(path+AC_NAME), new File(path+AC_NAME));
+				offInstr.addInputClass(new File(path+AC_WW_NAME), new File(path+AC_WW_NAME));
 			} else {
 				offInstr.addInputElement(new File("."), OWN_JAR_FILE+AC_NAME);
+				offInstr.addInputElement(new File("."), OWN_JAR_FILE+AC_WW_NAME);
 			}
 			offInstr.beginTraversal();
 			for(int i=0; i<offInstr.getNumInputClasses(); i++) {
@@ -179,7 +185,7 @@ class BytecodeInstrumenter {
 						if(data.getName().equals(START)) {
 							instrumentStartPhase(editor);
 						} else if(data.getName().equals(WORKING)) {
-							instrumentWorkingPhase(editor);
+							instrumentWorkingPhase(clInstr, editor);
 						} else if(data.getName().equals(END)) {
 							instrumentEndPhase(editor);
 						}
@@ -187,7 +193,17 @@ class BytecodeInstrumenter {
 						editor.endPass();
 					});
 					clInstr.emitClass();
-					break;
+				} else if(clInstr.getInputName().endsWith(PACKAGE+AC_WW_NAME)) {
+					clInstr.visitMethods(data -> {
+						MethodEditor editor = new MethodEditor(data);
+						editor.beginPass();
+						if(data.getName().equals("run")) {
+							instrumentRunnableClassForWorkingPhase(editor);
+						}
+						editor.applyPatches();
+						editor.endPass();
+					});
+					clInstr.emitClass();
 				}
 			}
 			offInstr.close();
@@ -428,14 +444,24 @@ class BytecodeInstrumenter {
 	/**
 	 * Instruments the bytecode for the working phase.
 	 * 
+	 * @param clInstr instrumenter of the artificial class.
 	 * @param editor the editor for the working phase method.
 	 */
-	private void instrumentWorkingPhase(MethodEditor editor) {
+	private void instrumentWorkingPhase(ClassInstrumenter clInstr, MethodEditor editor) {
+		resetLocalVariables();
+	}
+	
+	/**
+	 * Instruments the bytecode of the runnable class used in the working phase.
+	 * 
+	 * @param editor the editor for byteocde instrumentation.
+	 */
+	private void instrumentRunnableClassForWorkingPhase(MethodEditor editor) {
 		resetLocalVariables();
 	}
 
 	/**
-	 * Instruments bytecode with a non-deterministic if-else-if-clause 
+	 * Instruments bytecode with a non-deterministic if-else-if-clause.
 	 * 
 	 * @author Martin Armbruster
 	 */
