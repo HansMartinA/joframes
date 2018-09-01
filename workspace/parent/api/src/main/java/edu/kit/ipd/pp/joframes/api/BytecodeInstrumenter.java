@@ -7,6 +7,7 @@ import com.ibm.wala.shrikeBT.CheckCastInstruction;
 import com.ibm.wala.shrikeBT.ConditionalBranchInstruction;
 import com.ibm.wala.shrikeBT.ConstantInstruction;
 import com.ibm.wala.shrikeBT.DupInstruction;
+import com.ibm.wala.shrikeBT.GetInstruction;
 import com.ibm.wala.shrikeBT.GotoInstruction;
 import com.ibm.wala.shrikeBT.IBinaryOpInstruction;
 import com.ibm.wala.shrikeBT.IConditionalBranchInstruction;
@@ -458,6 +459,29 @@ class BytecodeInstrumenter {
 	 */
 	private void instrumentRunnableClassForWorkingPhase(MethodEditor editor) {
 		resetLocalVariables();
+		int cases = wrapper.getFramework().getWorkingPhases().size();
+		ArrayList<Integer> allocatedLabels = new ArrayList<>();
+		for(int i=0; i<=cases; i++) {
+			allocatedLabels.add(editor.allocateLabel());
+		}
+		editor.insertAfterBody(new MethodEditor.Patch() {
+			@Override
+			public void emitTo(MethodEditor.Output w) {
+				for(int i=0; i<cases; i++) {
+					w.emitLabel(allocatedLabels.get(i));
+					w.emit(LoadInstruction.make("L"+PACKAGE+"ArtificialClass$WorkingWorker", 0));
+					w.emit(GetInstruction.make("I", "L"+PACKAGE+"ArtificialClass$WorkingWorker", "phaseNumber", false));
+					w.emit(ConstantInstruction.make(i));
+					w.emit(ConditionalBranchInstruction.make("I", IConditionalBranchInstruction.Operator.EQ,
+							allocatedLabels.get(i+1)));
+					w.emit(LoadInstruction.make("L"+PACKAGE+"ArtificialClass$WorkingWorker", 0));
+					w.emit(GetInstruction.make("L"+PACKAGE+"ArtificialClass",
+							"L"+PACKAGE+"ArtificialClass$WorkingWorker", "outerInstance", false));
+					w.emit(InvokeInstruction.make("()V", "L"+PACKAGE+"ArtificialClass", "w"+i,
+							IInvokeInstruction.Dispatch.VIRTUAL));
+				}
+			}
+		});
 	}
 
 	/**
