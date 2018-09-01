@@ -2,11 +2,13 @@ package edu.kit.ipd.pp.joframes.api;
 
 import com.ibm.wala.classLoader.IClass;
 import com.ibm.wala.classLoader.IMethod;
+import com.ibm.wala.shrikeBT.BinaryOpInstruction;
 import com.ibm.wala.shrikeBT.CheckCastInstruction;
 import com.ibm.wala.shrikeBT.ConditionalBranchInstruction;
 import com.ibm.wala.shrikeBT.ConstantInstruction;
 import com.ibm.wala.shrikeBT.DupInstruction;
 import com.ibm.wala.shrikeBT.GotoInstruction;
+import com.ibm.wala.shrikeBT.IBinaryOpInstruction;
 import com.ibm.wala.shrikeBT.IConditionalBranchInstruction;
 import com.ibm.wala.shrikeBT.IInvokeInstruction;
 import com.ibm.wala.shrikeBT.InvokeInstruction;
@@ -25,6 +27,8 @@ import edu.kit.ipd.pp.joframes.ast.base.Method;
 import edu.kit.ipd.pp.joframes.ast.base.StaticMethod;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Set;
 
 /**
  * Generates the artificial method out of the abstract syntax tree.
@@ -392,7 +396,22 @@ class BytecodeInstrumenter {
 	 */
 	private void instrumentStartPhase(MethodEditor editor) {
 		resetLocalVariables();
-		
+		NonDeterministicIfInstrumenter ifInstr = new NonDeterministicIfInstrumenter();
+		Set<ExplicitDeclaration> declarations = wrapper.getFramework().getStartPhase().getDeclarations();
+		int maxUsesIndex = getNextLocalIndex();
+		editor.insertAfterBody(new MethodEditor.Patch() {
+			@Override
+			public void emitTo(MethodEditor.Output w) {
+				w.emit(ConstantInstruction.make((double)declarations.size()));
+				w.emit(StoreInstruction.make("D", maxUsesIndex));
+			}
+		});
+		ifInstr.instrumentBeginning(editor, maxUsesIndex);
+		for(ExplicitDeclaration dec : declarations) {
+			ifInstr.instrumentCaseBeginning(editor);
+			instrumentExplicitDeclaration(editor, dec, -1, null);
+		}
+		ifInstr.instrumentEnd(editor);
 	}
 	
 	/**
@@ -412,5 +431,86 @@ class BytecodeInstrumenter {
 	 */
 	private void instrumentWorkingPhase(MethodEditor editor) {
 		resetLocalVariables();
+	}
+
+	/**
+	 * Instruments bytecode with a non-deterministic if-else-if-clause 
+	 * 
+	 * @author Martin Armbruster
+	 */
+	private class NonDeterministicIfInstrumenter {
+		/**
+		 * Stores the index where the random generated number of the case to take is stored.
+		 */
+		private int randomIndex;
+		/**
+		 * Stores a list of all allocated labels for the cases.
+		 */
+		private ArrayList<Integer> allocatedCaseLabels;
+		/**
+		 * Stores the counter of the current case.
+		 */
+		private int caseCounter;
+		
+		/**
+		 * Instruments bytecode with the beginning of the clause.
+		 * 
+		 * @param editor the editor for bytecode instrumentation.
+		 * @param maxCasesIndex index where the number of the overall cases is stored.
+		 */
+		private void instrumentBeginning(MethodEditor editor, int maxCasesIndex) {
+			randomIndex = getNextLocalIndex();
+			allocatedCaseLabels = new ArrayList<>();
+			caseCounter = 0;
+			editor.insertAfterBody(new MethodEditor.Patch() {
+				@Override
+				public void emitTo(MethodEditor.Output w) {
+					w.emit(InvokeInstruction.make("()D", "Ljava/lang/Math", "random",
+							IInvokeInstruction.Dispatch.STATIC));
+					w.emit(LoadInstruction.make("D", maxCasesIndex));
+					w.emit(BinaryOpInstruction.make("D", IBinaryOpInstruction.Operator.ADD));
+					w.emit(CheckCastInstruction.make("I"));
+					w.emit(StoreInstruction.make("I", randomIndex));
+				}
+			});
+		}
+		
+		/**
+		 * Instruments bytecode with the beginning of a case. Must be called before the actual content of the case is
+		 * added.
+		 * 
+		 * @param editor the editor for bytecode instrumentation.
+		 */
+		private void instrumentCaseBeginning(MethodEditor editor) {
+			if(caseCounter==0) {
+				allocatedCaseLabels.add(editor.allocateLabel());
+			}
+			allocatedCaseLabels.add(editor.allocateLabel());
+			editor.insertAfterBody(new MethodEditor.Patch() {
+				@Override
+				public void emitTo(MethodEditor.Output w) {
+					w.emitLabel(allocatedCaseLabels.get(caseCounter));
+					w.emit(LoadInstruction.make("I", randomIndex));
+					w.emit(ConstantInstruction.make(caseCounter));
+					w.emit(ConditionalBranchInstruction.make("I", IConditionalBranchInstruction.Operator.EQ,
+							allocatedCaseLabels.get(caseCounter+1)));
+				}
+			});
+			caseCounter++;
+		}
+		
+		/**
+		 * Instruments bytecode with the end of the clause.
+		 * 
+		 * @param editor the editor for bytecode instrumentation.
+		 */
+		private void instrumentEnd(MethodEditor editor) {
+			editor.insertAfterBody(new MethodEditor.Patch() {
+				@Override
+				public void emitTo(MethodEditor.Output w) {
+					w.emitLabel(allocatedCaseLabels.get(caseCounter));
+				}
+			});
+		}
 	}
 }
