@@ -190,6 +190,7 @@ class BytecodeInstrumenter {
 					break;
 				}
 			}
+			offInstr.close();
 		} catch(IOException e) {
 			throw new InstrumenterException("An IO exception occurred while instrumenting the bytecode.", e);
 		} catch(InvalidClassFileException e) {

@@ -47,4 +47,35 @@ public class ArtificialClass {
 	 */
 	private void working() {
 	}
+	
+	/**
+	 * A general Runnable class that is used for the working phase.
+	 * 
+	 * @author Martin Armbruster
+	 */
+	private class WorkingWorker implements Runnable {
+		/**
+		 * Stores a reference to the outer instance using this instance.
+		 */
+		private ArtificialClass outerInstance;
+		/**
+		 * Stores the number of the working phase this instance belongs to.
+		 */
+		private int phaseNumber;
+		
+		/**
+		 * Creates a new instance.
+		 * 
+		 * @param instance outer instance using this instance.
+		 * @param phaseNumber number of the working phase this instance belongs to.
+		 */
+		private WorkingWorker(ArtificialClass instance, int phaseNumber) {
+			outerInstance = instance;
+			this.phaseNumber = phaseNumber;
+		}
+		
+		@Override
+		public void run() {
+		}
+	}
 }
