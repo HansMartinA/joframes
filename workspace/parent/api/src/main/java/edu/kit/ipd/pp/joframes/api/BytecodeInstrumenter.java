@@ -2,10 +2,13 @@ package edu.kit.ipd.pp.joframes.api;
 
 import com.ibm.wala.classLoader.IClass;
 import com.ibm.wala.classLoader.IMethod;
+import com.ibm.wala.shrikeBT.ArrayLoadInstruction;
+import com.ibm.wala.shrikeBT.ArrayStoreInstruction;
 import com.ibm.wala.shrikeBT.BinaryOpInstruction;
 import com.ibm.wala.shrikeBT.CheckCastInstruction;
 import com.ibm.wala.shrikeBT.ConditionalBranchInstruction;
 import com.ibm.wala.shrikeBT.ConstantInstruction;
+import com.ibm.wala.shrikeBT.Constants;
 import com.ibm.wala.shrikeBT.DupInstruction;
 import com.ibm.wala.shrikeBT.GetInstruction;
 import com.ibm.wala.shrikeBT.GotoInstruction;
@@ -14,6 +17,7 @@ import com.ibm.wala.shrikeBT.IConditionalBranchInstruction;
 import com.ibm.wala.shrikeBT.IInvokeInstruction;
 import com.ibm.wala.shrikeBT.InvokeInstruction;
 import com.ibm.wala.shrikeBT.LoadInstruction;
+import com.ibm.wala.shrikeBT.MethodData;
 import com.ibm.wala.shrikeBT.MethodEditor;
 import com.ibm.wala.shrikeBT.NewInstruction;
 import com.ibm.wala.shrikeBT.StoreInstruction;
@@ -26,9 +30,12 @@ import edu.kit.ipd.pp.joframes.ast.base.AstBaseClass;
 import edu.kit.ipd.pp.joframes.ast.base.ExplicitDeclaration;
 import edu.kit.ipd.pp.joframes.ast.base.Method;
 import edu.kit.ipd.pp.joframes.ast.base.StaticMethod;
+import edu.kit.ipd.pp.joframes.ast.base.ThreadType;
+import edu.kit.ipd.pp.joframes.ast.base.WorkingPhase;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -54,9 +61,17 @@ class BytecodeInstrumenter {
 	 */
 	private static final String AC_NAME = "ArtificialClass.class";
 	/**
+	 * Bytecode name of the ArtificialClass class.
+	 */
+	private static final String AC_BYTECODE_NAME = "L"+PACKAGE+"ArtificialClass";
+	/**
 	 * Name of the WorkingWorker class within the artificial class.
 	 */
 	private static final String AC_WW_NAME = "ArtificialClass$1.class";
+	/**
+	 * Bytecode name of the WorkingWorker class within the ArtificialClass class.
+	 */
+	private static final String AC_WW_BYTECODE_NAME = AC_BYTECODE_NAME+"$WorkingWorker";
 	/**
 	 * Name of a constructor in bytecode.
 	 */
@@ -450,6 +465,123 @@ class BytecodeInstrumenter {
 	 */
 	private void instrumentWorkingPhase(ClassInstrumenter clInstr, MethodEditor editor) {
 		resetLocalVariables();
+		List<WorkingPhase> workingPhases = wrapper.getFramework().getWorkingPhases();
+		ArrayList<Integer> allocatedLabels = new ArrayList<>();
+		for(WorkingPhase working : workingPhases) {
+			if(working.getThreadType()==ThreadType.MULTI) {
+				allocatedLabels.add(editor.allocateLabel());
+				allocatedLabels.add(editor.allocateLabel());
+				allocatedLabels.add(editor.allocateLabel());
+				allocatedLabels.add(editor.allocateLabel());
+			}
+		}
+		editor.insertAfterBody(new MethodEditor.Patch() {
+			@Override
+			public void emitTo(MethodEditor.Output w) {
+				int forLabelCounter = 0;
+				int procIndex = 0;
+				int threadAIndex = 0;
+				int loopIndex = 0;
+				for(int i=0; i<workingPhases.size(); i++) {
+					WorkingPhase working = workingPhases.get(i);
+					if(working.getThreadType()==ThreadType.SINGLE) {
+						w.emit(LoadInstruction.make(AC_BYTECODE_NAME, 0));
+						w.emit(NewInstruction.make(AC_WW_BYTECODE_NAME, 0));
+						w.emit(DupInstruction.make(0));
+						w.emit(LoadInstruction.make(AC_BYTECODE_NAME, 0));
+						w.emit(ConstantInstruction.make(i));
+						w.emit(InvokeInstruction.make("("+AC_BYTECODE_NAME+";I)V", AC_WW_BYTECODE_NAME, "<init>",
+								IInvokeInstruction.Dispatch.SPECIAL));
+						w.emit(InvokeInstruction.make("()V", AC_WW_BYTECODE_NAME, "run",
+								IInvokeInstruction.Dispatch.INTERFACE));
+					} else if(working.getThreadType()==ThreadType.MULTI) {
+						Runtime.getRuntime().availableProcessors();
+						if(procIndex==0) {
+							procIndex = getNextLocalIndex();
+							threadAIndex = getNextLocalIndex();
+							loopIndex = getNextLocalIndex();
+							w.emit(InvokeInstruction.make("()Ljava/lang/Runtime;", "Ljava/lang/Runtime", "getRuntime",
+									IInvokeInstruction.Dispatch.STATIC));
+							w.emit(InvokeInstruction.make("()I", "Ljava/lang/Runtime", "availableProcessors",
+									IInvokeInstruction.Dispatch.VIRTUAL));
+							w.emit(StoreInstruction.make("I", procIndex));
+							w.emit(LoadInstruction.make("I", procIndex));
+							w.emit(NewInstruction.make("Ljava/lang/Thread", 1));
+							w.emit(StoreInstruction.make("Ljava/lang/Thread", threadAIndex));
+						}
+						w.emit(ConstantInstruction.make(0));
+						w.emit(StoreInstruction.make("I", loopIndex));
+						
+						w.emitLabel(allocatedLabels.get(forLabelCounter));
+						w.emit(LoadInstruction.make("I", loopIndex));
+						w.emit(LoadInstruction.make("I", procIndex));
+						w.emit(ConditionalBranchInstruction.make("I", IConditionalBranchInstruction.Operator.LT,
+								allocatedLabels.get(forLabelCounter+1)));
+						w.emit(LoadInstruction.make("[Ljava/lang/Thread", threadAIndex));
+						w.emit(LoadInstruction.make("I", loopIndex));
+						w.emit(NewInstruction.make("Ljava/lang/Thread", 0));
+						w.emit(DupInstruction.make(0));
+						w.emit(NewInstruction.make(AC_WW_BYTECODE_NAME, 0));
+						w.emit(DupInstruction.make(0));
+						w.emit(LoadInstruction.make(AC_BYTECODE_NAME, 0));
+						w.emit(ConstantInstruction.make(i));
+						w.emit(InvokeInstruction.make("()V", AC_WW_BYTECODE_NAME, "<init>",
+								IInvokeInstruction.Dispatch.SPECIAL));
+						w.emit(InvokeInstruction.make("(Ljava/lang/Runnable;)V", "Ljava/lang/Thread", "<init>",
+								IInvokeInstruction.Dispatch.SPECIAL));
+						w.emit(ArrayStoreInstruction.make("[Ljava/lang/Thread"));
+						w.emit(LoadInstruction.make("[Ljava/lang/Thread", threadAIndex));
+						w.emit(LoadInstruction.make("I", loopIndex));
+						w.emit(ArrayLoadInstruction.make("[Ljava/lang/Thread"));
+						w.emit(InvokeInstruction.make("()V", "Ljava/lang/Thread", "start",
+								IInvokeInstruction.Dispatch.VIRTUAL));
+						w.emit(LoadInstruction.make("I", loopIndex));
+						w.emit(ConstantInstruction.make(1));
+						w.emit(BinaryOpInstruction.make("I", IBinaryOpInstruction.Operator.ADD));
+						w.emit(StoreInstruction.make("I", loopIndex));
+						w.emit(GotoInstruction.make(allocatedLabels.get(forLabelCounter)));
+						
+						w.emitLabel(allocatedLabels.get(forLabelCounter+1));
+						w.emit(ConstantInstruction.make(0));
+						w.emit(StoreInstruction.make("I", loopIndex));
+						w.emitLabel(allocatedLabels.get(forLabelCounter+2));
+						w.emit(LoadInstruction.make("I", loopIndex));
+						w.emit(LoadInstruction.make("I", procIndex));
+						w.emit(ConditionalBranchInstruction.make("I", IConditionalBranchInstruction.Operator.LT,
+								allocatedLabels.get(forLabelCounter+3)));
+						w.emit(LoadInstruction.make("[Ljava/lang/Thread", threadAIndex));
+						w.emit(LoadInstruction.make("I", loopIndex));
+						w.emit(ArrayLoadInstruction.make("[Ljava/lang/Thread"));
+						w.emit(InvokeInstruction.make("()V", "Ljava/lang/Thread", "join",
+								IInvokeInstruction.Dispatch.VIRTUAL));
+						w.emit(LoadInstruction.make("I", loopIndex));
+						w.emit(ConstantInstruction.make(1));
+						w.emit(BinaryOpInstruction.make("I", IBinaryOpInstruction.Operator.ADD));
+						w.emit(StoreInstruction.make("I", loopIndex));
+						w.emit(GotoInstruction.make(allocatedLabels.get(forLabelCounter+2)));
+						
+						w.emitLabel(allocatedLabels.get(forLabelCounter+3));
+						forLabelCounter++;
+					}
+				}
+			}
+		});
+		for(int i=0; i<workingPhases.size(); i++) {
+			WorkingPhase working = workingPhases.get(i);
+			MethodData data = clInstr.createEmptyMethodData("w"+i, "()V", Constants.ACC_PROTECTED);
+			MethodEditor wEditor = new MethodEditor(data);
+			instrumentActualWorkingPhaseContent(wEditor, working);
+		}
+	}
+	
+	/**
+	 * Instruments a new ArtificialClass method with the actual content of a working phase.
+	 * 
+	 * @param editor the edtior for bytecode instrumentation.
+	 * @param working the working phase.
+	 */
+	private void instrumentActualWorkingPhaseContent(MethodEditor editor, WorkingPhase working) {
+		
 	}
 	
 	/**
@@ -469,16 +601,14 @@ class BytecodeInstrumenter {
 			public void emitTo(MethodEditor.Output w) {
 				for(int i=0; i<cases; i++) {
 					w.emitLabel(allocatedLabels.get(i));
-					w.emit(LoadInstruction.make("L"+PACKAGE+"ArtificialClass$WorkingWorker", 0));
-					w.emit(GetInstruction.make("I", "L"+PACKAGE+"ArtificialClass$WorkingWorker", "phaseNumber", false));
+					w.emit(LoadInstruction.make(AC_WW_BYTECODE_NAME, 0));
+					w.emit(GetInstruction.make("I", AC_WW_BYTECODE_NAME, "phaseNumber", false));
 					w.emit(ConstantInstruction.make(i));
 					w.emit(ConditionalBranchInstruction.make("I", IConditionalBranchInstruction.Operator.EQ,
 							allocatedLabels.get(i+1)));
-					w.emit(LoadInstruction.make("L"+PACKAGE+"ArtificialClass$WorkingWorker", 0));
-					w.emit(GetInstruction.make("L"+PACKAGE+"ArtificialClass",
-							"L"+PACKAGE+"ArtificialClass$WorkingWorker", "outerInstance", false));
-					w.emit(InvokeInstruction.make("()V", "L"+PACKAGE+"ArtificialClass", "w"+i,
-							IInvokeInstruction.Dispatch.VIRTUAL));
+					w.emit(LoadInstruction.make(AC_WW_BYTECODE_NAME, 0));
+					w.emit(GetInstruction.make(AC_BYTECODE_NAME, AC_WW_BYTECODE_NAME, "outerInstance", false));
+					w.emit(InvokeInstruction.make("()V", AC_BYTECODE_NAME, "w"+i, IInvokeInstruction.Dispatch.VIRTUAL));
 				}
 			}
 		});
