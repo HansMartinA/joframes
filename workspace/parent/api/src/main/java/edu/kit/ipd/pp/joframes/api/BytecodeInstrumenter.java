@@ -48,6 +48,10 @@ import java.util.Set;
  */
 class BytecodeInstrumenter {
 	/**
+	 * Default name for the output jar with the instrumented bytecode.
+	 */
+	private static final String DEFAULT_OUTPUT_NAME = "instrumented-application-of-%s.jar";
+	/**
 	 * Name of the package containing the external api classes.
 	 */
 	private static final String PACKAGE = "edu/kit/ipd/pp/joframes/api/external/";
@@ -109,13 +113,28 @@ class BytecodeInstrumenter {
 	 * 
 	 * @param wrapper the framework with the results of the class hierarchy analysis.
 	 * @param applicationJars paths to the jar files containing the application classes.
+	 * @throws InstrumenterException when an exception occurs during instrumentation.
 	 */
 	void instrumentBytecode(FrameworkWrapper wrapper, String[] applicationJars) throws InstrumenterException {
+		instrumentBytecode(wrapper, applicationJars,
+				String.format(DEFAULT_OUTPUT_NAME, wrapper.getFramework().getName()));
+	}
+	
+	/**
+	 * Instruments the bytecode for a specific framework and application.
+	 * 
+	 * @param wrapper the framework with the results of the class hierarchy analysis.
+	 * @param applicationJars paths to the jar files containing the application classes.
+	 * @param output name of the output jar with the instrumented bytecode.
+	 * @throws InstrumenterException when an exception occurs during instrumentation.
+	 */
+	void instrumentBytecode(FrameworkWrapper wrapper, String[] applicationJars, String output)
+			throws InstrumenterException {
 		this.wrapper = wrapper;
 		try {
 			OfflineInstrumenter offInstr = new OfflineInstrumenter();
 			offInstr.setPassUnmodifiedClasses(true);
-			offInstr.setOutputJar(new File("instrumented-application-of-"+wrapper.getFramework().getName()+".jar"));
+			offInstr.setOutputJar(new File(output));
 			for(String appJar : applicationJars) {
 				offInstr.addInputJar(new File(appJar));
 			}
