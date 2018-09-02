@@ -589,8 +589,27 @@ class BytecodeInstrumenter {
 		NonDeterministicLoopInstrumenter loop = new NonDeterministicLoopInstrumenter();
 		NonDeterministicIfInstrumenter ifInstr = new NonDeterministicIfInstrumenter();
 		loop.instrumentLoopBeginning(editor);
-		// Create bytecode for counting the maximum of cases.
-		ifInstr.instrumentBeginning(editor, 0);
+		int caseCounter = 0;
+		for(Rule r : working.getRules()) {
+			if(r.getClass()==MethodCollector.class) {
+				MethodCollector coll = (MethodCollector)r;
+				for(IClass cl : coll.getFrameworkClasses()) {
+					caseCounter += coll.getMethodCollection(cl).size()*wrapper.getInstancesCount(cl);
+				}
+			} else if(r.getClass()==Block.class) {
+				caseCounter += countBlocks((Block)r);
+			}
+		}
+		int caseCounterCopy = caseCounter;
+		int counterIndex = getNextLocalIndex();
+		editor.insertAfterBody(new MethodEditor.Patch() {
+			@Override
+			public void emitTo(MethodEditor.Output w) {
+				w.emit(ConstantInstruction.make(caseCounterCopy));
+				w.emit(StoreInstruction.make("I", counterIndex));
+			}
+		});
+		ifInstr.instrumentBeginning(editor, counterIndex);
 		for(Rule r : working.getRules()) {
 			if(r.getClass()==MethodCollector.class) {
 				
@@ -600,6 +619,16 @@ class BytecodeInstrumenter {
 		}
 		ifInstr.instrumentEnd(editor);
 		loop.instrumentLoopEnd(editor);
+	}
+	
+	/**
+	 * Counts the number of resulting blocks for a block rule.
+	 * 
+	 * @param b the block rule.
+	 * @return the number of blocks.
+	 */
+	private int countBlocks(Block b) {
+		return wrapper.getInstancesCount(b.getIClass())*(b.getInnerBlock()!=null?countBlocks(b.getInnerBlock()):0);
 	}
 	
 	/**
