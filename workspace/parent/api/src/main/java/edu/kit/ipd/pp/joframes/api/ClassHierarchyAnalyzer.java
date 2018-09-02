@@ -165,7 +165,7 @@ class ClassHierarchyAnalyzer {
 					m = boundClass.getMethod(Selector.make("<init>()V"));
 					if(boundClass.isInterface()) {
 						for(IClass cl : hierarchy.getImplementors(boundClass.getReference())) {
-							if(cl.getClassLoader().getReference()==applicationLoader) {
+							if(checkSubclassForExplicitDeclaration(cl)) {
 								declaration.addApplicationClass(cl);
 							}
 						}
@@ -175,7 +175,7 @@ class ClassHierarchyAnalyzer {
 						while(!subclasses.isEmpty()) {
 							IClass cl = subclasses.poll();
 							subclasses.addAll(hierarchy.getImmediateSubclasses(cl));
-							if(cl.getClassLoader().getReference()==applicationLoader) {
+							if(checkSubclassForExplicitDeclaration(cl)) {
 								declaration.addApplicationClass(cl);
 							}
 						}
@@ -191,6 +191,17 @@ class ClassHierarchyAnalyzer {
 				stMethod.setMethod(stMethod.getIClass().getMethod(Selector.make(stMethod.getSignature())));
 			}
 		}
+	}
+	
+	/**
+	 * Checks if a subclass of a framework class in an explicit declaration is an concrete application class. 
+	 * 
+	 * @param cl the subclass.
+	 * @return true if the subclass is a concrete application class. false otherwise.
+	 */
+	private boolean checkSubclassForExplicitDeclaration(IClass cl) {
+		return cl.getClassLoader().getReference()==applicationLoader&&
+				!(cl.isAbstract()||cl.isInterface()||cl.isPrivate());
 	}
 	
 	/**
@@ -250,7 +261,7 @@ class ClassHierarchyAnalyzer {
 			IClass type = iterator.next();
 			if(isClassInFramework(type)) {
 				for(IMethod method : type.getDeclaredMethods()) {
-					if(method.getName().toString().matches(regex)) {
+					if(method.getName().toString().matches(regex)&&checkMethodForObjectMethod(method)) {
 						collector.addMethod(method);
 						wrapper.addFrameworkClass(method.getDeclaringClass());
 					}
@@ -272,7 +283,11 @@ class ClassHierarchyAnalyzer {
 		if(supertype.isInterface()) {
 			for(IClass cl : hierarchy.getImplementors(supertype.getReference())) {
 				if(isClassInFramework(cl)) {
-					collector.addAllMethods(cl.getDeclaredMethods());
+					for(IMethod m : cl.getDeclaredMethods()) {
+						if(checkMethodForObjectMethod(m)) {
+							collector.addAllMethods(cl.getDeclaredMethods());
+						}
+					}
 					wrapper.addFrameworkClass(cl);
 				}
 			}
@@ -283,11 +298,25 @@ class ClassHierarchyAnalyzer {
 				IClass type = types.poll();
 				types.addAll(hierarchy.getImmediateSubclasses(type));
 				if(isClassInFramework(type)) {
-					collector.addAllMethods(type.getDeclaredMethods());
+					for(IMethod m : type.getDeclaredMethods()) {
+						if(checkMethodForObjectMethod(m)) {
+							collector.addMethod(m);
+						}
+					}
 					wrapper.addFrameworkClass(type);
 				}
 			}
 		}
+	}
+	
+	/**
+	 * Checks if a method is a callable object method.
+	 * 
+	 * @param m the method
+	 * @return true if the method is callable. false otherwise.
+	 */
+	private boolean checkMethodForObjectMethod(IMethod m) {
+		return !(m.isClinit()||m.isInit()||m.isPrivate()||m.isStatic());
 	}
 	
 	/**
