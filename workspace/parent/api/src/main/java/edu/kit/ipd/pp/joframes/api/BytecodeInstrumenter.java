@@ -659,7 +659,7 @@ class BytecodeInstrumenter {
 					}
 				}
 			} else if(r.getClass()==Block.class) {
-				
+				instrumentBlock(editor, ifInstr, (Block)r);
 			}
 		}
 		ifInstr.instrumentEnd(editor);
@@ -674,6 +674,39 @@ class BytecodeInstrumenter {
 	 */
 	private int countBlocks(Block b) {
 		return wrapper.getInstancesCount(b.getIClass())*(b.getInnerBlock()!=null?countBlocks(b.getInnerBlock()):0);
+	}
+	
+	/**
+	 * Instruments the bytecode with a block rule.
+	 * 
+	 * @param editor the editor for bytecode instrumentation.
+	 * @param ifInstr instrumenter for the non-deterministic if-else-if-clause in the working phase.
+	 * @param b the block rule.
+	 */
+	private void instrumentBlock(MethodEditor editor, NonDeterministicIfInstrumenter ifInstr, Block b) {
+		if(b.getInnerBlock()==null) {
+			for(int i=0; i<wrapper.getInstancesCount(b.getIClass()); i++) {
+				ifInstr.instrumentCaseBeginning(editor);
+				instrumentForGettingInstanceCollection(editor, b.getIClass());
+				int index = i;
+				int instanceIndex = getNextLocalIndex();
+				editor.insertAfterBody(new MethodEditor.Patch() {
+					@Override
+					public void emitTo(MethodEditor.Output w) {
+						w.emit(ConstantInstruction.make(index));
+						w.emit(InvokeInstruction.make("(I)Ljava/lang/Object;", "Ljava/util/List", "get",
+								IInvokeInstruction.Dispatch.INTERFACE));
+						w.emit(CheckCastInstruction.make(b.getClassName()));
+						w.emit(StoreInstruction.make(b.getClassName(), instanceIndex));
+						instrumentExplicitDeclaration(editor, b.getDeclaration(), instanceIndex, b.getClassName());
+					}
+				});
+			}
+		} else {
+			for(int i=0; i<wrapper.getInstancesCount(b.getIClass()); i++) {
+				instrumentBlock(editor, ifInstr, b.getInnerBlock());
+			}
+		}
 	}
 	
 	/**
