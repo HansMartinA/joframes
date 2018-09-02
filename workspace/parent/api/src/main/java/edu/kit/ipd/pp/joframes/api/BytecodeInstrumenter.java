@@ -258,6 +258,7 @@ class BytecodeInstrumenter {
 	private boolean isSubclassOfFrameworkClasses(String className) {
 		IClass subclass = wrapper.getClassHierarchy().lookupClass(TypeReference.findOrCreate
 				(wrapper.getClassHierarchy().getScope().getApplicationLoader(), className));
+		wrapper.countOneInstance(subclass);
 		for(IClass cl : wrapper.getFrameworkClasses()) {
 			if(wrapper.getClassHierarchy().isSubclassOf(subclass, cl)) {
 				return true;
@@ -331,6 +332,7 @@ class BytecodeInstrumenter {
 			});
 		}
 		for(IClass appClass : declaration.getApplicationClasses()) {
+			wrapper.countOneInstance(appClass);
 			instrumentExplicitDeclarationContent(editor, declaration, getNextLocalIndex(),
 					appClass.getName().toString());
 		}
