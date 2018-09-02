@@ -102,6 +102,10 @@ class FrameworkSpecificationParser {
 	 * Name of the class name attribute within an explicit declaration.
 	 */
 	private static final String ATTRIBUTE_EXPLICIT_DECLARATION_FOR_ALL = "for_all";
+	/**
+	 * Signature of a main method.
+	 */
+	private static final String MAIN_SIGNATURE = "main([Ljava/lang/String;)V";
 	
 	/**
 	 * Parses a framework specification.
@@ -377,6 +381,9 @@ class FrameworkSpecificationParser {
 			switch(xmlStream.getEventType()) {
 				case XMLStreamConstants.CHARACTERS:
 					String[] splittedText = xmlStream.getText().trim().split(" ");
+					if(splittedText.length==1&&splittedText[0].equals(MAIN_SIGNATURE)) {
+						return new StaticMethod(null, splittedText[1]);
+					}
 					return new StaticMethod(splittedText[0], splittedText[1]);
 			}
 			xmlStream.next();
