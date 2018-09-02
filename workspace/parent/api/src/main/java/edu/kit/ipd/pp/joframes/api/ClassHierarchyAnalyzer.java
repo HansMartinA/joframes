@@ -163,6 +163,14 @@ class ClassHierarchyAnalyzer {
 				IMethod m = null;
 				if(method.getSignature().equals(CONSTRUCTOR)) {
 					m = boundClass.getMethod(Selector.make("<init>()V"));
+					if(m==null) {
+						for(IMethod possibleInitMethod : boundClass.getDeclaredMethods()) {
+							if(possibleInitMethod.isInit()) {
+								m = possibleInitMethod;
+								break;
+							}
+						}
+					}
 					if(boundClass.isInterface()) {
 						for(IClass cl : hierarchy.getImplementors(boundClass.getReference())) {
 							if(checkSubclassForExplicitDeclaration(cl)) {
