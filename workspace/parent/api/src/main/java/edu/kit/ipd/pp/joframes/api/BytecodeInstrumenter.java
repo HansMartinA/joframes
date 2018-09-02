@@ -268,6 +268,27 @@ class BytecodeInstrumenter {
 	}
 	
 	/**
+	 * Instruments the bytecode with instructions to get an instance collection from the InstanceCollector.
+	 * After calling this method, the instance collection is on top of the stack.
+	 * 
+	 * @param editor the editor for bytecode instrumentation.
+	 * @param cl class for which the instance collection is obtained.
+	 */
+	private void instrumentForGettingInstanceCollection(MethodEditor editor, IClass cl) {
+		editor.insertAfterBody(new MethodEditor.Patch() {
+			@Override
+			public void emitTo(MethodEditor.Output w) {
+				w.emit(ConstantInstruction.makeString(cl.getName().toString()));
+				w.emit(InvokeInstruction.make("(Ljava/lang/String;)Ljava/lang/Class;",
+						"Ljava/lang/Class", "forName", IInvokeInstruction.Dispatch.STATIC));
+				w.emit(InvokeInstruction.make("(Ljava/lang/Class;)Ljava/util/List;",
+						"L"+PACKAGE+"InstanceCollector", "getInstances",
+						IInvokeInstruction.Dispatch.STATIC));
+			}
+		});
+	}
+	
+	/**
 	 * Instruments the bytecode with an explicit declaration.
 	 * 
 	 * @param editor the editor for the bytecode instrumentation.
@@ -292,15 +313,10 @@ class BytecodeInstrumenter {
 			int localInstanceIndexCopy = localInstanceIndex;
 			int beginLoopLabelCopy = beginLoopLabel;
 			int afterLoopLabelCopy = afterLoopLabel;
+			instrumentForGettingInstanceCollection(editor, declaration.getIClass());
 			editor.insertAfterBody(new MethodEditor.Patch() {
 				@Override
 				public void emitTo(MethodEditor.Output w) {
-					w.emit(ConstantInstruction.makeString(declaration.getClassName()));
-					w.emit(InvokeInstruction.make("(Ljava/lang/String;)Ljava/lang/Class;",
-							"Ljava/lang/Class", "forName", IInvokeInstruction.Dispatch.STATIC));
-					w.emit(InvokeInstruction.make("(Ljava/lang/Class;)Ljava/util/List;",
-							"L"+PACKAGE+"InstanceCollector", "getInstances",
-							IInvokeInstruction.Dispatch.STATIC));
 					w.emit(InvokeInstruction.make("()Ljava/util/Iterator", "Ljava/util/List", "iterator",
 							IInvokeInstruction.Dispatch.INTERFACE));
 					w.emit(StoreInstruction.make("Ljava/util/Iterator", iteratorIndexCopy));
@@ -612,7 +628,36 @@ class BytecodeInstrumenter {
 		ifInstr.instrumentBeginning(editor, counterIndex);
 		for(Rule r : working.getRules()) {
 			if(r.getClass()==MethodCollector.class) {
-				
+				MethodCollector coll = (MethodCollector)r;
+				for(IClass cl : coll.getFrameworkClasses()) {
+					int instancesCount = wrapper.getInstancesCount(cl);
+					for(int i=0; i<instancesCount; i++) {
+						for(IMethod m : coll.getMethodCollection(cl)) {
+							ifInstr.instrumentCaseBeginning(editor);
+							instrumentForGettingInstanceCollection(editor, cl);
+							int index = i;
+							editor.insertAfterBody(new MethodEditor.Patch() {
+								@Override
+								public void emitTo(MethodEditor.Output w) {
+									w.emit(ConstantInstruction.make(index));
+									w.emit(InvokeInstruction.make("(I)Ljava/lang/Object;", "Ljava/util/List", "get",
+											IInvokeInstruction.Dispatch.INTERFACE));
+									w.emit(CheckCastInstruction.make(cl.getName().toString()));
+								}
+							});
+							instantiateParameters(editor, m);
+							editor.insertAfterBody(new MethodEditor.Patch() {
+								@Override
+								public void emitTo(MethodEditor.Output w) {
+									w.emit(InvokeInstruction.make(m.getDescriptor().toString(), cl.getName().toString(),
+											m.getName().toString(), cl.isInterface()
+											?IInvokeInstruction.Dispatch.INTERFACE
+													:IInvokeInstruction.Dispatch.VIRTUAL));
+								}
+							});
+						}
+					}
+				}
 			} else if(r.getClass()==Block.class) {
 				
 			}
