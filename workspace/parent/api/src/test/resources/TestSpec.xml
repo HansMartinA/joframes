@@ -5,17 +5,33 @@
 	xmlns="fwspec" name="Test-Application">
 	<phases>
 		<start>
-			<explicit-declaration
-				for_all="Ledu/kit/ipd/pp/joframes/api/test/framework/A">
+			<explicit-declaration for_all="Ledu/kit/ipd/pp/joframes/api/test/framework/A">
+				<static-call>Ledu/kit/ipd/pp/joframes/api/test/framework/A similarToMain([Ljava/lang/String;)V</static-call>
 				<method-call>Constructor</method-call>
 				<method-call>init()V</method-call>
 				<method-call>start()V</method-call>
 			</explicit-declaration>
+			<explicit-declaration for_all="Ledu/kit/ipd/pp/jofames/api/test/framework/A2">
+				<static-call>Ledu/kit/ipd/pp/joframes/api/test/framework/A similarToMain([Ljava/lang/String;)V</static-call>
+				<method-call>Constructor</method-call>
+				<method-call>initialize()V</method-call>
+				<method-call>run()V</method-call>
+			</explicit-declaration>
+			<explicit-declaration for_all="Ledu/kit/ipd/pp/joframes/api/test/framework/A2">
+				<static-call>Ledu/kit/ipd/pp/joframes/api/test/framework/A similarToMain([Ljava/lang/String;)V</static-call>
+				<method-call>Constructor</method-call>
+				<method-call>initialize(Ljava/lang/String;)V</method-call>
+				<method-call>run()V</method-call>
+			</explicit-declaration>
 		</start>
 		<end>
-			<explicit-declaration
-				for_all="Ledu/kit/ipd/pp/joframes/api/test/framework/A">
-				<method-call>destroy()V</method-call>
+			<explicit-declaration>
+				<explicit-declaration for_all="Ledu/kit/ipd/pp/joframes/api/test/framework/A">
+					<method-call>destroy()V</method-call>
+				</explicit-declaration>
+				<explicit-declaration for_all="Ledu/kit/ipd/pp/joframes/apit/test/framework/A2">
+					<method-call>stop()V</method-call>
+				</explicit-declaration>
 			</explicit-declaration>
 		</end>
 		<working-phases>
@@ -25,13 +41,10 @@
 			</working>
 			<working threads="single">
 				<rule-supertype>Ljava/util/EventListener</rule-supertype>
-				<rule-block quantor="for_all"
-					class="Ledu/kit/ipd/pp/joframes/api/test/framework/BlockA">
-					<rule-block quantor="for_all"
-						class="Ledu/kit/ipd/pp/joframes/api/test/framework/BlockB">
+				<rule-block quantor="for_all" class="Ledu/kit/ipd/pp/joframes/api/test/framework/BlockA">
+					<rule-block quantor="for_all" class="Ledu/kit/ipd/pp/joframes/api/test/framework/BlockB">
 						<explicit-declaration>
-							<explicit-declaration
-								for_all="Ledu/kit/ipd/pp/joframes/api/test/framework/BlockC">
+							<explicit-declaration for_all="Ledu/kit/ipd/pp/joframes/api/test/framework/BlockC">
 								<method-call>biz()V</method-call>
 							</explicit-declaration>
 						</explicit-declaration>

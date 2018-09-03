@@ -7,6 +7,15 @@ package edu.kit.ipd.pp.joframes.api.test.framework;
  */
 public class A {
 	/**
+	 * A static method that is similar to a main method.
+	 * 
+	 * @param args arguments.
+	 */
+	public static void similarToMain(String[] args) {
+		System.out.println("A similarToMain([Ljava/lang/String;)V");
+	}
+	
+	/**
 	 * Represents an initialization process.
 	 */
 	public void init() {

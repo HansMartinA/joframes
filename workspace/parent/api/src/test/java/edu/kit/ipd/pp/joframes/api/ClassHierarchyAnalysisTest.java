@@ -35,11 +35,11 @@ public class ClassHierarchyAnalysisTest {
 	/**
 	 * Stores the path to the jar file with the test framework.
 	 */
-	private static final String TEST_FRAMEWORK_JAR_PATH = "src/test/resources/api-test-data-1.0.jar";
+	private static final String TEST_FRAMEWORK_JAR_PATH = "src/test/resources/api-test-data-2.0.jar";
 	/**
 	 * Stores the path to the jar file with the test application.
 	 */
-	private static final String TEST_APPLICATION_JAR_PATH = "src/test/resources/api-test-data-1.0-tests.jar";
+	private static final String TEST_APPLICATION_JAR_PATH = "src/test/resources/api-test-data-2.0-tests.jar";
 	/**
 	 * General package name for the test framework and application.
 	 */
