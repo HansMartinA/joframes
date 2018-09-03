@@ -62,6 +62,10 @@ class ClassHierarchyAnalyzer {
 	 * Stores the application class loader.
 	 */
 	private ClassLoaderReference applicationLoader;
+	/**
+	 * Stores the name of the class containing the main method.
+	 */
+	private String mainClassName;
 	
 	/**
 	 * Analyzes the class hierarchy of the framework and application.
@@ -69,12 +73,30 @@ class ClassHierarchyAnalyzer {
 	 * @param framework the framework specification that will be modified.
 	 * @param frameworkJars list of all jar files containing the framework classes. Can be null.
 	 * @param applicationJars list of all jar files containing the application classes.
-	 * @throws ClassHierarchyCreationException when the creation of the class hierarchy fails.
+	 * @return the modified framework with additional information in a FrameworkWrapper.
+	 * @throws ClassHierarchyCreationException
 	 */
 	FrameworkWrapper analyzeClassHierarchy(Framework framework, String[] frameworkJars, String[] applicationJars) throws
 		ClassHierarchyCreationException {
+		return analyzeClassHierarchy(framework, frameworkJars, applicationJars, null);
+	}
+	
+	/**
+	 * Analyzes the class hierarchy of the framework and application.
+	 * 
+	 * @param framework the framework specification that will be modified.
+	 * @param frameworkJars list of all jar files containing the framework classes. Can be null.
+	 * @param applicationJars list of all jar files containing the application classes.
+	 * @param mainClassName name of the class containing the main method.
+	 * @return the modified framework with additional information in a FrameworkWrapper.
+	 * @throws ClassHierarchyCreationException when the creation of the class hierarchy fails.
+	 */
+	FrameworkWrapper analyzeClassHierarchy(Framework framework, String[] frameworkJars, String[] applicationJars,
+			String mainClassName) throws ClassHierarchyCreationException {
+		this.mainClassName = mainClassName;
 		wrapper = new FrameworkWrapper(framework);
 		ClassHierarchy hierarchy = makeClassHierarchy(frameworkJars, applicationJars);
+		wrapper.setClassHierarchy(hierarchy);
 		extensionLoader = hierarchy.getScope().getExtensionLoader();
 		applicationLoader = hierarchy.getScope().getApplicationLoader();
 		analyzeFramework(hierarchy);
@@ -194,8 +216,18 @@ class ClassHierarchyAnalyzer {
 				method.setMethod(m);
 			} else if(abc.getClass()==StaticMethod.class) {
 				StaticMethod stMethod = (StaticMethod)abc;
-				stMethod.setIClass(hierarchy.lookupClass(TypeReference.findOrCreate(
-						extensionLoader, stMethod.getClassString())));
+				if(stMethod.getClassString()==null&&
+						stMethod.getSignature().equals(FrameworkSpecificationParser.MAIN_SIGNATURE)) {
+					if(mainClassName==null) {
+						stMethod.setIClass(findNextMainClass(hierarchy));
+					} else {
+						stMethod.setIClass(hierarchy.lookupClass(
+								TypeReference.findOrCreate(applicationLoader, mainClassName)));
+					}
+				} else {
+					stMethod.setIClass(hierarchy.lookupClass(TypeReference.findOrCreate(
+							extensionLoader, stMethod.getClassString())));
+				}
 				stMethod.setMethod(stMethod.getIClass().getMethod(Selector.make(stMethod.getSignature())));
 			}
 		}
@@ -210,6 +242,44 @@ class ClassHierarchyAnalyzer {
 	private boolean checkSubclassForExplicitDeclaration(IClass cl) {
 		return cl.getClassLoader().getReference()==applicationLoader&&
 				!(cl.isAbstract()||cl.isInterface()||cl.isPrivate());
+	}
+	
+	/**
+	 * When a call to a main method is given without a class, this method looks for the next class containing a main
+	 * method. First, lookups in application classes are performed. Afterwards, there are lookups in framework classes
+	 * and last in all classes.
+	 * 
+	 * @param hierarchy the class hierarchy for analysis.
+	 * @return the first found class with a main method or null if no class can be found.
+	 */
+	private IClass findNextMainClass(ClassHierarchy hierarchy) {
+		for(IClass cl : hierarchy) {
+			if(cl.getClassLoader().getReference()==applicationLoader&&checkClassForMain(cl)) {
+				return cl;
+			}
+		}
+		for(IClass cl : hierarchy) {
+			if(isClassInFramework(cl)&&checkClassForMain(cl)) {
+				return cl;
+			}
+		}
+		for(IClass cl : hierarchy) {
+			if(checkClassForMain(cl)) {
+				return cl;
+			}
+		}
+		return null;
+	}
+	
+	/**
+	 * Checks if a class contains a main method.
+	 * 
+	 * @param cl the class to check.
+	 * @return true if the class contains a main method. false otherwise.
+	 */
+	private boolean checkClassForMain(IClass cl) {
+		IMethod possibleMain = cl.getMethod(Selector.make(FrameworkSpecificationParser.MAIN_SIGNATURE));
+		return possibleMain!=null&&possibleMain.isStatic()&&possibleMain.isPublic();
 	}
 	
 	/**

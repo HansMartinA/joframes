@@ -105,7 +105,7 @@ class FrameworkSpecificationParser {
 	/**
 	 * Signature of a main method.
 	 */
-	private static final String MAIN_SIGNATURE = "main([Ljava/lang/String;)V";
+	static final String MAIN_SIGNATURE = "main([Ljava/lang/String;)V";
 	
 	/**
 	 * Parses a framework specification.
