@@ -1,6 +1,7 @@
 package edu.kit.ipd.pp.joframes.api;
 
 import com.ibm.wala.classLoader.IClass;
+import com.ibm.wala.classLoader.IMethod;
 import edu.kit.ipd.pp.joframes.api.exceptions.ClassHierarchyCreationException;
 import edu.kit.ipd.pp.joframes.api.exceptions.ParseException;
 import edu.kit.ipd.pp.joframes.ast.acha.MethodCollector;
@@ -49,6 +50,84 @@ public class ClassHierarchyAnalysisTest {
 	 */
 	private static final String PACKAGE_FRAMEWORK = PACKAGE+"framework/";
 	/**
+	 * Package name of the test application.
+	 */
+	private static final String PACKAGE_APPLICATION = PACKAGE+"application/";
+	/**
+	 * Bytecode name of the A class.
+	 */
+	private static final String CLASS_A = PACKAGE_FRAMEWORK+"A";
+	/**
+	 * Bytecode name of the A2 interface.
+	 */
+	private static final String CLASS_A2 = PACKAGE_FRAMEWORK+"A2";
+	/**
+	 * Bytecode name of the EventListener interface.
+	 */
+	private static final String CLASS_EVENT_LISTENER = "Ljava/util/EventListener";
+	/**
+	 * Bytecode name of the AEventListener interface.
+	 */
+	private static final String CLASS_A_EVENT_LISTENER = PACKAGE_FRAMEWORK+"AEventListener";
+	/**
+	 * Bytecode name of the BEventListener interface.
+	 */
+	private static final String CLASS_B_EVENT_LISTENER = PACKAGE_FRAMEWORK+"BEventListener";
+	/**
+	 * Bytecode name of the AAEventListener interface.
+	 */
+	private static final String CLASS_AA_EVENT_LISTENER = PACKAGE_FRAMEWORK+"AAEventListener";
+	/**
+	 * Bytecode name of the CEventListener interface.
+	 */
+	private static final String CLASS_C_EVENT_LISTENER = PACKAGE_FRAMEWORK+"CEventListener";
+	/**
+	 * Bytecode name of the ConcreteFrameworkCEventListener class.
+	 */
+	private static final String CLASS_CONCRETE_FRAMEWORK_C_EVENT_LISTENER = PACKAGE_FRAMEWORK
+			+"ConcreteFrameworkCEventListener";
+	/**
+	 * Bytecode name of the BlockA class.
+	 */
+	private static final String CLASS_BLOCK_A = PACKAGE_FRAMEWORK+"BlockA";
+	/**
+	 * Bytecode name of the BlockB class.
+	 */
+	private static final String CLASS_BLOCK_B = PACKAGE_FRAMEWORK+"BlockB";
+	/**
+	 * Bytecode name of the BlockC class.
+	 */
+	private static final String CLASS_BLOCK_C = PACKAGE_FRAMEWORK+"BlockC";
+	/**
+	 * Bytecode name of the Random class.
+	 */
+	private static final String CLASS_RANDOM = PACKAGE_FRAMEWORK+"Random";
+	/**
+	 * Bytecode name of the SubRandom class.
+	 */
+	private static final String CLASS_SUB_RANDOM = PACKAGE_FRAMEWORK+"SubRandom";
+	/**
+	 * Bytecode name of the B class.
+	 */
+	private static final String CLASS_B = PACKAGE_APPLICATION+"B";
+	/**
+	 * Bytecode name of the B2 class.
+	 */
+	private static final String CLASS_B2 = PACKAGE_APPLICATION+"B2";
+	/**
+	 * Bytecode name for a handle method.
+	 */
+	private static final String METHOD_HANDLE = "handle()V";
+	/**
+	 * Bytecode name for a handleAA method.
+	 */
+	private static final String METHOD_HANDLE_AA = "handleAA()V";
+	/**
+	 * Bytecode name for a doSomething method.
+	 */
+	private static final String METHOD_DO_SOMETHING = "doSomething()V";
+	
+	/**
 	 * Stores the parsed framework.
 	 */
 	private Framework framework;
@@ -68,21 +147,25 @@ public class ClassHierarchyAnalysisTest {
 		analyzeClassHierarchy(TEST_SPEC_PATH, new String[]
 				{TEST_FRAMEWORK_JAR_PATH}, new String[]
 						{TEST_APPLICATION_JAR_PATH});
-		assertEquals(10, wrapper.getFrameworkClasses().size());
+		assertEquals(13, wrapper.getFrameworkClasses().size());
 		Set<?> set = convertToStringSet(wrapper.getFrameworkClasses());
-		assertTrue(set.contains(PACKAGE_FRAMEWORK+"A"));
-		assertTrue(set.contains(PACKAGE_FRAMEWORK+"AEventListener"));
-		assertTrue(set.contains(PACKAGE_FRAMEWORK+"BEventListener"));
-		assertTrue(set.contains(PACKAGE_FRAMEWORK+"AAEventListener"));
-		assertTrue(set.contains(PACKAGE_FRAMEWORK+"BlockA"));
-		assertTrue(set.contains(PACKAGE_FRAMEWORK+"BlockB"));
-		assertTrue(set.contains(PACKAGE_FRAMEWORK+"BlockC"));
-		assertTrue(set.contains(PACKAGE_FRAMEWORK+"Random"));
-		assertTrue(set.contains(PACKAGE_FRAMEWORK+"SubRandom"));
-		assertTrue(set.contains("Ljava/util/EventListener"));
+		assertTrue(set.contains(CLASS_A));
+		assertTrue(set.contains(CLASS_A2));
+		assertTrue(set.contains(CLASS_A_EVENT_LISTENER));
+		assertTrue(set.contains(CLASS_B_EVENT_LISTENER));
+		assertTrue(set.contains(CLASS_C_EVENT_LISTENER));
+		assertTrue(set.contains(CLASS_AA_EVENT_LISTENER));
+		assertTrue(set.contains(CLASS_BLOCK_A));
+		assertTrue(set.contains(CLASS_BLOCK_B));
+		assertTrue(set.contains(CLASS_BLOCK_C));
+		assertTrue(set.contains(CLASS_CONCRETE_FRAMEWORK_C_EVENT_LISTENER));
+		assertTrue(set.contains(CLASS_EVENT_LISTENER));
+		assertTrue(set.contains(CLASS_RANDOM));
+		assertTrue(set.contains(CLASS_SUB_RANDOM));
 		for(ExplicitDeclaration declaration : wrapper.getFramework().getStartPhase().getDeclarations()) {
 			validateExplicitDeclaration(declaration);
 		}
+		validateStartPhaseOfTestSpec();
 		validateExplicitDeclaration(wrapper.getFramework().getEndPhase().getEnd());
 		assertEquals(2, wrapper.getFramework().getWorkingPhases().size());
 		WorkingPhase working = wrapper.getFramework().getWorkingPhases().get(0);
@@ -90,7 +173,7 @@ public class ClassHierarchyAnalysisTest {
 		for(Rule r : working.getRules()) {
 			if(r.getClass()==MethodCollector.class) {
 				MethodCollector c = (MethodCollector)r;
-				// Test the MethodCollector.
+				validateMethodCollectorOfTestSpec(c, true);
 			} else {
 				fail("First working phase contains an illegal block, regex or supertype rule.");
 			}
@@ -100,11 +183,103 @@ public class ClassHierarchyAnalysisTest {
 		for(Rule r : working.getRules()) {
 			if(r.getClass()==MethodCollector.class) {
 				MethodCollector c = (MethodCollector)r;
-				// Test the MethodCollector.
+				validateMethodCollectorOfTestSpec(c, false);
 			} else if(r.getClass()==Block.class) {
 				validateBlock((Block)r);
 			} else {
 				fail("The second working phase contains an illegal regex or supertype rule.");
+			}
+		}
+	}
+	
+	/**
+	 * Validates the start phase for the TestSpec.
+	 */
+	private void validateStartPhaseOfTestSpec() {
+		for(ExplicitDeclaration declaration : wrapper.getFramework().getStartPhase().getDeclarations()) {
+			assertEquals(1, declaration.getApplicationClasses());
+			if(declaration.getClassName().equals(CLASS_A)) {
+				for(IClass cl : declaration.getApplicationClasses()) {
+					assertEquals(CLASS_B, cl.getName().toString());
+				}
+			} else if(declaration.getClassName().equals(CLASS_A2)) {
+				for(IClass cl : declaration.getApplicationClasses()) {
+					assertEquals(CLASS_B2, cl.getName().toString());
+				}
+			} else {
+				fail("Unexpected class found in the start phase: "+declaration.getClassName());
+			}
+		}
+	}
+	
+	/**
+	 * Validates a MethodCollector object created during the class hierarchy analysis of the TestSpec.
+	 * 
+	 * @param coll the MethodCollector object.
+	 * @param regexIncluded true if the regex rule (from working phase one) is included. false if not (in working phase
+	 *                      two).
+	 */
+	private void validateMethodCollectorOfTestSpec(MethodCollector coll, boolean regexIncluded) {
+		int expectedInstances = regexIncluded?8:6;
+		assertEquals(expectedInstances, coll.getFrameworkClasses().size());
+		for(IClass cl : coll.getFrameworkClasses()) {
+			Set<IMethod> methods = coll.getMethodCollection(cl);
+			switch(cl.getName().toString()) {
+				case CLASS_EVENT_LISTENER:
+					assertEquals(0, methods.size());
+					break;
+				case CLASS_A_EVENT_LISTENER:
+					assertEquals(1, methods.size());
+					for(IMethod m : methods) {
+						assertEquals(cl, m.getDeclaringClass());
+						assertEquals(METHOD_HANDLE, m.getSelector().toString());
+					}
+					break;
+				case CLASS_B_EVENT_LISTENER:
+					assertEquals(1, methods.size());
+					for(IMethod m : methods) {
+						assertEquals(cl, m.getDeclaringClass());
+						assertEquals(METHOD_HANDLE, m.getSelector().toString());
+					}
+					break;
+				case CLASS_C_EVENT_LISTENER:
+					assertEquals(1, methods.size());
+					for(IMethod m : methods) {
+						assertEquals(cl, m.getDeclaringClass());
+						assertEquals(METHOD_DO_SOMETHING, m.getSelector().toString());
+					}
+					break;
+				case CLASS_AA_EVENT_LISTENER:
+					assertEquals(1, methods.size());
+					for(IMethod m : methods) {
+						assertEquals(cl, m.getDeclaringClass());
+						assertEquals(METHOD_HANDLE_AA, m.getSelector().toString());
+					}
+					break;
+				case CLASS_CONCRETE_FRAMEWORK_C_EVENT_LISTENER:
+					assertEquals(1, methods.size());
+					for(IMethod m : methods) {
+						assertEquals(cl, m.getDeclaringClass());
+						assertEquals(METHOD_DO_SOMETHING, m.getSelector().toString());
+					}
+					break;
+				case CLASS_RANDOM:
+					assertEquals(1, methods.size());
+					for(IMethod m : methods) {
+						assertEquals(cl, m.getDeclaringClass());
+						assertEquals(METHOD_DO_SOMETHING, m.getSelector().toString());
+					}
+					break;
+				case CLASS_SUB_RANDOM:
+					assertEquals(1, methods.size());
+					for(IMethod m : methods) {
+						assertEquals(cl, m.getDeclaringClass());
+						assertEquals(METHOD_DO_SOMETHING, m.getSelector().toString());
+					}
+					break;
+				default:
+					fail("The MethodCollector contains the unexpected class or interface: "+cl.getName().toString());
+					break;
 			}
 		}
 	}
@@ -150,7 +325,12 @@ public class ClassHierarchyAnalysisTest {
 		assertNotNull(wrapper);
 		assertNotNull(wrapper.getFramework());
 		assertEquals(framework, wrapper.getFramework());
+		assertNotNull(wrapper.getClassHierarchy());
 		assertNotNull(wrapper.getFrameworkClasses());
+		for(IClass cl : wrapper.getFrameworkClasses()) {
+			// Instances are counted during the bytecode instrumentation.
+			assertTrue(wrapper.getInstancesCount(cl)==0);
+		}
 	}
 	
 	/**
@@ -188,9 +368,9 @@ public class ClassHierarchyAnalysisTest {
 				assertNotNull(m.getSignature());
 				assertNotNull(m.getMethod());
 				if(m.getSignature().equals("Constructor")) {
-					assertTrue(m.getMethod().getSignature().endsWith("<init>()V"));
+					assertTrue(m.getMethod().getName().toString().equals("<init>"));
 					for(IClass cl : declaration.getApplicationClasses()) {
-						assertTrue(cl.getClassHierarchy().isSubclassOf(cl, declaration.getIClass()));
+						assertTrue(wrapper.getClassHierarchy().isSubclassOf(cl, declaration.getIClass()));
 					}
 				} else {
 					assertTrue(m.getMethod().getSignature().endsWith(m.getSignature()));
