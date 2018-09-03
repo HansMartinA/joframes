@@ -11,7 +11,7 @@
 				<method-call>init()V</method-call>
 				<method-call>start()V</method-call>
 			</explicit-declaration>
-			<explicit-declaration for_all="Ledu/kit/ipd/pp/jofames/api/test/framework/A2">
+			<explicit-declaration for_all="Ledu/kit/ipd/pp/joframes/api/test/framework/A2">
 				<static-call>Ledu/kit/ipd/pp/joframes/api/test/framework/A similarToMain([Ljava/lang/String;)V</static-call>
 				<method-call>Constructor</method-call>
 				<method-call>initialize()V</method-call>
@@ -29,7 +29,7 @@
 				<explicit-declaration for_all="Ledu/kit/ipd/pp/joframes/api/test/framework/A">
 					<method-call>destroy()V</method-call>
 				</explicit-declaration>
-				<explicit-declaration for_all="Ledu/kit/ipd/pp/joframes/apit/test/framework/A2">
+				<explicit-declaration for_all="Ledu/kit/ipd/pp/joframes/api/test/framework/A2">
 					<method-call>stop()V</method-call>
 				</explicit-declaration>
 			</explicit-declaration>
