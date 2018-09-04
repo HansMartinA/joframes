@@ -37,26 +37,6 @@ public class FrameworkSpecificationParserTest {
 	 * Stores the generated test ast.
 	 */
 	private Framework framework;
-	/**
-	 * Constant name for the constructor used in a framework specification.
-	 */
-	private static final String CONSTRUCTOR = "Constructor";
-	/**
-	 * Constant name for the EventListener interface.
-	 */
-	private static final String EVENT_LISTENER = "Ljava/util/EventListener";
-	/**
-	 * Constant name of the Servlet class.
-	 */
-	private static final String SERVLET = "Ljavax/servlet/Servlet";
-	/**
-	 * Constant name of the ServletContextListener interface.
-	 */
-	private static final String SERVLET_CONTEXT_LISTENER = "Ljavax/servlet/ServletContextListener";
-	/**
-	 * Constant name of the ServletRequestListener interface.
-	 */
-	private static final String SERVLET_REQUEST_LISTENER = "Ljavax/servlet/ServletRequestListener";
 	
 	/**
 	 * Sets all test resources up.
@@ -82,29 +62,29 @@ public class FrameworkSpecificationParserTest {
 		assertNull(startDeclaration.getClassName());
 		assertEquals(3, startDeclaration.getNumberOfCallsAndDeclarations());
 		ExplicitDeclaration decl = (ExplicitDeclaration)startDeclaration.getCallOrDeclaration(0);
-		assertEquals(EVENT_LISTENER, decl.getClassName());
+		assertEquals(TestConstants.EVENT_LISTENER, decl.getClassName());
 		assertEquals(1, decl.getNumberOfCallsAndDeclarations());
-		assertEquals(CONSTRUCTOR, ((Call)decl.getCallOrDeclaration(0)).getSignature());
+		assertEquals(TestConstants.CONSTRUCTOR, ((Call)decl.getCallOrDeclaration(0)).getSignature());
 		decl = (ExplicitDeclaration)startDeclaration.getCallOrDeclaration(1);
-		assertEquals(SERVLET_CONTEXT_LISTENER, decl.getClassName());
+		assertEquals(TestConstants.SERVLET_CONTEXT_LISTENER, decl.getClassName());
 		assertEquals(1, decl.getNumberOfCallsAndDeclarations());
 		assertEquals("contextInitialized(Ljavax/servlet/ServletContextEvent;)V",
 				((Call)decl.getCallOrDeclaration(0)).getSignature());
 		decl = (ExplicitDeclaration)startDeclaration.getCallOrDeclaration(2);
-		assertEquals(SERVLET, decl.getClassName());
+		assertEquals(TestConstants.SERVLET, decl.getClassName());
 		assertEquals(2, decl.getNumberOfCallsAndDeclarations());
-		assertEquals(CONSTRUCTOR, ((Call)decl.getCallOrDeclaration(0)).getSignature());
+		assertEquals(TestConstants.CONSTRUCTOR, ((Call)decl.getCallOrDeclaration(0)).getSignature());
 		assertEquals("init(Ljavax/servlet/ServletConfig;)V",
 				((Call)decl.getCallOrDeclaration(1)).getSignature());
 		ExplicitDeclaration endDeclaration = framework.getEndPhase().getEnd();
 		assertNull(endDeclaration.getClassName());
 		assertEquals(2, endDeclaration.getNumberOfCallsAndDeclarations());
 		decl = (ExplicitDeclaration)endDeclaration.getCallOrDeclaration(0);
-		assertEquals(SERVLET, decl.getClassName());
+		assertEquals(TestConstants.SERVLET, decl.getClassName());
 		assertEquals(1, decl.getNumberOfCallsAndDeclarations());
 		assertEquals("destroy()V", ((Call)decl.getCallOrDeclaration(0)).getSignature());
 		decl = (ExplicitDeclaration)endDeclaration.getCallOrDeclaration(1);
-		assertEquals(SERVLET_CONTEXT_LISTENER, decl.getClassName());
+		assertEquals(TestConstants.SERVLET_CONTEXT_LISTENER, decl.getClassName());
 		assertEquals(1, decl.getNumberOfCallsAndDeclarations());
 		assertEquals("contextDestroyed(Ljavax/servlet/ServletContextEvent;)V",
 				((Call)decl.getCallOrDeclaration(0)).getSignature());
@@ -117,21 +97,21 @@ public class FrameworkSpecificationParserTest {
 			blockRule = (Block)r;
 		}
 		assertEquals(BlockQuantor.FOR_ALL, blockRule.getQuantor());
-		assertEquals(SERVLET, blockRule.getClassName());
+		assertEquals(TestConstants.SERVLET, blockRule.getClassName());
 		assertNull(blockRule.getInnerBlock());
 		assertNotNull(blockRule.getDeclaration());
 		decl = blockRule.getDeclaration();
 		assertNull(decl.getClassName());
 		assertEquals(3, decl.getNumberOfCallsAndDeclarations());
 		ExplicitDeclaration moreDecl = (ExplicitDeclaration)decl.getCallOrDeclaration(0);
-		assertEquals(SERVLET_REQUEST_LISTENER, moreDecl.getClassName());
+		assertEquals(TestConstants.SERVLET_REQUEST_LISTENER, moreDecl.getClassName());
 		assertEquals(1, moreDecl.getNumberOfCallsAndDeclarations());
 		assertEquals("requestInitialized(Ljavax/servlet/ServletRequestEvent;)V",
 				((Call)moreDecl.getCallOrDeclaration(0)).getSignature());
 		assertEquals("service(Ljavax/servlet/ServletRequest;Ljavax/servlet/ServletResponse;)V",
 				((Call)decl.getCallOrDeclaration(1)).getSignature());
 		moreDecl = (ExplicitDeclaration)decl.getCallOrDeclaration(2);
-		assertEquals(SERVLET_REQUEST_LISTENER, moreDecl.getClassName());
+		assertEquals(TestConstants.SERVLET_REQUEST_LISTENER, moreDecl.getClassName());
 		assertEquals(1, moreDecl.getNumberOfCallsAndDeclarations());
 		assertEquals("requestDestroyed(Ljavax/servlet/ServletRequestEvent;)V",
 				((Call)moreDecl.getCallOrDeclaration(0)).getSignature());
@@ -183,7 +163,8 @@ public class FrameworkSpecificationParserTest {
 				assertEquals(".*", rr.getRegularExpression());
 			} else if(r.getClass()==Supertype.class) {
 				Supertype rr = (Supertype)r;
-				assertTrue(rr.getSuperType().equals(EVENT_LISTENER) || rr.getSuperType().equals("Ljava/lang/Object")
+				assertTrue(rr.getSuperType().equals(TestConstants.EVENT_LISTENER)
+						|| rr.getSuperType().equals("Ljava/lang/Object")
 						|| rr.getSuperType().equals("Ljavax/swing/JFrame"));
 			} else {
 				Block block = (Block)r;
