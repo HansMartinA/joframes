@@ -174,6 +174,10 @@ public final class TestConstants {
 	 */
 	static final String CLASS_NAME_SUB_BLOCK_C = PACKAGE_APPLICATION.substring(1)+"SubBlockC.class";
 	/**
+	 * Class name of the inner class in SubBlockC.s
+	 */
+	static final String CLASS_NAME_SUB_BLOCK_C_INNER_CLASS = PACKAGE_APPLICATION.substring(1)+"SubBlockC$1.class";
+	/**
 	 * Package name of the external API package.
 	 */
 	static final String PACKAGE_API_EXTERNAL = "edu/kit/ipd/pp/joframes/api/external/";
@@ -189,6 +193,10 @@ public final class TestConstants {
 	 * Class name of the ArtificialClass$WorkingWorker class.
 	 */
 	static final String CLASS_NAME_WORKING_WORKER = PACKAGE_API_EXTERNAL+"ArtificialClass$WorkingWorker.class";
+	/**
+	 * Class name of the package-info class out of the external API package.
+	 */
+	static final String CLASS_NAME_PACKAGE_INFO_EXTERNAL = PACKAGE_API_EXTERNAL+"package-info.class";
 	/**
 	 * Path of a non-existing jar file.
 	 */
