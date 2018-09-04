@@ -371,7 +371,7 @@ class BytecodeInstrumenter {
 					w.emit(InvokeInstruction.make("()Z", "Ljava/util/Iterator", "hasNext",
 							IInvokeInstruction.Dispatch.INTERFACE));
 					w.emit(ConstantInstruction.make(1));
-					w.emit(ConditionalBranchInstruction.make("Z", IConditionalBranchInstruction.Operator.EQ,
+					w.emit(ConditionalBranchInstruction.make("I", IConditionalBranchInstruction.Operator.EQ,
 							afterLoopLabelCopy));
 					w.emit(LoadInstruction.make("Ljava/util/Iterator", iteratorIndexCopy));
 					w.emit(InvokeInstruction.make("()Ljava/util/Object;", "Ljava/util/Iterator", "next",
