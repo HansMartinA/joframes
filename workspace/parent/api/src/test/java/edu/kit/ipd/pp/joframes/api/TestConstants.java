@@ -119,6 +119,80 @@ public final class TestConstants {
 	 * Bytecode name for a doSomething method.
 	 */
 	static final String METHOD_DO_SOMETHING = "doSomething()V";
+	/**
+	 * Name of the output jar for the instrumented test application.
+	 */
+	static final String OUTPUT_JAR = "target/ins-test.jar";
+	/**
+	 * Class name of the B class.
+	 */
+	static final String CLASS_NAME_B = CLASS_B.substring(1)+".class";
+	/**
+	 * Class name of the B2 class.
+	 */
+	static final String CLASS_NAME_B2 = CLASS_B2.substring(1)+".class";
+	/**
+	 * Class name of the AppRandom class.
+	 */
+	static final String CLASS_NAME_APP_RANDOM = PACKAGE_APPLICATION.substring(1)+"AppRandom.class";
+	/**
+	 * Class name of the AppSubRandom class.
+	 */
+	static final String CLASS_NAME_APP_SUB_RANDOM = PACKAGE_APPLICATION.substring(1)+"AppSubRandom.class";
+	/**
+	 * Class name of the AABEventListenerImpl class.
+	 */
+	static final String CLASS_NAME_AAB_EVENT_LISTENER_IMPL = PACKAGE_APPLICATION.substring(1)
+			+"AABEventListenerImpl.class";
+	/**
+	 * Class name of the AAEventListenerImpl class.
+	 */
+	static final String CLASS_NAME_AA_EVENT_LISTENER_IMPL = PACKAGE_APPLICATION.substring(1)
+			+"AAEventListenerImpl.class";
+	/**
+	 * Class name of the AEventListenerImpl class.
+	 */
+	static final String CLASS_NAME_A_EVENT_LISTENER_IMPL = PACKAGE_APPLICATION.substring(1)+"AEventListenerImpl.class";
+	/**
+	 * Class name of the BEventListenerImpl class.
+	 */
+	static final String CLASS_NAME_B_EVENT_LISTENER_IMPL = PACKAGE_APPLICATION.substring(1)+"BEventListenerImpl.class";
+	/**
+	 * Class name of the package-info class.
+	 */
+	static final String CLASS_NAME_PACKAGE_INFO = PACKAGE_APPLICATION.substring(1)+"package-info.class";
+	/**
+	 * Class name of the SubBlockA class.
+	 */
+	static final String CLASS_NAME_SUB_BLOCK_A = PACKAGE_APPLICATION.substring(1)+"SubBlockA.class";
+	/**
+	 * Class name of the SubBlockB class.
+	 */
+	static final String CLASS_NAME_SUB_BLOCK_B = PACKAGE_APPLICATION.substring(1)+"SubBlockB.class";
+	/**
+	 * Class name of the SubBlockC class.
+	 */
+	static final String CLASS_NAME_SUB_BLOCK_C = PACKAGE_APPLICATION.substring(1)+"SubBlockC.class";
+	/**
+	 * Package name of the external API package.
+	 */
+	static final String PACKAGE_API_EXTERNAL = "edu/kit/ipd/pp/joframes/api/external/";
+	/**
+	 * Class name of the InstanceCollector class.
+	 */
+	static final String CLASS_NAME_INSTANCE_COLLECTOR = PACKAGE_API_EXTERNAL+"InstanceCollector.class";
+	/**
+	 * Class name of the ArtificialClass class.
+	 */
+	static final String CLASS_NAME_ARTIFICIAL_CLASS = PACKAGE_API_EXTERNAL+"ArtificialClass.class";
+	/**
+	 * Class name of the ArtificialClass$WorkingWorker class.
+	 */
+	static final String CLASS_NAME_WORKING_WORKER = PACKAGE_API_EXTERNAL+"ArtificialClass$WorkingWorker.class";
+	/**
+	 * Path of a non-existing jar file.
+	 */
+	static final String NON_EXISTING_JAR = "NonExistent.jar";
 	
 	/**
 	 * Private constructor to avoid instantiation because the class contains only constants.

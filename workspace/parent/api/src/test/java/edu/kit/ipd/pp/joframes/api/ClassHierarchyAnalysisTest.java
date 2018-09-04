@@ -204,7 +204,7 @@ public class ClassHierarchyAnalysisTest {
 	@Test(expected=ClassHierarchyCreationException.class)
 	public void testTestSpecWithNonExistingApplicationJars() throws ParseException, ClassHierarchyCreationException {
 		analyzeClassHierarchy(TestConstants.TEST_SPEC_PATH,
-				new String[] {TestConstants.TEST_FRAMEWORK_JAR_PATH}, new String[] {"NonExistent.jar"});
+				new String[] {TestConstants.TEST_FRAMEWORK_JAR_PATH}, new String[] {TestConstants.NON_EXISTING_JAR});
 	}
 	
 	/**
