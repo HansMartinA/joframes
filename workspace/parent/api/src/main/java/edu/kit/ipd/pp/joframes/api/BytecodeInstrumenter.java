@@ -641,7 +641,10 @@ class BytecodeInstrumenter {
 			WorkingPhase working = workingPhases.get(i);
 			MethodData data = clInstr.createEmptyMethodData("w"+i, "()V", Constants.ACC_PROTECTED);
 			MethodEditor wEditor = new MethodEditor(data);
+			wEditor.beginPass();
 			instrumentActualWorkingPhaseContent(wEditor, working);
+			wEditor.applyPatches();
+			wEditor.endPass();
 		}
 	}
 	
@@ -748,9 +751,9 @@ class BytecodeInstrumenter {
 								IInvokeInstruction.Dispatch.INTERFACE));
 						w.emit(CheckCastInstruction.make(b.getClassName()));
 						w.emit(StoreInstruction.make(b.getClassName(), instanceIndex));
-						instrumentExplicitDeclaration(editor, b.getDeclaration(), instanceIndex, b.getIClass());
 					}
 				});
+				instrumentExplicitDeclaration(editor, b.getDeclaration(), instanceIndex, b.getIClass());
 			}
 		} else {
 			for(int i=0; i<wrapper.getInstancesCount(b.getIClass()); i++) {
