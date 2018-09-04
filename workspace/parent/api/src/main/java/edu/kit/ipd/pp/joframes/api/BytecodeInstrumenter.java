@@ -183,6 +183,9 @@ class BytecodeInstrumenter {
 			offInstr.beginTraversal();
 			for(int i=0; i<offInstr.getNumInputClasses(); i++) {
 				ClassInstrumenter clInstr = offInstr.nextClass();
+				if(clInstr==null) {
+					continue;
+				}
 				clInstr.visitMethods(data -> {
 					MethodEditor editor = new MethodEditor(data);
 					if(editor.getData().getClassType().contains(PACKAGE)) {
@@ -192,9 +195,13 @@ class BytecodeInstrumenter {
 					editor.visitInstructions(new MethodEditor.Visitor() {
 						@Override
 						public void visitInvoke(IInvokeInstruction instruction) {
+							String invokedClass = instruction.getClassType()
+									.substring(0, instruction.getClassType().length()-1);
 							if(instruction.getMethodName().equals(INIT)
-									&&isSubclassOfFrameworkClasses(instruction.getClassType()
-											.substring(0, instruction.getClassType().length()-1))) {
+									&&isSubclassOfFrameworkClasses(invokedClass)
+									&&!(data.getName().equals(INIT)
+											&&areDirectSubclasses(invokedClass, data.getClassType()
+													.substring(0, data.getClassType().length()-1)))) {
 								this.insertAfter(new MethodEditor.Patch() {
 									@Override
 									public void emitTo(MethodEditor.Output w) {
@@ -215,6 +222,9 @@ class BytecodeInstrumenter {
 			offInstr.beginTraversal();
 			for(int i=0; i<offInstr.getNumInputClasses(); i++) {
 				ClassInstrumenter clInstr = offInstr.nextClass();
+				if(clInstr==null) {
+					continue;
+				}
 				if(clInstr.getInputName().endsWith(PACKAGE+AC_NAME)) {
 					clInstr.visitMethods(data -> {
 						MethodEditor editor = new MethodEditor(data);
@@ -276,13 +286,31 @@ class BytecodeInstrumenter {
 	private boolean isSubclassOfFrameworkClasses(String className) {
 		IClass subclass = wrapper.getClassHierarchy().lookupClass(TypeReference.findOrCreate
 				(wrapper.getClassHierarchy().getScope().getApplicationLoader(), className));
-		wrapper.countOneInstance(subclass);
+		
 		for(IClass cl : wrapper.getFrameworkClasses()) {
-			if(wrapper.getClassHierarchy().isSubclassOf(subclass, cl)) {
+			if(wrapper.getClassHierarchy().isSubclassOf(subclass, cl)
+					||wrapper.getClassHierarchy().implementsInterface(subclass, cl)) {
+				wrapper.countOneInstance(subclass);
 				return true;
 			}
 		}
 		return false;
+	}
+	
+	/**
+	 * Checks that two classes are direct subclasses of each other or equal.
+	 * 
+	 * @param classOne one class.
+	 * @param classTwo another class.
+	 * @return true if both classes are equal or direct subclasses. false otherwise.
+	 */
+	private boolean areDirectSubclasses(String classOne, String classTwo) {
+		IClass one = wrapper.getClassHierarchy().lookupClass(TypeReference.findOrCreate(wrapper.getClassHierarchy().getScope().getApplicationLoader(), classOne));
+		IClass two = wrapper.getClassHierarchy().lookupClass(TypeReference.findOrCreate(wrapper.getClassHierarchy().getScope().getApplicationLoader(), classTwo));
+		return one==two||wrapper.getClassHierarchy().isSubclassOf(one, two)
+				||wrapper.getClassHierarchy().isSubclassOf(two, one)
+				||wrapper.getClassHierarchy().implementsInterface(one, two)
+				||wrapper.getClassHierarchy().implementsInterface(one, two);
 	}
 	
 	/**
