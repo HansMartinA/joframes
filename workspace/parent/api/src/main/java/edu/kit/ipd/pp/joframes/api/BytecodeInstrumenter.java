@@ -173,10 +173,9 @@ class BytecodeInstrumenter {
 								}
 							});
 							editor.applyPatches();
-							editor.endPass();
 						}
 					});
-					clInstr.emitClass();
+					offInstr.outputModifiedClass(clInstr);
 					break;
 				}
 			}
@@ -215,9 +214,10 @@ class BytecodeInstrumenter {
 						}
 					});
 					editor.applyPatches();
-					editor.endPass();
 				});
-				clInstr.emitClass();
+				if(clInstr.isChanged()) {
+					offInstr.outputModifiedClass(clInstr);
+				}
 			}
 			offInstr.beginTraversal();
 			for(int i=0; i<offInstr.getNumInputClasses(); i++) {
@@ -237,9 +237,8 @@ class BytecodeInstrumenter {
 							instrumentEndPhase(editor);
 						}
 						editor.applyPatches();
-						editor.endPass();
 					});
-					clInstr.emitClass();
+					offInstr.outputModifiedClass(clInstr);
 				} else if(clInstr.getInputName().endsWith(PACKAGE+AC_WW_NAME)) {
 					clInstr.visitMethods(data -> {
 						MethodEditor editor = new MethodEditor(data);
@@ -248,9 +247,8 @@ class BytecodeInstrumenter {
 							instrumentRunnableClassForWorkingPhase(editor);
 						}
 						editor.applyPatches();
-						editor.endPass();
 					});
-					clInstr.emitClass();
+					offInstr.outputModifiedClass(clInstr);
 				}
 			}
 			offInstr.close();
@@ -644,7 +642,6 @@ class BytecodeInstrumenter {
 			wEditor.beginPass();
 			instrumentActualWorkingPhaseContent(wEditor, working);
 			wEditor.applyPatches();
-			wEditor.endPass();
 		}
 	}
 	
