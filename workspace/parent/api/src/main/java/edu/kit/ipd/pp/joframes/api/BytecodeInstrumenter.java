@@ -845,14 +845,15 @@ class BytecodeInstrumenter {
 				allocatedCaseLabels.add(editor.allocateLabel());
 			}
 			allocatedCaseLabels.add(editor.allocateLabel());
+			int caseCounterCopy = caseCounter;
 			editor.insertAfterBody(new MethodEditor.Patch() {
 				@Override
 				public void emitTo(MethodEditor.Output w) {
-					w.emitLabel(allocatedCaseLabels.get(caseCounter));
+					w.emitLabel(allocatedCaseLabels.get(caseCounterCopy));
 					w.emit(LoadInstruction.make("I", randomIndex));
-					w.emit(ConstantInstruction.make(caseCounter));
+					w.emit(ConstantInstruction.make(caseCounterCopy));
 					w.emit(ConditionalBranchInstruction.make("I", IConditionalBranchInstruction.Operator.EQ,
-							allocatedCaseLabels.get(caseCounter+1)));
+							allocatedCaseLabels.get(caseCounterCopy+1)));
 				}
 			});
 			caseCounter++;
