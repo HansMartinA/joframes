@@ -138,21 +138,19 @@ class BytecodeInstrumenter {
 			for(String appJar : applicationJars) {
 				offInstr.addInputJar(new File(appJar));
 			}
-			// At the first try to load the external api classes, they are searched in the jar file corresponding to
-			// this application. Otherwise, it is assumed that they are used in the eclipse project.
-			if(!offInstr.addInputElement(new File("."), OWN_JAR_FILE+IC_NAME)) {
-				String path = "../api-external/target/classes/"+PACKAGE;
-				offInstr.addInputClass(new File(path+IC_NAME), new File(path+IC_NAME));
-				offInstr.addInputClass(new File(path+AC_NAME), new File(path+AC_NAME));
-				offInstr.addInputClass(new File(path+AC_WW_NAME), new File(path+AC_WW_NAME));
-			} else {
-				offInstr.addInputElement(new File("."), OWN_JAR_FILE+AC_NAME);
-				offInstr.addInputElement(new File("."), OWN_JAR_FILE+AC_WW_NAME);
-			}
+			// For test purposes, the loading of the external api classes is done by assuming that the project is used
+			// within eclipse.
+			String path = new File("").getAbsoluteFile().getParentFile().getAbsolutePath()
+					+"/api-external/target/classes/";
+			offInstr.addInputDirectory(new File(path), new File(path));
+			// Actual class loading for the stand-alone application.
+//			offInstr.addInputElement(new File("."), OWN_JAR_FILE+IC_NAME);
+//			offInstr.addInputElement(new File("."), OWN_JAR_FILE+AC_NAME);
+//			offInstr.addInputElement(new File("."), OWN_JAR_FILE+AC_WW_NAME);
 			offInstr.beginTraversal();
 			for(int i=0; i<offInstr.getNumInputClasses(); i++) {
 				ClassInstrumenter clInstr = offInstr.nextClass();
-				if(clInstr.getInputName().endsWith(PACKAGE+IC_NAME)) {
+				if(clInstr!=null&&clInstr.getInputName().endsWith(PACKAGE+IC_NAME)) {
 					clInstr.visitMethods(data -> {
 						if(data.getName().equals(CLINIT)) {
 							MethodEditor editor = new MethodEditor(data);
@@ -195,7 +193,8 @@ class BytecodeInstrumenter {
 						@Override
 						public void visitInvoke(IInvokeInstruction instruction) {
 							if(instruction.getMethodName().equals(INIT)
-									&&isSubclassOfFrameworkClasses(instruction.getClassType())) {
+									&&isSubclassOfFrameworkClasses(instruction.getClassType()
+											.substring(0, instruction.getClassType().length()-1))) {
 								this.insertAfter(new MethodEditor.Patch() {
 									@Override
 									public void emitTo(MethodEditor.Output w) {
