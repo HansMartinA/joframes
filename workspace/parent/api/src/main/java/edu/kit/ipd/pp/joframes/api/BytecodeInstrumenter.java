@@ -415,6 +415,9 @@ class BytecodeInstrumenter {
 				Method m = (Method)abc;
 				if(m.getSignature().equals("Constructor")) {
 					IMethod init = declaration.getConstructor(instanceType);
+					if(init==null) {
+						continue;
+					}
 					editor.insertAfterBody(new MethodEditor.Patch() {
 						@Override
 						public void emitTo(MethodEditor.Output w) {
