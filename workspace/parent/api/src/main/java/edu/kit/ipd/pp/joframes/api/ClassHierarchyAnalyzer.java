@@ -373,7 +373,7 @@ class ClassHierarchyAnalyzer {
 				if(isClassInFramework(cl)) {
 					for(IMethod m : cl.getDeclaredMethods()) {
 						if(checkMethodForObjectMethod(m)) {
-							collector.addAllMethods(cl.getDeclaredMethods());
+							collector.addMethod(m);
 						}
 					}
 					wrapper.addFrameworkClass(cl);
