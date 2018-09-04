@@ -197,7 +197,7 @@ public class ClassHierarchyAnalysisTest {
 	 */
 	private void validateStartPhaseOfTestSpec() {
 		for(ExplicitDeclaration declaration : wrapper.getFramework().getStartPhase().getDeclarations()) {
-			assertEquals(1, declaration.getApplicationClasses());
+			assertEquals(1, declaration.getApplicationClasses().size());
 			if(declaration.getClassName().equals(CLASS_A)) {
 				for(IClass cl : declaration.getApplicationClasses()) {
 					assertEquals(CLASS_B, cl.getName().toString());
@@ -220,14 +220,11 @@ public class ClassHierarchyAnalysisTest {
 	 *                      two).
 	 */
 	private void validateMethodCollectorOfTestSpec(MethodCollector coll, boolean regexIncluded) {
-		int expectedInstances = regexIncluded?8:6;
+		int expectedInstances = regexIncluded?7:5;
 		assertEquals(expectedInstances, coll.getFrameworkClasses().size());
 		for(IClass cl : coll.getFrameworkClasses()) {
 			Set<IMethod> methods = coll.getMethodCollection(cl);
 			switch(cl.getName().toString()) {
-				case CLASS_EVENT_LISTENER:
-					assertEquals(0, methods.size());
-					break;
 				case CLASS_A_EVENT_LISTENER:
 					assertEquals(1, methods.size());
 					for(IMethod m : methods) {
@@ -366,16 +363,20 @@ public class ClassHierarchyAnalysisTest {
 			} else if(abc.getClass()==Method.class) {
 				Method m = (Method)abc;
 				assertNotNull(m.getSignature());
-				assertNotNull(m.getMethod());
 				if(m.getSignature().equals("Constructor")) {
-					assertTrue(m.getMethod().getName().toString().equals("<init>"));
 					for(IClass cl : declaration.getApplicationClasses()) {
-						assertTrue(wrapper.getClassHierarchy().isSubclassOf(cl, declaration.getIClass()));
+						assertTrue(wrapper.getClassHierarchy().isSubclassOf(cl, declaration.getIClass())
+								||wrapper.getClassHierarchy().implementsInterface(cl, declaration.getIClass()));
+						IMethod init = declaration.getConstructor(cl);
+						assertNotNull(init);
+						assertTrue(init.getName().toString().equals("<init>"));
+						assertEquals(cl, init.getDeclaringClass());
 					}
 				} else {
+					assertNotNull(m.getMethod());
 					assertTrue(m.getMethod().getSignature().endsWith(m.getSignature()));
+					assertEquals(declaration.getIClass(), m.getMethod().getDeclaringClass());
 				}
-				assertEquals(declaration.getIClass(), m.getMethod().getDeclaringClass());
 			} else if(abc.getClass()==StaticMethod.class) {
 				StaticMethod sm = (StaticMethod)abc;
 				assertNotNull(sm.getClassString());

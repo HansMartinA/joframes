@@ -184,19 +184,10 @@ class ClassHierarchyAnalyzer {
 				Method method = (Method)abc;
 				IMethod m = null;
 				if(method.getSignature().equals(CONSTRUCTOR)) {
-					m = boundClass.getMethod(Selector.make("<init>()V"));
-					if(m==null) {
-						for(IMethod possibleInitMethod : boundClass.getDeclaredMethods()) {
-							if(possibleInitMethod.isInit()) {
-								m = possibleInitMethod;
-								break;
-							}
-						}
-					}
 					if(boundClass.isInterface()) {
 						for(IClass cl : hierarchy.getImplementors(boundClass.getReference())) {
 							if(checkSubclassForExplicitDeclaration(cl)) {
-								declaration.addApplicationClass(cl);
+								declaration.addApplicationClass(cl, findInit(cl));
 							}
 						}
 					} else {
@@ -206,7 +197,7 @@ class ClassHierarchyAnalyzer {
 							IClass cl = subclasses.poll();
 							subclasses.addAll(hierarchy.getImmediateSubclasses(cl));
 							if(checkSubclassForExplicitDeclaration(cl)) {
-								declaration.addApplicationClass(cl);
+								declaration.addApplicationClass(cl, findInit(cl));
 							}
 						}
 					}
@@ -242,6 +233,25 @@ class ClassHierarchyAnalyzer {
 	private boolean checkSubclassForExplicitDeclaration(IClass cl) {
 		return cl.getClassLoader().getReference()==applicationLoader&&
 				!(cl.isAbstract()||cl.isInterface()||cl.isPrivate());
+	}
+	
+	/**
+	 * Searches a class for a constructor.
+	 * 
+	 * @param cl the class.
+	 * @return the constructor of null if no can be found.
+	 */
+	private IMethod findInit(IClass cl) {
+		IMethod m = cl.getMethod(Selector.make("<init>()V"));
+		if(m==null) {
+			for(IMethod possibleInitMethod : cl.getDeclaredMethods()) {
+				if(possibleInitMethod.isInit()) {
+					m = possibleInitMethod;
+					break;
+				}
+			}
+		}
+		return m;
 	}
 	
 	/**

@@ -315,15 +315,15 @@ class BytecodeInstrumenter {
 	 * @param instanceIndex local variable index of an instance that is put in.
 	 */
 	private void instrumentExplicitDeclaration(MethodEditor editor, ExplicitDeclaration declaration, int instanceIndex,
-			String instanceType) {
+			IClass instanceType) {
 		boolean useForLoop = declaration.getClassName()!=null;
-		String actualInstanceType = instanceType;
+		IClass actualInstanceType = instanceType;
 		int iteratorIndex = 0;
 		int localInstanceIndex = instanceIndex;
 		int beginLoopLabel = 0;
 		int afterLoopLabel = 0;
 		if(useForLoop) {
-			actualInstanceType = declaration.getClassName();
+			actualInstanceType = declaration.getIClass();
 			iteratorIndex = getNextLocalIndex();
 			localInstanceIndex = getNextLocalIndex();
 			beginLoopLabel = editor.allocateLabel();
@@ -368,8 +368,7 @@ class BytecodeInstrumenter {
 		}
 		for(IClass appClass : declaration.getApplicationClasses()) {
 			wrapper.countOneInstance(appClass);
-			instrumentExplicitDeclarationContent(editor, declaration, getNextLocalIndex(),
-					appClass.getName().toString());
+			instrumentExplicitDeclarationContent(editor, declaration, getNextLocalIndex(), appClass);
 		}
 	}
 	
@@ -382,29 +381,31 @@ class BytecodeInstrumenter {
 	 * @param instanceType type of the local variable.
 	 */
 	private void instrumentExplicitDeclarationContent(MethodEditor editor, ExplicitDeclaration declaration,
-			int instanceIndex, String instanceType) {
+			int instanceIndex, IClass instanceType) {
 		for(int i=0; i<declaration.getNumberOfCallsAndDeclarations(); i++) {
 			AstBaseClass abc = declaration.getCallOrDeclaration(i);
 			if(abc.getClass()==Method.class) {
 				Method m = (Method)abc;
 				if(m.getSignature().equals("Constructor")) {
+					IMethod init = declaration.getConstructor(instanceType);
 					editor.insertAfterBody(new MethodEditor.Patch() {
 						@Override
 						public void emitTo(MethodEditor.Output w) {
 							w.emit(LoadInstruction.make("L"+PACKAGE+"ArtificialClass", 0));
-							w.emit(NewInstruction.make(instanceType, 0));
+							w.emit(NewInstruction.make(instanceType.getName().toString(), 0));
 							w.emit(DupInstruction.make(0));
 						}
 					});
-					instantiateParameters(editor, m.getMethod());
+					instantiateParameters(editor, init);
 					editor.insertAfterBody(new MethodEditor.Patch() {
 						@Override
 						public void emitTo(MethodEditor.Output w) {
-							w.emit(InvokeInstruction.make("()V", "", "<init>", IInvokeInstruction.Dispatch.SPECIAL));
+							w.emit(InvokeInstruction.make(init.getDescriptor().toString(),
+									instanceType.getName().toString(), "<init>", IInvokeInstruction.Dispatch.SPECIAL));
 							w.emit(DupInstruction.make(0));
 							w.emit(InvokeInstruction.make("(Ljava/lang/Object;)V", "L"+PACKAGE+"InstanceCollector",
 									"addInstance", IInvokeInstruction.Dispatch.STATIC));
-							w.emit(StoreInstruction.make(instanceType, instanceIndex));
+							w.emit(StoreInstruction.make(instanceType.getName().toString(), instanceIndex));
 						}
 					});
 					continue;
@@ -412,16 +413,16 @@ class BytecodeInstrumenter {
 				editor.insertAfterBody(new MethodEditor.Patch() {
 					@Override
 					public void emitTo(MethodEditor.Output w) {
-						w.emit(LoadInstruction.make(instanceType, instanceIndex));
+						w.emit(LoadInstruction.make(instanceType.getName().toString(), instanceIndex));
 					}
 				});
 				instantiateParameters(editor, m.getMethod());
 				editor.insertAfterBody(new MethodEditor.Patch() {
 					@Override
 					public void emitTo(MethodEditor.Output w) {
-						w.emit(InvokeInstruction.make(m.getMethod().getDescriptor().toString(), instanceType,
-								m.getMethod().getName().toString(), m.getMethod().getDeclaringClass()
-								.isInterface()?IInvokeInstruction.Dispatch.INTERFACE
+						w.emit(InvokeInstruction.make(m.getMethod().getDescriptor().toString(),
+								instanceType.getName().toString(), m.getMethod().getName().toString(),
+								m.getMethod().getDeclaringClass().isInterface()?IInvokeInstruction.Dispatch.INTERFACE
 										:IInvokeInstruction.Dispatch.VIRTUAL));
 					}
 				});
@@ -717,7 +718,7 @@ class BytecodeInstrumenter {
 								IInvokeInstruction.Dispatch.INTERFACE));
 						w.emit(CheckCastInstruction.make(b.getClassName()));
 						w.emit(StoreInstruction.make(b.getClassName(), instanceIndex));
-						instrumentExplicitDeclaration(editor, b.getDeclaration(), instanceIndex, b.getClassName());
+						instrumentExplicitDeclaration(editor, b.getDeclaration(), instanceIndex, b.getIClass());
 					}
 				});
 			}

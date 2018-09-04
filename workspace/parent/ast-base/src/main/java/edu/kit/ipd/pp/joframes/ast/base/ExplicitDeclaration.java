@@ -1,8 +1,9 @@
 package edu.kit.ipd.pp.joframes.ast.base;
 
 import com.ibm.wala.classLoader.IClass;
+import com.ibm.wala.classLoader.IMethod;
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.Set;
 
 /**
@@ -20,9 +21,9 @@ public class ExplicitDeclaration implements AstBaseClass {
 	 */
 	private IClass correspondingClass;
 	/**
-	 * Stores all application classes that are subclasses of the correspondingClass.
+	 * Stores all application classes that are subclasses of the correspondingClass with a mapping to their constructor.
 	 */
-	private HashSet<IClass> applicationClasses;
+	private HashMap<IClass, IMethod> applicationClassToInit;
 	/**
 	 * Stores all calls related to this explicit declaration.
 	 */
@@ -33,7 +34,7 @@ public class ExplicitDeclaration implements AstBaseClass {
 	 */
 	public ExplicitDeclaration() {
 		calls = new ArrayList<>();
-		applicationClasses = new HashSet<>();
+		applicationClassToInit = new HashMap<>();
 	}
 	
 	/**
@@ -74,12 +75,14 @@ public class ExplicitDeclaration implements AstBaseClass {
 	}
 	
 	/**
-	 * Adds an application class which is a subclass to the corresponding class of this explicit declaration.
+	 * Adds an application class which is a subclass to the corresponding class of this explicit declaration
+	 * and its constructor.
 	 * 
 	 * @param cl the application class.
+	 * @param init constructor of the application class.
 	 */
-	public void addApplicationClass(IClass cl) {
-		applicationClasses.add(cl);
+	public void addApplicationClass(IClass cl, IMethod init) {
+		applicationClassToInit.put(cl, init);
 	}
 	
 	/**
@@ -89,7 +92,17 @@ public class ExplicitDeclaration implements AstBaseClass {
 	 * @return the set of all application classes.
 	 */
 	public Set<IClass> getApplicationClasses() {
-		return (Set<IClass>)applicationClasses.clone();
+		return applicationClassToInit.keySet();
+	}
+	
+	/**
+	 * Returns the constructor for an application class.
+	 * 
+	 * @param appClass the application class.
+	 * @return the constructor.
+	 */
+	public IMethod getConstructor(IClass appClass) {
+		return applicationClassToInit.get(appClass);
 	}
 	
 	/**
