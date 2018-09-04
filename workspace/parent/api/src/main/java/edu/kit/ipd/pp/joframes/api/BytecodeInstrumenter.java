@@ -577,8 +577,8 @@ class BytecodeInstrumenter {
 									IInvokeInstruction.Dispatch.VIRTUAL));
 							w.emit(StoreInstruction.make("I", procIndex));
 							w.emit(LoadInstruction.make("I", procIndex));
-							w.emit(NewInstruction.make("Ljava/lang/Thread", 1));
-							w.emit(StoreInstruction.make("Ljava/lang/Thread", threadAIndex));
+							w.emit(NewInstruction.make("[Ljava/lang/Thread", 1));
+							w.emit(StoreInstruction.make("[Ljava/lang/Thread", threadAIndex));
 						}
 						w.emit(ConstantInstruction.make(0));
 						w.emit(StoreInstruction.make("I", loopIndex));
