@@ -20,6 +20,7 @@ import com.ibm.wala.shrikeBT.LoadInstruction;
 import com.ibm.wala.shrikeBT.MethodData;
 import com.ibm.wala.shrikeBT.MethodEditor;
 import com.ibm.wala.shrikeBT.NewInstruction;
+import com.ibm.wala.shrikeBT.ReturnInstruction;
 import com.ibm.wala.shrikeBT.StoreInstruction;
 import com.ibm.wala.shrikeBT.shrikeCT.ClassInstrumenter;
 import com.ibm.wala.shrikeBT.shrikeCT.OfflineInstrumenter;
@@ -155,7 +156,7 @@ class BytecodeInstrumenter {
 						if(data.getName().equals(CLINIT)) {
 							MethodEditor editor = new MethodEditor(data);
 							editor.beginPass();
-							editor.insertAfterBody(new MethodEditor.Patch() {
+							editor.insertBefore(editor.getInstructions().length-1, new MethodEditor.Patch() {
 								@Override
 								public void emitTo(MethodEditor.Output w) {
 									for(IClass cl : wrapper.getFrameworkClasses()) {
@@ -229,12 +230,28 @@ class BytecodeInstrumenter {
 					clInstr.visitMethods(data -> {
 						MethodEditor editor = new MethodEditor(data);
 						editor.beginPass();
+						boolean emptyMethod = editor.getInstructions().length==1;
+						if(emptyMethod) {
+							editor.replaceWith(0, new MethodEditor.Patch() {
+								@Override
+								public void emitTo(MethodEditor.Output w) {
+								}
+							});
+						}
 						if(data.getName().equals(START)) {
 							instrumentStartPhase(editor);
 						} else if(data.getName().equals(WORKING)) {
 							instrumentWorkingPhase(clInstr, editor);
 						} else if(data.getName().equals(END)) {
 							instrumentEndPhase(editor);
+						}
+						if(emptyMethod) {
+							editor.insertAfter(0, new MethodEditor.Patch() {
+								@Override
+								public void emitTo(MethodEditor.Output w) {
+									w.emit(ReturnInstruction.make("V"));
+								}
+							});
 						}
 						editor.applyPatches();
 					});
@@ -244,6 +261,11 @@ class BytecodeInstrumenter {
 						MethodEditor editor = new MethodEditor(data);
 						editor.beginPass();
 						if(data.getName().equals("run")) {
+							editor.replaceWith(0, new MethodEditor.Patch() {
+								@Override
+								public void emitTo(MethodEditor.Output w) {
+								}
+							});
 							instrumentRunnableClassForWorkingPhase(editor);
 						}
 						editor.applyPatches();
@@ -319,7 +341,7 @@ class BytecodeInstrumenter {
 	 * @param cl class for which the instance collection is obtained.
 	 */
 	private void instrumentForGettingInstanceCollection(MethodEditor editor, IClass cl) {
-		editor.insertAfterBody(new MethodEditor.Patch() {
+		editor.insertAfter(0, new MethodEditor.Patch() {
 			@Override
 			public void emitTo(MethodEditor.Output w) {
 				w.emit(ConstantInstruction.makeString(cl.getName().toString()));
@@ -358,7 +380,7 @@ class BytecodeInstrumenter {
 			int beginLoopLabelCopy = beginLoopLabel;
 			int afterLoopLabelCopy = afterLoopLabel;
 			instrumentForGettingInstanceCollection(editor, declaration.getIClass());
-			editor.insertAfterBody(new MethodEditor.Patch() {
+			editor.insertAfter(0, new MethodEditor.Patch() {
 				@Override
 				public void emitTo(MethodEditor.Output w) {
 					w.emit(InvokeInstruction.make("()Ljava/util/Iterator", "Ljava/util/List", "iterator",
@@ -383,7 +405,7 @@ class BytecodeInstrumenter {
 		if(useForLoop) {
 			int beginLoopLabelCopy = beginLoopLabel;
 			int afterLoopLabelCopy = afterLoopLabel;
-			editor.insertAfterBody(new MethodEditor.Patch() {
+			editor.insertAfter(0, new MethodEditor.Patch() {
 				@Override
 				public void emitTo(MethodEditor.Output w) {
 					w.emit(GotoInstruction.make(beginLoopLabelCopy));
@@ -416,7 +438,7 @@ class BytecodeInstrumenter {
 					if(init==null) {
 						continue;
 					}
-					editor.insertAfterBody(new MethodEditor.Patch() {
+					editor.insertAfter(0, new MethodEditor.Patch() {
 						@Override
 						public void emitTo(MethodEditor.Output w) {
 							w.emit(LoadInstruction.make("L"+PACKAGE+"ArtificialClass", 0));
@@ -425,7 +447,7 @@ class BytecodeInstrumenter {
 						}
 					});
 					instantiateParameters(editor, init);
-					editor.insertAfterBody(new MethodEditor.Patch() {
+					editor.insertAfter(0, new MethodEditor.Patch() {
 						@Override
 						public void emitTo(MethodEditor.Output w) {
 							w.emit(InvokeInstruction.make(init.getDescriptor().toString(),
@@ -438,14 +460,14 @@ class BytecodeInstrumenter {
 					});
 					continue;
 				}
-				editor.insertAfterBody(new MethodEditor.Patch() {
+				editor.insertAfter(0, new MethodEditor.Patch() {
 					@Override
 					public void emitTo(MethodEditor.Output w) {
 						w.emit(LoadInstruction.make(instanceType.getName().toString(), instanceIndex));
 					}
 				});
 				instantiateParameters(editor, m.getMethod());
-				editor.insertAfterBody(new MethodEditor.Patch() {
+				editor.insertAfter(0, new MethodEditor.Patch() {
 					@Override
 					public void emitTo(MethodEditor.Output w) {
 						w.emit(InvokeInstruction.make(m.getMethod().getDescriptor().toString(),
@@ -456,7 +478,7 @@ class BytecodeInstrumenter {
 				});
 			} else if(abc.getClass()==StaticMethod.class) {
 				StaticMethod st = (StaticMethod)abc;
-				editor.insertAfterBody(new MethodEditor.Patch() {
+				editor.insertAfter(0, new MethodEditor.Patch() {
 					@Override
 					public void emitTo(MethodEditor.Output w) {
 						w.emit(InvokeInstruction.make(st.getMethod().getDescriptor().toString(), st.getClassString(),
@@ -476,7 +498,7 @@ class BytecodeInstrumenter {
 	 * @param method the method for which the parameters are created.
 	 */
 	private void instantiateParameters(MethodEditor editor, IMethod method) {
-		editor.insertAfterBody(new MethodEditor.Patch() {
+		editor.insertAfter(0, new MethodEditor.Patch() {
 			@Override
 			public void emitTo(MethodEditor.Output w) {
 				for(int i=0; i<method.getNumberOfParameters(); i++) {
@@ -501,7 +523,7 @@ class BytecodeInstrumenter {
 		NonDeterministicIfInstrumenter ifInstr = new NonDeterministicIfInstrumenter();
 		Set<ExplicitDeclaration> declarations = wrapper.getFramework().getStartPhase().getDeclarations();
 		int maxUsesIndex = getNextLocalIndex();
-		editor.insertAfterBody(new MethodEditor.Patch() {
+		editor.insertAfter(0, new MethodEditor.Patch() {
 			@Override
 			public void emitTo(MethodEditor.Output w) {
 				w.emit(ConstantInstruction.make((double)declarations.size()));
@@ -544,7 +566,7 @@ class BytecodeInstrumenter {
 				allocatedLabels.add(editor.allocateLabel());
 			}
 		}
-		editor.insertAfterBody(new MethodEditor.Patch() {
+		editor.insertAfter(0, new MethodEditor.Patch() {
 			@Override
 			public void emitTo(MethodEditor.Output w) {
 				int forLabelCounter = 0;
@@ -639,9 +661,7 @@ class BytecodeInstrumenter {
 			WorkingPhase working = workingPhases.get(i);
 			MethodData data = clInstr.createEmptyMethodData("w"+i, "()V", Constants.ACC_PROTECTED);
 			MethodEditor wEditor = new MethodEditor(data);
-			wEditor.beginPass();
 			instrumentActualWorkingPhaseContent(wEditor, working);
-			wEditor.applyPatches();
 		}
 	}
 	
@@ -652,6 +672,7 @@ class BytecodeInstrumenter {
 	 * @param working the working phase.
 	 */
 	private void instrumentActualWorkingPhaseContent(MethodEditor editor, WorkingPhase working) {
+		editor.beginPass();
 		NonDeterministicLoopInstrumenter loop = new NonDeterministicLoopInstrumenter();
 		NonDeterministicIfInstrumenter ifInstr = new NonDeterministicIfInstrumenter();
 		loop.instrumentLoopBeginning(editor);
@@ -668,7 +689,7 @@ class BytecodeInstrumenter {
 		}
 		int caseCounterCopy = caseCounter;
 		int counterIndex = getNextLocalIndex();
-		editor.insertAfterBody(new MethodEditor.Patch() {
+		editor.insertAfter(0, new MethodEditor.Patch() {
 			@Override
 			public void emitTo(MethodEditor.Output w) {
 				w.emit(ConstantInstruction.make(caseCounterCopy));
@@ -686,7 +707,7 @@ class BytecodeInstrumenter {
 							ifInstr.instrumentCaseBeginning(editor);
 							instrumentForGettingInstanceCollection(editor, cl);
 							int index = i;
-							editor.insertAfterBody(new MethodEditor.Patch() {
+							editor.insertAfter(0, new MethodEditor.Patch() {
 								@Override
 								public void emitTo(MethodEditor.Output w) {
 									w.emit(ConstantInstruction.make(index));
@@ -696,7 +717,7 @@ class BytecodeInstrumenter {
 								}
 							});
 							instantiateParameters(editor, m);
-							editor.insertAfterBody(new MethodEditor.Patch() {
+							editor.insertAfter(0, new MethodEditor.Patch() {
 								@Override
 								public void emitTo(MethodEditor.Output w) {
 									w.emit(InvokeInstruction.make(m.getDescriptor().toString(), cl.getName().toString(),
@@ -714,6 +735,13 @@ class BytecodeInstrumenter {
 		}
 		ifInstr.instrumentEnd(editor);
 		loop.instrumentLoopEnd(editor);
+		editor.insertAfter(0, new MethodEditor.Patch() {
+			@Override
+			public void emitTo(MethodEditor.Output w) {
+				w.emit(ReturnInstruction.make("V"));
+			}
+		});
+		editor.applyPatches();
 	}
 	
 	/**
@@ -740,7 +768,7 @@ class BytecodeInstrumenter {
 				instrumentForGettingInstanceCollection(editor, b.getIClass());
 				int index = i;
 				int instanceIndex = getNextLocalIndex();
-				editor.insertAfterBody(new MethodEditor.Patch() {
+				editor.insertAfter(0, new MethodEditor.Patch() {
 					@Override
 					public void emitTo(MethodEditor.Output w) {
 						w.emit(ConstantInstruction.make(index));
@@ -771,7 +799,7 @@ class BytecodeInstrumenter {
 		for(int i=0; i<=cases; i++) {
 			allocatedLabels.add(editor.allocateLabel());
 		}
-		editor.insertAfterBody(new MethodEditor.Patch() {
+		editor.insertAfter(0, new MethodEditor.Patch() {
 			@Override
 			public void emitTo(MethodEditor.Output w) {
 				for(int i=0; i<cases; i++) {
@@ -785,6 +813,7 @@ class BytecodeInstrumenter {
 					w.emit(GetInstruction.make(AC_BYTECODE_NAME, AC_WW_BYTECODE_NAME, "outerInstance", false));
 					w.emit(InvokeInstruction.make("()V", AC_BYTECODE_NAME, "w"+i, IInvokeInstruction.Dispatch.VIRTUAL));
 				}
+				w.emit(ReturnInstruction.make("V"));
 			}
 		});
 	}
@@ -818,7 +847,7 @@ class BytecodeInstrumenter {
 			randomIndex = getNextLocalIndex();
 			allocatedCaseLabels = new ArrayList<>();
 			caseCounter = 0;
-			editor.insertAfterBody(new MethodEditor.Patch() {
+			editor.insertAfter(0, new MethodEditor.Patch() {
 				@Override
 				public void emitTo(MethodEditor.Output w) {
 					w.emit(InvokeInstruction.make("()D", "Ljava/lang/Math", "random",
@@ -843,7 +872,7 @@ class BytecodeInstrumenter {
 			}
 			allocatedCaseLabels.add(editor.allocateLabel());
 			int caseCounterCopy = caseCounter;
-			editor.insertAfterBody(new MethodEditor.Patch() {
+			editor.insertAfter(0, new MethodEditor.Patch() {
 				@Override
 				public void emitTo(MethodEditor.Output w) {
 					w.emitLabel(allocatedCaseLabels.get(caseCounterCopy));
@@ -862,7 +891,7 @@ class BytecodeInstrumenter {
 		 * @param editor the editor for bytecode instrumentation.
 		 */
 		private void instrumentEnd(MethodEditor editor) {
-			editor.insertAfterBody(new MethodEditor.Patch() {
+			editor.insertAfter(0, new MethodEditor.Patch() {
 				@Override
 				public void emitTo(MethodEditor.Output w) {
 					w.emitLabel(allocatedCaseLabels.get(caseCounter));
@@ -900,7 +929,7 @@ class BytecodeInstrumenter {
 			int randomIndex = getNextLocalIndex();
 			beginLabel = editor.allocateLabel();
 			endLabel = editor.allocateLabel();
-			editor.insertAfterBody(new MethodEditor.Patch() {
+			editor.insertAfter(0, new MethodEditor.Patch() {
 				@Override
 				public void emitTo(MethodEditor.Output w) {
 					w.emit(InvokeInstruction.make("()D", "Ljava/lang/Math", "random",
@@ -925,7 +954,7 @@ class BytecodeInstrumenter {
 		 * @param editor the editor for bytecode instrumentation.
 		 */
 		private void instrumentLoopEnd(MethodEditor editor) {
-			editor.insertAfterBody(new MethodEditor.Patch() {
+			editor.insertAfter(0, new MethodEditor.Patch() {
 				@Override
 				public void emitTo(MethodEditor.Output w) {
 					w.emit(LoadInstruction.make("I", loopIndex));
