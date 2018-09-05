@@ -480,6 +480,7 @@ class BytecodeInstrumenter {
 				});
 			} else if(abc.getClass()==StaticMethod.class) {
 				StaticMethod st = (StaticMethod)abc;
+				instantiateParameters(editor, st.getMethod());
 				editor.insertAfter(0, new MethodEditor.Patch() {
 					@Override
 					public void emitTo(MethodEditor.Output w) {
