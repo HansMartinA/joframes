@@ -22,6 +22,7 @@ import com.ibm.wala.shrikeBT.MethodEditor;
 import com.ibm.wala.shrikeBT.NewInstruction;
 import com.ibm.wala.shrikeBT.ReturnInstruction;
 import com.ibm.wala.shrikeBT.StoreInstruction;
+import com.ibm.wala.shrikeBT.info.LocalAllocator;
 import com.ibm.wala.shrikeBT.shrikeCT.ClassInstrumenter;
 import com.ibm.wala.shrikeBT.shrikeCT.OfflineInstrumenter;
 import com.ibm.wala.shrikeCT.InvalidClassFileException;
@@ -104,10 +105,6 @@ class BytecodeInstrumenter {
 	 * Stores the wrapper for the framework.
 	 */
 	private FrameworkWrapper wrapper;
-	/**
-	 * Stores the next index for a local variable.
-	 */
-	private int nextLocalIndex;
 	
 	/**
 	 * Instruments the bytecode for a specific framework and application.
@@ -282,22 +279,6 @@ class BytecodeInstrumenter {
 	}
 	
 	/**
-	 * Resets the indices for local variables in case a new method is instrumented.
-	 */
-	private void resetLocalVariables() {
-		nextLocalIndex = 1;
-	}
-	
-	/**
-	 * Gets the next free index for a local variable.
-	 * 
-	 * @return the next index.
-	 */
-	private int getNextLocalIndex() {
-		return nextLocalIndex++;
-	}
-	
-	/**
 	 * Checks if a class is a subclass of a framework class.
 	 * 
 	 * @param className name of the class that is checked.
@@ -373,8 +354,8 @@ class BytecodeInstrumenter {
 		int afterLoopLabel = 0;
 		if(useForLoop) {
 			actualInstanceType = declaration.getIClass();
-			iteratorIndex = getNextLocalIndex();
-			localInstanceIndex = getNextLocalIndex();
+			iteratorIndex = LocalAllocator.allocate(editor.getData(), "Ljava/util/Iterator;");
+			localInstanceIndex = LocalAllocator.allocate(editor.getData(), declaration.getClassName());
 			beginLoopLabel = editor.allocateLabel();
 			afterLoopLabel = editor.allocateLabel();
 			int iteratorIndexCopy = iteratorIndex;
@@ -417,7 +398,8 @@ class BytecodeInstrumenter {
 		}
 		for(IClass appClass : declaration.getApplicationClasses()) {
 			wrapper.countOneInstance(appClass);
-			instrumentExplicitDeclarationContent(editor, declaration, getNextLocalIndex(), appClass);
+			instrumentExplicitDeclarationContent(editor, declaration, LocalAllocator.allocate(editor.getData(),
+					appClass.getName().toString()), appClass);
 		}
 	}
 	
@@ -522,10 +504,9 @@ class BytecodeInstrumenter {
 	 * @param editor the editor for the start phase method.
 	 */
 	private void instrumentStartPhase(MethodEditor editor) {
-		resetLocalVariables();
 		NonDeterministicIfInstrumenter ifInstr = new NonDeterministicIfInstrumenter();
 		Set<ExplicitDeclaration> declarations = wrapper.getFramework().getStartPhase().getDeclarations();
-		int maxUsesIndex = getNextLocalIndex();
+		int maxUsesIndex = LocalAllocator.allocate(editor.getData(), "D");
 		editor.insertAfter(0, new MethodEditor.Patch() {
 			@Override
 			public void emitTo(MethodEditor.Output w) {
@@ -547,7 +528,6 @@ class BytecodeInstrumenter {
 	 * @param editor the editor for the end phase method.
 	 */
 	private void instrumentEndPhase(MethodEditor editor) {
-		resetLocalVariables();
 		instrumentExplicitDeclaration(editor, wrapper.getFramework().getEndPhase().getEnd(), 0, null);
 	}
 	
@@ -558,7 +538,6 @@ class BytecodeInstrumenter {
 	 * @param editor the editor for the working phase method.
 	 */
 	private void instrumentWorkingPhase(ClassInstrumenter clInstr, MethodEditor editor) {
-		resetLocalVariables();
 		List<WorkingPhase> workingPhases = wrapper.getFramework().getWorkingPhases();
 		ArrayList<Integer> allocatedLabels = new ArrayList<>();
 		for(WorkingPhase working : workingPhases) {
@@ -591,9 +570,9 @@ class BytecodeInstrumenter {
 					} else if(working.getThreadType()==ThreadType.MULTI) {
 						Runtime.getRuntime().availableProcessors();
 						if(procIndex==0) {
-							procIndex = getNextLocalIndex();
-							threadAIndex = getNextLocalIndex();
-							loopIndex = getNextLocalIndex();
+							procIndex = LocalAllocator.allocate(editor.getData(), "I");
+							threadAIndex = LocalAllocator.allocate(editor.getData(), "[Ljava/lang/Thread;");
+							loopIndex = LocalAllocator.allocate(editor.getData(), "I");
 							w.emit(InvokeInstruction.make("()Ljava/lang/Runtime;", "Ljava/lang/Runtime;", "getRuntime",
 									IInvokeInstruction.Dispatch.STATIC));
 							w.emit(InvokeInstruction.make("()I", "Ljava/lang/Runtime;", "availableProcessors",
@@ -691,7 +670,7 @@ class BytecodeInstrumenter {
 			}
 		}
 		int caseCounterCopy = caseCounter;
-		int counterIndex = getNextLocalIndex();
+		int counterIndex = LocalAllocator.allocate(editor.getData(), "I");
 		editor.insertAfter(0, new MethodEditor.Patch() {
 			@Override
 			public void emitTo(MethodEditor.Output w) {
@@ -770,7 +749,7 @@ class BytecodeInstrumenter {
 				ifInstr.instrumentCaseBeginning(editor);
 				instrumentForGettingInstanceCollection(editor, b.getIClass());
 				int index = i;
-				int instanceIndex = getNextLocalIndex();
+				int instanceIndex = LocalAllocator.allocate(editor.getData(), b.getClassName());
 				editor.insertAfter(0, new MethodEditor.Patch() {
 					@Override
 					public void emitTo(MethodEditor.Output w) {
@@ -796,7 +775,6 @@ class BytecodeInstrumenter {
 	 * @param editor the editor for byteocde instrumentation.
 	 */
 	private void instrumentRunnableClassForWorkingPhase(MethodEditor editor) {
-		resetLocalVariables();
 		int cases = wrapper.getFramework().getWorkingPhases().size();
 		ArrayList<Integer> allocatedLabels = new ArrayList<>();
 		for(int i=0; i<=cases; i++) {
@@ -847,7 +825,7 @@ class BytecodeInstrumenter {
 		 * @param maxCasesIndex index where the number of the overall cases is stored.
 		 */
 		private void instrumentBeginning(MethodEditor editor, int maxCasesIndex) {
-			randomIndex = getNextLocalIndex();
+			randomIndex = LocalAllocator.allocate(editor.getData(), "I");
 			allocatedCaseLabels = new ArrayList<>();
 			caseCounter = 0;
 			editor.insertAfter(0, new MethodEditor.Patch() {
@@ -928,8 +906,8 @@ class BytecodeInstrumenter {
 		 * @param editor the editor for bytecode instrumentation.
 		 */
 		private void instrumentLoopBeginning(MethodEditor editor) {
-			loopIndex = getNextLocalIndex();
-			int randomIndex = getNextLocalIndex();
+			loopIndex = LocalAllocator.allocate(editor.getData(), "I");
+			int randomIndex = LocalAllocator.allocate(editor.getData(), "I");
 			beginLabel = editor.allocateLabel();
 			endLabel = editor.allocateLabel();
 			editor.insertAfter(0, new MethodEditor.Patch() {
