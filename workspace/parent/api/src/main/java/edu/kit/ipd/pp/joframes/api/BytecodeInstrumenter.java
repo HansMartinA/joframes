@@ -23,8 +23,10 @@ import com.ibm.wala.shrikeBT.NewInstruction;
 import com.ibm.wala.shrikeBT.ReturnInstruction;
 import com.ibm.wala.shrikeBT.StoreInstruction;
 import com.ibm.wala.shrikeBT.info.LocalAllocator;
+import com.ibm.wala.shrikeBT.shrikeCT.CTUtils;
 import com.ibm.wala.shrikeBT.shrikeCT.ClassInstrumenter;
 import com.ibm.wala.shrikeBT.shrikeCT.OfflineInstrumenter;
+import com.ibm.wala.shrikeCT.ClassWriter;
 import com.ibm.wala.shrikeCT.InvalidClassFileException;
 import com.ibm.wala.types.TypeReference;
 import edu.kit.ipd.pp.joframes.api.exceptions.InstrumenterException;
@@ -80,7 +82,8 @@ class BytecodeInstrumenter {
 	/**
 	 * Bytecode name of the WorkingWorker class within the ArtificialClass class.
 	 */
-	private static final String AC_WW_BYTECODE_NAME = AC_BYTECODE_NAME+"$WorkingWorker;";
+	private static final String AC_WW_BYTECODE_NAME = AC_BYTECODE_NAME.substring(0, AC_BYTECODE_NAME.length()-1)
+			+"$WorkingWorker;";
 	/**
 	 * Name of a constructor in bytecode.
 	 */
@@ -224,6 +227,7 @@ class BytecodeInstrumenter {
 					continue;
 				}
 				if(clInstr.getInputName().endsWith(PACKAGE+AC_NAME)) {
+					ArrayList<MethodData> workingMethods = new ArrayList<>();
 					clInstr.visitMethods(data -> {
 						MethodEditor editor = new MethodEditor(data);
 						editor.beginPass();
@@ -238,7 +242,7 @@ class BytecodeInstrumenter {
 						if(data.getName().equals(START)) {
 							instrumentStartPhase(editor);
 						} else if(data.getName().equals(WORKING)) {
-							instrumentWorkingPhase(clInstr, editor);
+							instrumentWorkingPhase(clInstr, editor, workingMethods);
 						} else if(data.getName().equals(END)) {
 							instrumentEndPhase(editor);
 						}
@@ -252,7 +256,12 @@ class BytecodeInstrumenter {
 						}
 						editor.applyPatches();
 					});
-					offInstr.outputModifiedClass(clInstr);
+					ClassWriter writer = clInstr.emitClass();
+					for(MethodData data : workingMethods) {
+						CTUtils.compileAndAddMethodToClassWriter(data, writer, null);
+						break;
+					}
+					offInstr.outputModifiedClass(clInstr, writer);
 				} else if(clInstr.getInputName().endsWith(PACKAGE+AC_WW_NAME)) {
 					clInstr.visitMethods(data -> {
 						MethodEditor editor = new MethodEditor(data);
@@ -486,7 +495,7 @@ class BytecodeInstrumenter {
 		editor.insertAfter(0, new MethodEditor.Patch() {
 			@Override
 			public void emitTo(MethodEditor.Output w) {
-				for(int i=0; i<method.getNumberOfParameters(); i++) {
+				for(int i=method.isStatic()?0:1; i<method.getNumberOfParameters(); i++) {
 					TypeReference type = method.getParameterType(i);
 					if(type.isPrimitiveType()) {
 						w.emit(ConstantInstruction.make(type.getName().toString(), 0));
@@ -536,8 +545,10 @@ class BytecodeInstrumenter {
 	 * 
 	 * @param clInstr instrumenter of the artificial class.
 	 * @param editor the editor for the working phase method.
+	 * @param workingDatas list for generated methods.
 	 */
-	private void instrumentWorkingPhase(ClassInstrumenter clInstr, MethodEditor editor) {
+	private void instrumentWorkingPhase(ClassInstrumenter clInstr, MethodEditor editor,
+			ArrayList<MethodData> workingDatas) {
 		List<WorkingPhase> workingPhases = wrapper.getFramework().getWorkingPhases();
 		ArrayList<Integer> allocatedLabels = new ArrayList<>();
 		for(WorkingPhase working : workingPhases) {
@@ -644,6 +655,7 @@ class BytecodeInstrumenter {
 			MethodData data = clInstr.createEmptyMethodData("w"+i, "()V", Constants.ACC_PROTECTED);
 			MethodEditor wEditor = new MethodEditor(data);
 			instrumentActualWorkingPhaseContent(wEditor, working);
+			workingDatas.add(data);
 		}
 	}
 	
