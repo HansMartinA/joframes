@@ -10,6 +10,7 @@ import com.ibm.wala.shrikeBT.ConditionalBranchInstruction;
 import com.ibm.wala.shrikeBT.ConstantInstruction;
 import com.ibm.wala.shrikeBT.Constants;
 import com.ibm.wala.shrikeBT.DupInstruction;
+import com.ibm.wala.shrikeBT.ExceptionHandler;
 import com.ibm.wala.shrikeBT.GetInstruction;
 import com.ibm.wala.shrikeBT.GotoInstruction;
 import com.ibm.wala.shrikeBT.IBinaryOpInstruction;
@@ -20,6 +21,7 @@ import com.ibm.wala.shrikeBT.LoadInstruction;
 import com.ibm.wala.shrikeBT.MethodData;
 import com.ibm.wala.shrikeBT.MethodEditor;
 import com.ibm.wala.shrikeBT.NewInstruction;
+import com.ibm.wala.shrikeBT.PopInstruction;
 import com.ibm.wala.shrikeBT.ReturnInstruction;
 import com.ibm.wala.shrikeBT.StoreInstruction;
 import com.ibm.wala.shrikeBT.info.LocalAllocator;
@@ -336,15 +338,23 @@ class BytecodeInstrumenter {
 	 * @param cl class for which the instance collection is obtained.
 	 */
 	private void instrumentForGettingInstanceCollection(MethodEditor editor, IClass cl) {
+		int exLabel = editor.allocateLabel();
+		int afterExLabel = editor.allocateLabel();
 		editor.insertAfter(0, new MethodEditor.Patch() {
 			@Override
 			public void emitTo(MethodEditor.Output w) {
+				ExceptionHandler h = new ExceptionHandler(exLabel, "Ljava/lang/ClassNotFoundException;");
 				w.emit(ConstantInstruction.makeString(cl.getName().toString().substring(1).replace("/", ".")));
 				w.emit(InvokeInstruction.make("(Ljava/lang/String;)Ljava/lang/Class;",
-						"Ljava/lang/Class;", "forName", IInvokeInstruction.Dispatch.STATIC));
+						"Ljava/lang/Class;", "forName", IInvokeInstruction.Dispatch.STATIC),
+						new ExceptionHandler[] {h});
 				w.emit(InvokeInstruction.make("(Ljava/lang/Class;)Ljava/util/List;",
 						"L"+PACKAGE+"InstanceCollector;", "getInstances",
 						IInvokeInstruction.Dispatch.STATIC));
+				w.emit(GotoInstruction.make(afterExLabel));
+				w.emitLabel(exLabel);
+				w.emit(ReturnInstruction.make("V"));
+				w.emitLabel(afterExLabel);
 			}
 		});
 	}
@@ -561,6 +571,7 @@ class BytecodeInstrumenter {
 				allocatedLabels.add(editor.allocateLabel());
 				allocatedLabels.add(editor.allocateLabel());
 				allocatedLabels.add(editor.allocateLabel());
+				allocatedLabels.add(editor.allocateLabel());
 			}
 		}
 		editor.insertAfter(0, new MethodEditor.Patch() {
@@ -599,6 +610,7 @@ class BytecodeInstrumenter {
 						w.emit(ConstantInstruction.make(0));
 						w.emit(StoreInstruction.make("I", loopIndex));
 						
+						// First loop: creation and start of threads.
 						w.emitLabel(allocatedLabels.get(forLabelCounter));
 						w.emit(LoadInstruction.make("I", loopIndex));
 						w.emit(LoadInstruction.make("I", procIndex));
@@ -628,6 +640,7 @@ class BytecodeInstrumenter {
 						w.emit(StoreInstruction.make("I", loopIndex));
 						w.emit(GotoInstruction.make(allocatedLabels.get(forLabelCounter)));
 						
+						// Second loop: every thread will be joined.
 						w.emitLabel(allocatedLabels.get(forLabelCounter+1));
 						w.emit(ConstantInstruction.make(0));
 						w.emit(StoreInstruction.make("I", loopIndex));
@@ -639,17 +652,26 @@ class BytecodeInstrumenter {
 						w.emit(LoadInstruction.make("[Ljava/lang/Thread;", threadAIndex));
 						w.emit(LoadInstruction.make("I", loopIndex));
 						w.emit(ArrayLoadInstruction.make("[Ljava/lang/Thread;"));
+						ExceptionHandler h = new ExceptionHandler(allocatedLabels.get(forLabelCounter+4),
+								"Ljava/lang/InterruptedException;");
 						w.emit(InvokeInstruction.make("()V", "Ljava/lang/Thread;", "join",
-								IInvokeInstruction.Dispatch.VIRTUAL));
+								IInvokeInstruction.Dispatch.VIRTUAL), new ExceptionHandler[] {h});
 						w.emit(LoadInstruction.make("I", loopIndex));
 						w.emit(ConstantInstruction.make(1));
 						w.emit(BinaryOpInstruction.make("I", IBinaryOpInstruction.Operator.ADD));
 						w.emit(StoreInstruction.make("I", loopIndex));
 						w.emit(GotoInstruction.make(allocatedLabels.get(forLabelCounter+2)));
 						
+						// Exception handling of InterruptedException that can occur during join().
+						w.emitLabel(allocatedLabels.get(forLabelCounter+4));
+						w.emit(PopInstruction.make(1));
+						w.emit(GotoInstruction.make(allocatedLabels.get(forLabelCounter+2)));
+						
+						// End of loops.
 						w.emitLabel(allocatedLabels.get(forLabelCounter+3));
-						forLabelCounter++;
+						forLabelCounter+=5;
 					}
+					
 				}
 			}
 		});
@@ -705,6 +727,9 @@ class BytecodeInstrumenter {
 				for(IClass cl : coll.getFrameworkClasses()) {
 					int instancesCount = wrapper.getInstancesCount(cl);
 					for(int i=0; i<instancesCount; i++) {
+						int exLabel = editor.allocateLabel();
+						ExceptionHandler[] handlers = new ExceptionHandler[] {new ExceptionHandler(exLabel,
+								"Ljava/lang/IndexOutOfBoundsException;")};
 						for(IMethod m : coll.getMethodCollection(cl)) {
 							ifInstr.instrumentCaseBeginning(editor);
 							instrumentForGettingInstanceCollection(editor, cl);
@@ -714,7 +739,7 @@ class BytecodeInstrumenter {
 								public void emitTo(MethodEditor.Output w) {
 									w.emit(ConstantInstruction.make(index));
 									w.emit(InvokeInstruction.make("(I)Ljava/lang/Object;", "Ljava/util/List;", "get",
-											IInvokeInstruction.Dispatch.INTERFACE));
+											IInvokeInstruction.Dispatch.INTERFACE), handlers);
 									w.emit(CheckCastInstruction.make(cl.getName().toString()+";"));
 								}
 							});
@@ -730,6 +755,12 @@ class BytecodeInstrumenter {
 								}
 							});
 						}
+						editor.insertAfter(0, new MethodEditor.Patch() {
+							@Override
+							public void emitTo(MethodEditor.Output w) {
+								w.emitLabel(exLabel);
+							}
+						});
 					}
 				}
 			} else if(r.getClass()==Block.class) {
