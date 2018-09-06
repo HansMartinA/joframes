@@ -670,6 +670,11 @@ class BytecodeInstrumenter {
 	 */
 	private void instrumentActualWorkingPhaseContent(MethodEditor editor, WorkingPhase working) {
 		editor.beginPass();
+		editor.replaceWith(0, new MethodEditor.Patch() {
+			@Override
+			public void emitTo(MethodEditor.Output w) {
+			}
+		});
 		NonDeterministicLoopInstrumenter loop = new NonDeterministicLoopInstrumenter();
 		NonDeterministicIfInstrumenter ifInstr = new NonDeterministicIfInstrumenter();
 		loop.instrumentLoopBeginning(editor);
