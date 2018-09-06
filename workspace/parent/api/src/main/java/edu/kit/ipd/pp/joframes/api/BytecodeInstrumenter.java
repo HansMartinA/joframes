@@ -164,7 +164,7 @@ class BytecodeInstrumenter {
 										// Class.forName requires a full-qualified class name. Therefore, the bytecode
 										// name is converted to a fully qualified class name.
 										w.emit(ConstantInstruction.makeString(cl.getName().toString()
-												.substring(1).replace("/", ".")+";"));
+												.substring(1).replace("/", ".")));
 										w.emit(InvokeInstruction.make("(Ljava/lang/String;)Ljava/lang/Class;",
 												"Ljava/lang/Class;", "forName", IInvokeInstruction.Dispatch.STATIC));
 										w.emit(InvokeInstruction.make("(Ljava/lang/Class;)V",
@@ -339,7 +339,7 @@ class BytecodeInstrumenter {
 		editor.insertAfter(0, new MethodEditor.Patch() {
 			@Override
 			public void emitTo(MethodEditor.Output w) {
-				w.emit(ConstantInstruction.makeString(cl.getName().toString()));
+				w.emit(ConstantInstruction.makeString(cl.getName().toString().substring(1).replace("/", ".")));
 				w.emit(InvokeInstruction.make("(Ljava/lang/String;)Ljava/lang/Class;",
 						"Ljava/lang/Class;", "forName", IInvokeInstruction.Dispatch.STATIC));
 				w.emit(InvokeInstruction.make("(Ljava/lang/Class;)Ljava/util/List;",
@@ -389,7 +389,7 @@ class BytecodeInstrumenter {
 					w.emit(ConditionalBranchInstruction.make("I", IConditionalBranchInstruction.Operator.EQ,
 							afterLoopLabelCopy));
 					w.emit(LoadInstruction.make("Ljava/util/Iterator;", iteratorIndexCopy));
-					w.emit(InvokeInstruction.make("()Ljava/util/Object;", "Ljava/util/Iterator;", "next",
+					w.emit(InvokeInstruction.make("()Ljava/lang/Object;", "Ljava/util/Iterator;", "next",
 							IInvokeInstruction.Dispatch.INTERFACE));
 					w.emit(CheckCastInstruction.make(declaration.getClassName()+";"));
 					w.emit(StoreInstruction.make(declaration.getClassName()+";", localInstanceIndexCopy));
@@ -437,7 +437,6 @@ class BytecodeInstrumenter {
 					editor.insertAfter(0, new MethodEditor.Patch() {
 						@Override
 						public void emitTo(MethodEditor.Output w) {
-							w.emit(LoadInstruction.make("L"+PACKAGE+"ArtificialClass;", 0));
 							w.emit(NewInstruction.make(instanceType.getName().toString()+";", 0));
 							w.emit(DupInstruction.make(0));
 						}
@@ -574,7 +573,6 @@ class BytecodeInstrumenter {
 				for(int i=0; i<workingPhases.size(); i++) {
 					WorkingPhase working = workingPhases.get(i);
 					if(working.getThreadType()==ThreadType.SINGLE) {
-						w.emit(LoadInstruction.make(AC_BYTECODE_NAME, 0));
 						w.emit(NewInstruction.make(AC_WW_BYTECODE_NAME, 0));
 						w.emit(DupInstruction.make(0));
 						w.emit(LoadInstruction.make(AC_BYTECODE_NAME, 0));
@@ -614,7 +612,7 @@ class BytecodeInstrumenter {
 						w.emit(DupInstruction.make(0));
 						w.emit(LoadInstruction.make(AC_BYTECODE_NAME, 0));
 						w.emit(ConstantInstruction.make(i));
-						w.emit(InvokeInstruction.make("()V", AC_WW_BYTECODE_NAME, "<init>",
+						w.emit(InvokeInstruction.make("("+AC_BYTECODE_NAME+"I)V", AC_WW_BYTECODE_NAME, "<init>",
 								IInvokeInstruction.Dispatch.SPECIAL));
 						w.emit(InvokeInstruction.make("(Ljava/lang/Runnable;)V", "Ljava/lang/Thread;", "<init>",
 								IInvokeInstruction.Dispatch.SPECIAL));
