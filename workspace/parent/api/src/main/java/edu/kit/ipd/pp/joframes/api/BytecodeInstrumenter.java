@@ -9,6 +9,7 @@ import com.ibm.wala.shrikeBT.CheckCastInstruction;
 import com.ibm.wala.shrikeBT.ConditionalBranchInstruction;
 import com.ibm.wala.shrikeBT.ConstantInstruction;
 import com.ibm.wala.shrikeBT.Constants;
+import com.ibm.wala.shrikeBT.ConversionInstruction;
 import com.ibm.wala.shrikeBT.DupInstruction;
 import com.ibm.wala.shrikeBT.ExceptionHandler;
 import com.ibm.wala.shrikeBT.GetInstruction;
@@ -712,12 +713,12 @@ class BytecodeInstrumenter {
 			}
 		}
 		int caseCounterCopy = caseCounter;
-		int counterIndex = LocalAllocator.allocate(editor.getData(), "I");
+		int counterIndex = LocalAllocator.allocate(editor.getData(), "D");
 		editor.insertAfter(0, new MethodEditor.Patch() {
 			@Override
 			public void emitTo(MethodEditor.Output w) {
-				w.emit(ConstantInstruction.make(caseCounterCopy));
-				w.emit(StoreInstruction.make("I", counterIndex));
+				w.emit(ConstantInstruction.make((double)caseCounterCopy));
+				w.emit(StoreInstruction.make("D", counterIndex));
 			}
 		});
 		ifInstr.instrumentBeginning(editor, counterIndex);
@@ -728,6 +729,7 @@ class BytecodeInstrumenter {
 					int instancesCount = wrapper.getInstancesCount(cl);
 					for(int i=0; i<instancesCount; i++) {
 						int exLabel = editor.allocateLabel();
+						int afterExLabel = editor.allocateLabel();
 						ExceptionHandler[] handlers = new ExceptionHandler[] {new ExceptionHandler(exLabel,
 								"Ljava/lang/IndexOutOfBoundsException;")};
 						for(IMethod m : coll.getMethodCollection(cl)) {
@@ -758,7 +760,10 @@ class BytecodeInstrumenter {
 						editor.insertAfter(0, new MethodEditor.Patch() {
 							@Override
 							public void emitTo(MethodEditor.Output w) {
+								w.emit(GotoInstruction.make(afterExLabel));
 								w.emitLabel(exLabel);
+								w.emit(PopInstruction.make(1));
+								w.emitLabel(afterExLabel);
 							}
 						});
 					}
@@ -888,7 +893,7 @@ class BytecodeInstrumenter {
 							IInvokeInstruction.Dispatch.STATIC));
 					w.emit(LoadInstruction.make("D", maxCasesIndex));
 					w.emit(BinaryOpInstruction.make("D", IBinaryOpInstruction.Operator.MUL));
-					w.emit(CheckCastInstruction.make("I"));
+					w.emit(ConversionInstruction.make("D", "I"));
 					w.emit(StoreInstruction.make("I", randomIndex));
 				}
 			});
@@ -970,7 +975,7 @@ class BytecodeInstrumenter {
 							IInvokeInstruction.Dispatch.STATIC));
 					w.emit(ConstantInstruction.make(1000000.0));
 					w.emit(BinaryOpInstruction.make("D", IBinaryOpInstruction.Operator.MUL));
-					w.emit(CheckCastInstruction.make("I"));
+					w.emit(ConversionInstruction.make("D", "I"));
 					w.emit(StoreInstruction.make("I", randomIndex));
 					w.emit(ConstantInstruction.make(0));
 					w.emit(StoreInstruction.make("I", loopIndex));
