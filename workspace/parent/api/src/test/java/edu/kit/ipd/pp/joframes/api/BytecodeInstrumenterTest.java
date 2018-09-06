@@ -86,12 +86,16 @@ public class BytecodeInstrumenterTest {
 			offInstr.beginTraversal();
 			for(int i=0; i<offInstr.getNumInputClasses(); i++) {
 				ClassInstrumenter clInstr = offInstr.nextClass();
+				if(clInstr==null) {
+					continue;
+				}
 				clInstr.visitMethods(data -> {
 					Verifier v = new Verifier(data);
 					try {
 						v.verify();
 					} catch(FailureException e) {
-						fail("Could not verify a method: "+data.getSignature()+"("+clInstr.getInputName()+").");
+						fail("Could not verify a method: "+data.getName()+data.getSignature()+"("+clInstr.getInputName()
+							+"). Cause: "+e.getMessage());
 					}
 				});
 			}
