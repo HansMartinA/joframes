@@ -134,11 +134,12 @@ class BytecodeInstrumenter {
 	 */
 	void instrumentBytecode(FrameworkWrapper wrapper, String[] applicationJars, String output)
 			throws InstrumenterException {
+		String tempEnd = "-temp.jar";
 		this.wrapper = wrapper;
 		try {
 			OfflineInstrumenter offInstr = new OfflineInstrumenter();
 			offInstr.setPassUnmodifiedClasses(true);
-			offInstr.setOutputJar(new File(output));
+			offInstr.setOutputJar(new File(output+tempEnd));
 			for(String appJar : applicationJars) {
 				offInstr.addInputJar(new File(appJar));
 			}
@@ -285,10 +286,45 @@ class BytecodeInstrumenter {
 					offInstr.outputModifiedClass(clInstr);
 				}
 			}
+			offInstr.writeUnmodifiedClasses();
 			offInstr.close();
+			offInstr = new OfflineInstrumenter();
+			offInstr.addInputJar(new File(output+tempEnd));
+			offInstr.setPassUnmodifiedClasses(true);
+			offInstr.setOutputJar(new File(output));
+			offInstr.beginTraversal();
+			for(int i=0; i<offInstr.getNumInputClasses(); i++) {
+				ClassInstrumenter clInstr = offInstr.nextClass();
+				if(clInstr==null) {
+					continue;
+				}
+				if(clInstr.getInputName().endsWith(AC_NAME)) {
+					clInstr.visitMethods(data -> {
+						if(data.getName().startsWith("w")) {
+							MethodEditor editor = new MethodEditor(data);
+							editor.beginPass();
+							editor.insertAfterBody(new MethodEditor.Patch() {
+								@Override
+								public void emitTo(MethodEditor.Output w) {
+									w.emit(ConstantInstruction.make(0));
+									w.emit(PopInstruction.make(1));
+								}
+							});
+							editor.applyPatches();
+							editor.endPass();
+						}
+					});
+					offInstr.outputModifiedClass(clInstr);
+				}
+			}
+			offInstr.writeUnmodifiedClasses();
+			offInstr.close();
+			new File(output+tempEnd).delete();
 		} catch(IOException e) {
+			new File(output+tempEnd).delete();
 			throw new InstrumenterException("An IO exception occurred while instrumenting the bytecode.", e);
 		} catch(InvalidClassFileException e) {
+			new File(output+tempEnd).delete();
 			throw new InstrumenterException("Bytcode instrumentation resulted in an invalid class.", e);
 		}
 	}
