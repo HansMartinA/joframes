@@ -111,6 +111,19 @@ class BytecodeInstrumenter {
 	 * Stores the wrapper for the framework.
 	 */
 	private FrameworkWrapper wrapper;
+	/**
+	 * Stores the actual output name.
+	 */
+	private String actualOutput;
+	
+	/**
+	 * Returns the path to the actual ouput jar file.
+	 * 
+	 * @return the path to the output jar file or null if the bytecode is not yet instrumented.
+	 */
+	String getOutput() {
+		return actualOutput;
+	}
 	
 	/**
 	 * Instruments the bytecode for a specific framework and application.
@@ -135,6 +148,7 @@ class BytecodeInstrumenter {
 	void instrumentBytecode(FrameworkWrapper wrapper, String[] applicationJars, String output)
 			throws InstrumenterException {
 		String tempEnd = "-temp.jar";
+		this.actualOutput = output;
 		this.wrapper = wrapper;
 		try {
 			OfflineInstrumenter offInstr = new OfflineInstrumenter();
