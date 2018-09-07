@@ -69,7 +69,7 @@ public class ArtificialClass {
 		 * @param instance outer instance using this instance.
 		 * @param phaseNumber number of the working phase this instance belongs to.
 		 */
-		private WorkingWorker(ArtificialClass instance, int phaseNumber) {
+		WorkingWorker(ArtificialClass instance, int phaseNumber) {
 			outerInstance = instance;
 			this.phaseNumber = phaseNumber;
 		}

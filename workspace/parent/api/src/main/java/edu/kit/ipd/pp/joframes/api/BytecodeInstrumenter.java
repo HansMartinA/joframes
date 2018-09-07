@@ -432,7 +432,7 @@ class BytecodeInstrumenter {
 					w.emit(LoadInstruction.make("Ljava/util/Iterator;", iteratorIndexCopy));
 					w.emit(InvokeInstruction.make("()Z", "Ljava/util/Iterator;", "hasNext",
 							IInvokeInstruction.Dispatch.INTERFACE));
-					w.emit(ConstantInstruction.make(1));
+					w.emit(ConstantInstruction.make(0));
 					w.emit(ConditionalBranchInstruction.make("I", IConditionalBranchInstruction.Operator.EQ,
 							afterLoopLabelCopy));
 					w.emit(LoadInstruction.make("Ljava/util/Iterator;", iteratorIndexCopy));
@@ -515,8 +515,8 @@ class BytecodeInstrumenter {
 					public void emitTo(MethodEditor.Output w) {
 						w.emit(InvokeInstruction.make(m.getMethod().getDescriptor().toString(),
 								instanceType.getName().toString()+";", m.getMethod().getName().toString(),
-								m.getMethod().getDeclaringClass().isInterface()?IInvokeInstruction.Dispatch.INTERFACE
-										:IInvokeInstruction.Dispatch.VIRTUAL));
+//								m.getMethod().getDeclaringClass().isInterface()?IInvokeInstruction.Dispatch.INTERFACE:
+										IInvokeInstruction.Dispatch.VIRTUAL));
 					}
 				});
 			} else if(abc.getClass()==StaticMethod.class) {
@@ -624,9 +624,10 @@ class BytecodeInstrumenter {
 						w.emit(NewInstruction.make(AC_WW_BYTECODE_NAME, 0));
 						w.emit(DupInstruction.make(0));
 						w.emit(LoadInstruction.make(AC_BYTECODE_NAME, 0));
+						w.emit(DupInstruction.make(0));
 						w.emit(ConstantInstruction.make(i));
-						w.emit(InvokeInstruction.make("("+AC_BYTECODE_NAME+"I)V", AC_WW_BYTECODE_NAME, "<init>",
-								IInvokeInstruction.Dispatch.SPECIAL));
+						w.emit(InvokeInstruction.make("("+AC_BYTECODE_NAME+AC_BYTECODE_NAME+"I)V", AC_WW_BYTECODE_NAME,
+								"<init>", IInvokeInstruction.Dispatch.SPECIAL));
 						w.emit(InvokeInstruction.make("()V", AC_WW_BYTECODE_NAME, "run",
 								IInvokeInstruction.Dispatch.INTERFACE));
 					} else if(working.getThreadType()==ThreadType.MULTI) {
@@ -660,9 +661,10 @@ class BytecodeInstrumenter {
 						w.emit(NewInstruction.make(AC_WW_BYTECODE_NAME, 0));
 						w.emit(DupInstruction.make(0));
 						w.emit(LoadInstruction.make(AC_BYTECODE_NAME, 0));
+						w.emit(DupInstruction.make(0));
 						w.emit(ConstantInstruction.make(i));
-						w.emit(InvokeInstruction.make("("+AC_BYTECODE_NAME+"I)V", AC_WW_BYTECODE_NAME, "<init>",
-								IInvokeInstruction.Dispatch.SPECIAL));
+						w.emit(InvokeInstruction.make("("+AC_BYTECODE_NAME+AC_BYTECODE_NAME+"I)V", AC_WW_BYTECODE_NAME,
+								"<init>", IInvokeInstruction.Dispatch.SPECIAL));
 						w.emit(InvokeInstruction.make("(Ljava/lang/Runnable;)V", "Ljava/lang/Thread;", "<init>",
 								IInvokeInstruction.Dispatch.SPECIAL));
 						w.emit(ArrayStoreInstruction.make("[Ljava/lang/Thread;"));
@@ -888,6 +890,7 @@ class BytecodeInstrumenter {
 					w.emit(GetInstruction.make(AC_BYTECODE_NAME, AC_WW_BYTECODE_NAME, "outerInstance", false));
 					w.emit(InvokeInstruction.make("()V", AC_BYTECODE_NAME, "w"+i, IInvokeInstruction.Dispatch.VIRTUAL));
 				}
+				w.emitLabel(allocatedLabels.get(cases));
 				w.emit(ReturnInstruction.make("V"));
 			}
 		});
