@@ -5,14 +5,14 @@
 	<parent>
 		<groupId>framework</groupId>
 		<artifactId>parent</artifactId>
-		<version>0.0.0</version>
+		<version>0.1</version>
 	</parent>
 	<artifactId>ast-ap</artifactId>
 	<dependencies>
 		<dependency>
 			<groupId>framework</groupId>
 			<artifactId>ast-base</artifactId>
-			<version>0.0.0</version>
+			<version>0.1</version>
 		</dependency>
 	</dependencies>
 </project>
