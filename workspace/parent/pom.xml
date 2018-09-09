@@ -15,6 +15,7 @@
 		<module>api-external</module>
 		<module>api-test-data</module>
 		<module>ui-cli</module>
+		<module>ui-gui</module>
 	</modules>
 	<properties>
 		<maven.compiler.source>1.8</maven.compiler.source>
