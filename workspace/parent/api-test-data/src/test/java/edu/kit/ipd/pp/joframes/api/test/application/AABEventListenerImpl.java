@@ -5,7 +5,7 @@ import edu.kit.ipd.pp.joframes.api.test.framework.BEventListener;
 
 /**
  * Implementation of the AAEventListener and BEventListener.
- * 
+ *
  * @author Martin Armbruster
  */
 public class AABEventListenerImpl implements AAEventListener, BEventListener {
@@ -13,7 +13,7 @@ public class AABEventListenerImpl implements AAEventListener, BEventListener {
 	public void handle() {
 		System.out.println("AABEventListenerImpl handle()");
 	}
-	
+
 	@Override
 	public void handleAA() {
 		System.out.println("AABEventListenerImpl handleAA()");

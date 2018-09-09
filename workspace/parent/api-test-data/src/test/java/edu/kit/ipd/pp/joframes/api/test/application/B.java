@@ -4,7 +4,7 @@ import edu.kit.ipd.pp.joframes.api.test.framework.A;
 
 /**
  * Represents an application class controlling as framework subclass the framework's life cycle.
- * 
+ *
  * @author Martin Armbruster
  */
 public class B extends A {
@@ -19,7 +19,7 @@ public class B extends A {
 		new SubBlockC();
 		new AppSubRandom();
 	}
-	
+
 	@Override
 	public void destroy() {
 		super.destroy();

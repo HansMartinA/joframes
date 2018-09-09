@@ -50,7 +50,7 @@ import java.util.Set;
 
 /**
  * Generates the artificial method out of the abstract syntax tree.
- * 
+ *
  * @author Martin Armbruster
  */
 class BytecodeInstrumenter {
@@ -65,7 +65,7 @@ class BytecodeInstrumenter {
 	/**
 	 * Format for the jar file containing the external api classes.
 	 */
-	private static final String OWN_JAR_FILE = ".jar#"+PACKAGE;
+	private static final String OWN_JAR_FILE = ".jar#" + PACKAGE;
 	/**
 	 * Name of the InstanceCollector class.
 	 */
@@ -77,7 +77,7 @@ class BytecodeInstrumenter {
 	/**
 	 * Bytecode name of the ArtificialClass class.
 	 */
-	private static final String AC_BYTECODE_NAME = "L"+PACKAGE+"ArtificialClass;";
+	private static final String AC_BYTECODE_NAME = "L" + PACKAGE + "ArtificialClass;";
 	/**
 	 * Name of the WorkingWorker class within the artificial class.
 	 */
@@ -85,8 +85,8 @@ class BytecodeInstrumenter {
 	/**
 	 * Bytecode name of the WorkingWorker class within the ArtificialClass class.
 	 */
-	private static final String AC_WW_BYTECODE_NAME = AC_BYTECODE_NAME.substring(0, AC_BYTECODE_NAME.length()-1)
-			+"$WorkingWorker;";
+	private static final String AC_WW_BYTECODE_NAME = AC_BYTECODE_NAME.substring(0, AC_BYTECODE_NAME.length() - 1)
+			+ "$WorkingWorker;";
 	/**
 	 * Name of a constructor in bytecode.
 	 */
@@ -115,69 +115,71 @@ class BytecodeInstrumenter {
 	 * Stores the actual output name.
 	 */
 	private String actualOutput;
-	
+
 	/**
 	 * Returns the path to the actual ouput jar file.
-	 * 
+	 *
 	 * @return the path to the output jar file or null if the bytecode is not yet instrumented.
 	 */
 	String getOutput() {
 		return actualOutput;
 	}
-	
+
 	/**
 	 * Instruments the bytecode for a specific framework and application.
-	 * 
-	 * @param wrapper the framework with the results of the class hierarchy analysis.
+	 *
+	 * @param frameworkWrapper the framework with the results of the class hierarchy analysis.
 	 * @param applicationJars paths to the jar files containing the application classes.
 	 * @throws InstrumenterException when an exception occurs during instrumentation.
 	 */
-	void instrumentBytecode(FrameworkWrapper wrapper, String[] applicationJars) throws InstrumenterException {
+	void instrumentBytecode(final FrameworkWrapper frameworkWrapper, final String[] applicationJars)
+			throws InstrumenterException {
 		instrumentBytecode(wrapper, applicationJars,
 				String.format(DEFAULT_OUTPUT_NAME, wrapper.getFramework().getName()));
 	}
-	
+
 	/**
 	 * Instruments the bytecode for a specific framework and application.
-	 * 
-	 * @param wrapper the framework with the results of the class hierarchy analysis.
+	 *
+	 * @param frameworkWrapper the framework with the results of the class hierarchy analysis.
 	 * @param applicationJars paths to the jar files containing the application classes.
 	 * @param output name of the output jar with the instrumented bytecode.
 	 * @throws InstrumenterException when an exception occurs during instrumentation.
 	 */
-	void instrumentBytecode(FrameworkWrapper wrapper, String[] applicationJars, String output)
+	void instrumentBytecode(final FrameworkWrapper frameworkWrapper, final String[] applicationJars,
+			final String output)
 			throws InstrumenterException {
 		String tempEnd = "-temp.jar";
 		this.actualOutput = output;
-		this.wrapper = wrapper;
+		this.wrapper = frameworkWrapper;
 		try {
 			OfflineInstrumenter offInstr = new OfflineInstrumenter();
 			offInstr.setPassUnmodifiedClasses(true);
-			offInstr.setOutputJar(new File(output+tempEnd));
-			for(String appJar : applicationJars) {
+			offInstr.setOutputJar(new File(output + tempEnd));
+			for (String appJar : applicationJars) {
 				offInstr.addInputJar(new File(appJar));
 			}
-			// For test purposes, the loading of the external api classes is done by assuming that the project is used
-			// within eclipse.
+			// For test purposes, the loading of the external api classes is done by assuming that
+			// the project is used within eclipse.
 			String path = new File("").getAbsoluteFile().getParentFile().getAbsolutePath()
-					+"/api-external/target/classes/";
+					+ "/api-external/target/classes/";
 			offInstr.addInputDirectory(new File(path), new File(path));
 			// Actual class loading for the stand-alone application.
-//			offInstr.addInputElement(new File("."), OWN_JAR_FILE+IC_NAME);
-//			offInstr.addInputElement(new File("."), OWN_JAR_FILE+AC_NAME);
-//			offInstr.addInputElement(new File("."), OWN_JAR_FILE+AC_WW_NAME);
+			// offInstr.addInputElement(new File("."), OWN_JAR_FILE + IC_NAME);
+			// offInstr.addInputElement(new File("."), OWN_JAR_FILE + AC_NAME);
+			// offInstr.addInputElement(new File("."), OWN_JAR_FILE + AC_WW_NAME);
 			offInstr.beginTraversal();
-			for(int i=0; i<offInstr.getNumInputClasses(); i++) {
+			for (int i = 0; i < offInstr.getNumInputClasses(); i++) {
 				ClassInstrumenter clInstr = offInstr.nextClass();
-				if(clInstr!=null&&clInstr.getInputName().endsWith(PACKAGE+IC_NAME)) {
+				if (clInstr != null && clInstr.getInputName().endsWith(PACKAGE + IC_NAME)) {
 					clInstr.visitMethods(data -> {
-						if(data.getName().equals(CLINIT)) {
+						if (data.getName().equals(CLINIT)) {
 							MethodEditor editor = new MethodEditor(data);
 							editor.beginPass();
-							editor.insertBefore(editor.getInstructions().length-1, new MethodEditor.Patch() {
+							editor.insertBefore(editor.getInstructions().length - 1, new MethodEditor.Patch() {
 								@Override
-								public void emitTo(MethodEditor.Output w) {
-									for(IClass cl : wrapper.getFrameworkClasses()) {
+								public void emitTo(final MethodEditor.Output w) {
+									for (IClass cl : wrapper.getFrameworkClasses()) {
 										// WALA classes stores class names in the bytecode format, but the used method
 										// Class.forName requires a full-qualified class name. Therefore, the bytecode
 										// name is converted to a fully qualified class name.
@@ -186,7 +188,7 @@ class BytecodeInstrumenter {
 										w.emit(InvokeInstruction.make("(Ljava/lang/String;)Ljava/lang/Class;",
 												"Ljava/lang/Class;", "forName", IInvokeInstruction.Dispatch.STATIC));
 										w.emit(InvokeInstruction.make("(Ljava/lang/Class;)V",
-												"L"+PACKAGE+"InstanceCollector;", "addClass",
+												"L" + PACKAGE + "InstanceCollector;", "addClass",
 												IInvokeInstruction.Dispatch.STATIC));
 									}
 								}
@@ -200,33 +202,33 @@ class BytecodeInstrumenter {
 				}
 			}
 			offInstr.beginTraversal();
-			for(int i=0; i<offInstr.getNumInputClasses(); i++) {
+			for (int i = 0; i < offInstr.getNumInputClasses(); i++) {
 				ClassInstrumenter clInstr = offInstr.nextClass();
-				if(clInstr==null) {
+				if (clInstr == null) {
 					continue;
 				}
 				clInstr.visitMethods(data -> {
 					MethodEditor editor = new MethodEditor(data);
-					if(editor.getData().getClassType().contains(PACKAGE)) {
+					if (editor.getData().getClassType().contains(PACKAGE)) {
 						return;
 					}
 					editor.beginPass();
 					editor.visitInstructions(new MethodEditor.Visitor() {
 						@Override
-						public void visitInvoke(IInvokeInstruction instruction) {
+						public void visitInvoke(final IInvokeInstruction instruction) {
 							String invokedClass = instruction.getClassType()
-									.substring(0, instruction.getClassType().length()-1);
-							if(instruction.getMethodName().equals(INIT)
-									&&isSubclassOfFrameworkClasses(invokedClass)
-									&&!(data.getName().equals(INIT)
-											&&areDirectSubclasses(invokedClass, data.getClassType()
-													.substring(0, data.getClassType().length()-1)))) {
+									.substring(0, instruction.getClassType().length() - 1);
+							if (instruction.getMethodName().equals(INIT)
+									&& isSubclassOfFrameworkClasses(invokedClass)
+									&& !(data.getName().equals(INIT)
+											&& areDirectSubclasses(invokedClass, data.getClassType()
+													.substring(0, data.getClassType().length() - 1)))) {
 								this.insertAfter(new MethodEditor.Patch() {
 									@Override
-									public void emitTo(MethodEditor.Output w) {
+									public void emitTo(final MethodEditor.Output w) {
 										w.emit(DupInstruction.make(0));
 										w.emit(InvokeInstruction.make("(Ljava/lang/Object;)V",
-												"L"+PACKAGE+"InstanceCollector;", "addInstance",
+												"L" + PACKAGE + "InstanceCollector;", "addInstance",
 												IInvokeInstruction.Dispatch.STATIC));
 									}
 								});
@@ -236,40 +238,40 @@ class BytecodeInstrumenter {
 					editor.applyPatches();
 					editor.endPass();
 				});
-				if(clInstr.isChanged()) {
+				if (clInstr.isChanged()) {
 					offInstr.outputModifiedClass(clInstr);
 				}
 			}
 			offInstr.beginTraversal();
-			for(int i=0; i<offInstr.getNumInputClasses(); i++) {
+			for (int i = 0; i < offInstr.getNumInputClasses(); i++) {
 				ClassInstrumenter clInstr = offInstr.nextClass();
-				if(clInstr==null) {
+				if (clInstr == null) {
 					continue;
 				}
-				if(clInstr.getInputName().endsWith(PACKAGE+AC_NAME)) {
+				if (clInstr.getInputName().endsWith(PACKAGE + AC_NAME)) {
 					ArrayList<MethodData> workingMethods = new ArrayList<>();
 					clInstr.visitMethods(data -> {
 						MethodEditor editor = new MethodEditor(data);
 						editor.beginPass();
-						boolean emptyMethod = editor.getInstructions().length==1;
-						if(emptyMethod) {
+						boolean emptyMethod = editor.getInstructions().length == 1;
+						if (emptyMethod) {
 							editor.replaceWith(0, new MethodEditor.Patch() {
 								@Override
-								public void emitTo(MethodEditor.Output w) {
+								public void emitTo(final MethodEditor.Output w) {
 								}
 							});
 						}
-						if(data.getName().equals(START)) {
+						if (data.getName().equals(START)) {
 							instrumentStartPhase(editor);
-						} else if(data.getName().equals(WORKING)) {
+						} else if (data.getName().equals(WORKING)) {
 							instrumentWorkingPhase(clInstr, editor, workingMethods);
-						} else if(data.getName().equals(END)) {
+						} else if (data.getName().equals(END)) {
 							instrumentEndPhase(editor);
 						}
-						if(emptyMethod) {
+						if (emptyMethod) {
 							editor.insertAfter(0, new MethodEditor.Patch() {
 								@Override
-								public void emitTo(MethodEditor.Output w) {
+								public void emitTo(final MethodEditor.Output w) {
 									w.emit(ReturnInstruction.make("V"));
 								}
 							});
@@ -278,18 +280,18 @@ class BytecodeInstrumenter {
 						editor.endPass();
 					});
 					ClassWriter writer = clInstr.emitClass();
-					for(MethodData data : workingMethods) {
+					for (MethodData data : workingMethods) {
 						CTUtils.compileAndAddMethodToClassWriter(data, writer, null);
 					}
 					offInstr.outputModifiedClass(clInstr, writer);
-				} else if(clInstr.getInputName().endsWith(PACKAGE+AC_WW_NAME)) {
+				} else if (clInstr.getInputName().endsWith(PACKAGE + AC_WW_NAME)) {
 					clInstr.visitMethods(data -> {
 						MethodEditor editor = new MethodEditor(data);
 						editor.beginPass();
-						if(data.getName().equals("run")) {
+						if (data.getName().equals("run")) {
 							editor.replaceWith(0, new MethodEditor.Patch() {
 								@Override
-								public void emitTo(MethodEditor.Output w) {
+								public void emitTo(final MethodEditor.Output w) {
 								}
 							});
 							instrumentRunnableClassForWorkingPhase(editor);
@@ -303,23 +305,23 @@ class BytecodeInstrumenter {
 			offInstr.writeUnmodifiedClasses();
 			offInstr.close();
 			offInstr = new OfflineInstrumenter();
-			offInstr.addInputJar(new File(output+tempEnd));
+			offInstr.addInputJar(new File(output + tempEnd));
 			offInstr.setPassUnmodifiedClasses(true);
 			offInstr.setOutputJar(new File(output));
 			offInstr.beginTraversal();
-			for(int i=0; i<offInstr.getNumInputClasses(); i++) {
+			for (int i = 0; i < offInstr.getNumInputClasses(); i++) {
 				ClassInstrumenter clInstr = offInstr.nextClass();
-				if(clInstr==null) {
+				if (clInstr == null) {
 					continue;
 				}
-				if(clInstr.getInputName().endsWith(AC_NAME)) {
+				if (clInstr.getInputName().endsWith(AC_NAME)) {
 					clInstr.visitMethods(data -> {
-						if(data.getName().startsWith("w")) {
+						if (data.getName().startsWith("w")) {
 							MethodEditor editor = new MethodEditor(data);
 							editor.beginPass();
 							editor.insertAfterBody(new MethodEditor.Patch() {
 								@Override
-								public void emitTo(MethodEditor.Output w) {
+								public void emitTo(final MethodEditor.Output w) {
 									w.emit(ConstantInstruction.make(0));
 									w.emit(PopInstruction.make(1));
 								}
@@ -333,74 +335,74 @@ class BytecodeInstrumenter {
 			}
 			offInstr.writeUnmodifiedClasses();
 			offInstr.close();
-			new File(output+tempEnd).delete();
-		} catch(IOException e) {
-			new File(output+tempEnd).delete();
+			new File(output + tempEnd).delete();
+		} catch (IOException e) {
+			new File(output + tempEnd).delete();
 			throw new InstrumenterException("An IO exception occurred while instrumenting the bytecode.", e);
-		} catch(InvalidClassFileException e) {
-			new File(output+tempEnd).delete();
+		} catch (InvalidClassFileException e) {
+			new File(output + tempEnd).delete();
 			throw new InstrumenterException("Bytcode instrumentation resulted in an invalid class.", e);
 		}
 	}
-	
+
 	/**
 	 * Checks if a class is a subclass of a framework class.
-	 * 
+	 *
 	 * @param className name of the class that is checked.
 	 * @return true if the class is a subclass of a framework class. false otherwise.
 	 */
-	private boolean isSubclassOfFrameworkClasses(String className) {
-		IClass subclass = wrapper.getClassHierarchy().lookupClass(TypeReference.findOrCreate
-				(wrapper.getClassHierarchy().getScope().getApplicationLoader(), className));
-		
-		for(IClass cl : wrapper.getFrameworkClasses()) {
-			if(wrapper.getClassHierarchy().isSubclassOf(subclass, cl)
-					||wrapper.getClassHierarchy().implementsInterface(subclass, cl)) {
+	private boolean isSubclassOfFrameworkClasses(final String className) {
+		IClass subclass = wrapper.getClassHierarchy().lookupClass(TypeReference.findOrCreate(
+				wrapper.getClassHierarchy().getScope().getApplicationLoader(), className));
+
+		for (IClass cl : wrapper.getFrameworkClasses()) {
+			if (wrapper.getClassHierarchy().isSubclassOf(subclass, cl)
+					|| wrapper.getClassHierarchy().implementsInterface(subclass, cl)) {
 				wrapper.countOneInstance(subclass);
 				return true;
 			}
 		}
 		return false;
 	}
-	
+
 	/**
 	 * Checks that two classes are direct subclasses of each other or equal.
-	 * 
+	 *
 	 * @param classOne one class.
 	 * @param classTwo another class.
 	 * @return true if both classes are equal or direct subclasses. false otherwise.
 	 */
-	private boolean areDirectSubclasses(String classOne, String classTwo) {
+	private boolean areDirectSubclasses(final String classOne, final String classTwo) {
 		IClass one = wrapper.getClassHierarchy().lookupClass(TypeReference
 				.findOrCreate(wrapper.getClassHierarchy().getScope().getApplicationLoader(), classOne));
 		IClass two = wrapper.getClassHierarchy().lookupClass(TypeReference
 				.findOrCreate(wrapper.getClassHierarchy().getScope().getApplicationLoader(), classTwo));
-		return one==two||wrapper.getClassHierarchy().isSubclassOf(one, two)
-				||wrapper.getClassHierarchy().isSubclassOf(two, one)
-				||wrapper.getClassHierarchy().implementsInterface(one, two)
-				||wrapper.getClassHierarchy().implementsInterface(one, two);
+		return one == two || wrapper.getClassHierarchy().isSubclassOf(one, two)
+				|| wrapper.getClassHierarchy().isSubclassOf(two, one)
+				|| wrapper.getClassHierarchy().implementsInterface(one, two)
+				|| wrapper.getClassHierarchy().implementsInterface(one, two);
 	}
-	
+
 	/**
 	 * Instruments the bytecode with instructions to get an instance collection from the InstanceCollector.
 	 * After calling this method, the instance collection is on top of the stack.
-	 * 
+	 *
 	 * @param editor the editor for bytecode instrumentation.
 	 * @param cl class for which the instance collection is obtained.
 	 */
-	private void instrumentForGettingInstanceCollection(MethodEditor editor, IClass cl) {
+	private void instrumentForGettingInstanceCollection(final MethodEditor editor, final IClass cl) {
 		int exLabel = editor.allocateLabel();
 		int afterExLabel = editor.allocateLabel();
 		editor.insertAfter(0, new MethodEditor.Patch() {
 			@Override
-			public void emitTo(MethodEditor.Output w) {
+			public void emitTo(final MethodEditor.Output w) {
 				ExceptionHandler h = new ExceptionHandler(exLabel, "Ljava/lang/ClassNotFoundException;");
 				w.emit(ConstantInstruction.makeString(cl.getName().toString().substring(1).replace("/", ".")));
 				w.emit(InvokeInstruction.make("(Ljava/lang/String;)Ljava/lang/Class;",
 						"Ljava/lang/Class;", "forName", IInvokeInstruction.Dispatch.STATIC),
 						new ExceptionHandler[] {h});
 				w.emit(InvokeInstruction.make("(Ljava/lang/Class;)Ljava/util/List;",
-						"L"+PACKAGE+"InstanceCollector;", "getInstances",
+						"L" + PACKAGE + "InstanceCollector;", "getInstances",
 						IInvokeInstruction.Dispatch.STATIC));
 				w.emit(GotoInstruction.make(afterExLabel));
 				w.emitLabel(exLabel);
@@ -409,23 +411,24 @@ class BytecodeInstrumenter {
 			}
 		});
 	}
-	
+
 	/**
 	 * Instruments the bytecode with an explicit declaration.
-	 * 
+	 *
 	 * @param editor the editor for the bytecode instrumentation.
 	 * @param declaration the explicit declaration.
-	 * @param instanceIndex local variable index of an instance that is put in.
+	 * @param instanceIndex local variable index of an instance that is put in or -1 if no instance is put in.
+	 * @param instanceType type of the instance put in or null if no instance is put in.
 	 */
-	private void instrumentExplicitDeclaration(MethodEditor editor, ExplicitDeclaration declaration, int instanceIndex,
-			IClass instanceType) {
-		boolean useForLoop = declaration.getClassName()!=null;
+	private void instrumentExplicitDeclaration(final MethodEditor editor, final ExplicitDeclaration declaration,
+			final int instanceIndex, final IClass instanceType) {
+		boolean useForLoop = declaration.getClassName() != null;
 		IClass actualInstanceType = instanceType;
 		int iteratorIndex = 0;
 		int localInstanceIndex = instanceIndex;
 		int beginLoopLabel = 0;
 		int afterLoopLabel = 0;
-		if(useForLoop) {
+		if (useForLoop) {
 			actualInstanceType = declaration.getIClass();
 			iteratorIndex = LocalAllocator.allocate(editor.getData(), "Ljava/util/Iterator;");
 			localInstanceIndex = LocalAllocator.allocate(editor.getData(), declaration.getClassName());
@@ -438,7 +441,7 @@ class BytecodeInstrumenter {
 			instrumentForGettingInstanceCollection(editor, declaration.getIClass());
 			editor.insertAfter(0, new MethodEditor.Patch() {
 				@Override
-				public void emitTo(MethodEditor.Output w) {
+				public void emitTo(final MethodEditor.Output w) {
 					w.emit(InvokeInstruction.make("()Ljava/util/Iterator;", "Ljava/util/List;", "iterator",
 							IInvokeInstruction.Dispatch.INTERFACE));
 					w.emit(StoreInstruction.make("Ljava/util/Iterator;", iteratorIndexCopy));
@@ -452,172 +455,171 @@ class BytecodeInstrumenter {
 					w.emit(LoadInstruction.make("Ljava/util/Iterator;", iteratorIndexCopy));
 					w.emit(InvokeInstruction.make("()Ljava/lang/Object;", "Ljava/util/Iterator;", "next",
 							IInvokeInstruction.Dispatch.INTERFACE));
-					w.emit(CheckCastInstruction.make(declaration.getClassName()+";"));
-					w.emit(StoreInstruction.make(declaration.getClassName()+";", localInstanceIndexCopy));
+					w.emit(CheckCastInstruction.make(declaration.getClassName() + ";"));
+					w.emit(StoreInstruction.make(declaration.getClassName() + ";", localInstanceIndexCopy));
 				}
 			});
 		}
 		instrumentExplicitDeclarationContent(editor, declaration, localInstanceIndex, actualInstanceType);
-		if(useForLoop) {
+		if (useForLoop) {
 			int beginLoopLabelCopy = beginLoopLabel;
 			int afterLoopLabelCopy = afterLoopLabel;
 			editor.insertAfter(0, new MethodEditor.Patch() {
 				@Override
-				public void emitTo(MethodEditor.Output w) {
+				public void emitTo(final MethodEditor.Output w) {
 					w.emit(GotoInstruction.make(beginLoopLabelCopy));
 					w.emitLabel(afterLoopLabelCopy);
 				}
 			});
 		}
-		for(IClass appClass : declaration.getApplicationClasses()) {
+		for (IClass appClass : declaration.getApplicationClasses()) {
 			wrapper.countOneInstance(appClass);
 			instrumentExplicitDeclarationContent(editor, declaration, LocalAllocator.allocate(editor.getData(),
 					appClass.getName().toString()), appClass);
 		}
 	}
-	
+
 	/**
 	 * Instruments the bytecode with the content of an explicit declaration.
-	 * 
+	 *
 	 * @param editor the editor for bytecode instrumentation.
 	 * @param declaration the explicit declaration.
 	 * @param instanceIndex index where the local variable to use is stored.
 	 * @param instanceType type of the local variable.
 	 */
-	private void instrumentExplicitDeclarationContent(MethodEditor editor, ExplicitDeclaration declaration,
-			int instanceIndex, IClass instanceType) {
-		for(int i=0; i<declaration.getNumberOfCallsAndDeclarations(); i++) {
+	private void instrumentExplicitDeclarationContent(final MethodEditor editor, final ExplicitDeclaration declaration,
+			final int instanceIndex, final IClass instanceType) {
+		for (int i = 0; i < declaration.getNumberOfCallsAndDeclarations(); i++) {
 			AstBaseClass abc = declaration.getCallOrDeclaration(i);
-			if(abc.getClass()==Method.class) {
-				Method m = (Method)abc;
-				if(m.getSignature().equals("Constructor")) {
+			if (abc.getClass() == Method.class) {
+				Method m = (Method) abc;
+				if (m.getSignature().equals("Constructor")) {
 					IMethod init = declaration.getConstructor(instanceType);
-					if(init==null) {
+					if (init == null) {
 						continue;
 					}
 					editor.insertAfter(0, new MethodEditor.Patch() {
 						@Override
-						public void emitTo(MethodEditor.Output w) {
-							w.emit(NewInstruction.make(instanceType.getName().toString()+";", 0));
+						public void emitTo(final MethodEditor.Output w) {
+							w.emit(NewInstruction.make(instanceType.getName().toString() + ";", 0));
 							w.emit(DupInstruction.make(0));
 						}
 					});
 					instantiateParameters(editor, init);
 					editor.insertAfter(0, new MethodEditor.Patch() {
 						@Override
-						public void emitTo(MethodEditor.Output w) {
+						public void emitTo(final MethodEditor.Output w) {
 							w.emit(InvokeInstruction.make(init.getDescriptor().toString(),
-									instanceType.getName().toString()+";", "<init>",
+									instanceType.getName().toString() + ";", "<init>",
 									IInvokeInstruction.Dispatch.SPECIAL));
 							w.emit(DupInstruction.make(0));
-							w.emit(InvokeInstruction.make("(Ljava/lang/Object;)V", "L"+PACKAGE+"InstanceCollector;",
+							w.emit(InvokeInstruction.make("(Ljava/lang/Object;)V", "L" + PACKAGE + "InstanceCollector;",
 									"addInstance", IInvokeInstruction.Dispatch.STATIC));
-							w.emit(StoreInstruction.make(instanceType.getName().toString()+";", instanceIndex));
+							w.emit(StoreInstruction.make(instanceType.getName().toString() + ";", instanceIndex));
 						}
 					});
 					continue;
 				}
 				editor.insertAfter(0, new MethodEditor.Patch() {
 					@Override
-					public void emitTo(MethodEditor.Output w) {
-						w.emit(LoadInstruction.make(instanceType.getName().toString()+";", instanceIndex));
+					public void emitTo(final MethodEditor.Output w) {
+						w.emit(LoadInstruction.make(instanceType.getName().toString() + ";", instanceIndex));
 					}
 				});
 				instantiateParameters(editor, m.getMethod());
 				editor.insertAfter(0, new MethodEditor.Patch() {
 					@Override
-					public void emitTo(MethodEditor.Output w) {
+					public void emitTo(final MethodEditor.Output w) {
 						w.emit(InvokeInstruction.make(m.getMethod().getDescriptor().toString(),
-								instanceType.getName().toString()+";", m.getMethod().getName().toString(),
-//								m.getMethod().getDeclaringClass().isInterface()?IInvokeInstruction.Dispatch.INTERFACE:
+								instanceType.getName().toString() + ";", m.getMethod().getName().toString(),
 										IInvokeInstruction.Dispatch.VIRTUAL));
 					}
 				});
-			} else if(abc.getClass()==StaticMethod.class) {
-				StaticMethod st = (StaticMethod)abc;
+			} else if (abc.getClass() == StaticMethod.class) {
+				StaticMethod st = (StaticMethod) abc;
 				instantiateParameters(editor, st.getMethod());
 				editor.insertAfter(0, new MethodEditor.Patch() {
 					@Override
-					public void emitTo(MethodEditor.Output w) {
+					public void emitTo(final MethodEditor.Output w) {
 						w.emit(InvokeInstruction.make(st.getMethod().getDescriptor().toString(),
-								st.getClassString()+";",
+								st.getClassString() + ";",
 								st.getMethod().getName().toString(), IInvokeInstruction.Dispatch.STATIC));
 					}
 				});
-			} else if(abc.getClass()==ExplicitDeclaration.class) {
-				instrumentExplicitDeclaration(editor, (ExplicitDeclaration)abc, instanceIndex, instanceType);
+			} else if (abc.getClass() == ExplicitDeclaration.class) {
+				instrumentExplicitDeclaration(editor, (ExplicitDeclaration) abc, instanceIndex, instanceType);
 			}
 		}
 	}
-	
+
 	/**
 	 * Instantiates the parameters for a method.
-	 * 
+	 *
 	 * @param editor the editor for bytecode instrumentation.
 	 * @param method the method for which the parameters are created.
 	 */
-	private void instantiateParameters(MethodEditor editor, IMethod method) {
+	private void instantiateParameters(final MethodEditor editor, final IMethod method) {
 		editor.insertAfter(0, new MethodEditor.Patch() {
 			@Override
-			public void emitTo(MethodEditor.Output w) {
-				for(int i=method.isStatic()?0:1; i<method.getNumberOfParameters(); i++) {
+			public void emitTo(final MethodEditor.Output w) {
+				for (int i = method.isStatic() ? 0 : 1; i < method.getNumberOfParameters(); i++) {
 					TypeReference type = method.getParameterType(i);
-					if(type.isPrimitiveType()) {
+					if (type.isPrimitiveType()) {
 						w.emit(ConstantInstruction.make(type.getName().toString(), 0));
 					} else {
-						w.emit(ConstantInstruction.make(type.getName().toString()+";", null));
+						w.emit(ConstantInstruction.make(type.getName().toString() + ";", null));
 					}
 				}
 			}
 		});
 	}
-	
+
 	/**
 	 * Instruments the bytecode for the start phase.
-	 * 
+	 *
 	 * @param editor the editor for the start phase method.
 	 */
-	private void instrumentStartPhase(MethodEditor editor) {
+	private void instrumentStartPhase(final MethodEditor editor) {
 		NonDeterministicIfInstrumenter ifInstr = new NonDeterministicIfInstrumenter();
 		Set<ExplicitDeclaration> declarations = wrapper.getFramework().getStartPhase().getDeclarations();
 		int maxUsesIndex = LocalAllocator.allocate(editor.getData(), "D");
 		editor.insertAfter(0, new MethodEditor.Patch() {
 			@Override
-			public void emitTo(MethodEditor.Output w) {
-				w.emit(ConstantInstruction.make((double)declarations.size()));
+			public void emitTo(final MethodEditor.Output w) {
+				w.emit(ConstantInstruction.make((double) declarations.size()));
 				w.emit(StoreInstruction.make("D", maxUsesIndex));
 			}
 		});
 		ifInstr.instrumentBeginning(editor, maxUsesIndex);
-		for(ExplicitDeclaration dec : declarations) {
+		for (ExplicitDeclaration dec : declarations) {
 			ifInstr.instrumentCaseBeginning(editor);
 			instrumentExplicitDeclaration(editor, dec, -1, null);
 		}
 		ifInstr.instrumentEnd(editor);
 	}
-	
+
 	/**
 	 * Instruments the bytecode for the end phase.
-	 * 
+	 *
 	 * @param editor the editor for the end phase method.
 	 */
-	private void instrumentEndPhase(MethodEditor editor) {
+	private void instrumentEndPhase(final MethodEditor editor) {
 		instrumentExplicitDeclaration(editor, wrapper.getFramework().getEndPhase().getEnd(), 0, null);
 	}
-	
+
 	/**
 	 * Instruments the bytecode for the working phase.
-	 * 
+	 *
 	 * @param clInstr instrumenter of the artificial class.
 	 * @param editor the editor for the working phase method.
 	 * @param workingDatas list for generated methods.
 	 */
-	private void instrumentWorkingPhase(ClassInstrumenter clInstr, MethodEditor editor,
-			ArrayList<MethodData> workingDatas) {
+	private void instrumentWorkingPhase(final ClassInstrumenter clInstr, final MethodEditor editor,
+			final ArrayList<MethodData> workingDatas) {
 		List<WorkingPhase> workingPhases = wrapper.getFramework().getWorkingPhases();
 		ArrayList<Integer> allocatedLabels = new ArrayList<>();
-		for(WorkingPhase working : workingPhases) {
-			if(working.getThreadType()==ThreadType.MULTI) {
+		for (WorkingPhase working : workingPhases) {
+			if (working.getThreadType() == ThreadType.MULTI) {
 				allocatedLabels.add(editor.allocateLabel());
 				allocatedLabels.add(editor.allocateLabel());
 				allocatedLabels.add(editor.allocateLabel());
@@ -627,26 +629,25 @@ class BytecodeInstrumenter {
 		}
 		editor.insertAfter(0, new MethodEditor.Patch() {
 			@Override
-			public void emitTo(MethodEditor.Output w) {
+			public void emitTo(final MethodEditor.Output w) {
 				int forLabelCounter = 0;
 				int procIndex = 0;
 				int threadAIndex = 0;
 				int loopIndex = 0;
-				for(int i=0; i<workingPhases.size(); i++) {
+				for (int i = 0; i < workingPhases.size(); i++) {
 					WorkingPhase working = workingPhases.get(i);
-					if(working.getThreadType()==ThreadType.SINGLE) {
+					if (working.getThreadType() == ThreadType.SINGLE) {
 						w.emit(NewInstruction.make(AC_WW_BYTECODE_NAME, 0));
 						w.emit(DupInstruction.make(0));
 						w.emit(LoadInstruction.make(AC_BYTECODE_NAME, 0));
 						w.emit(DupInstruction.make(0));
 						w.emit(ConstantInstruction.make(i));
-						w.emit(InvokeInstruction.make("("+AC_BYTECODE_NAME+AC_BYTECODE_NAME+"I)V", AC_WW_BYTECODE_NAME,
-								"<init>", IInvokeInstruction.Dispatch.SPECIAL));
+						w.emit(InvokeInstruction.make("(" + AC_BYTECODE_NAME + AC_BYTECODE_NAME + "I)V",
+								AC_WW_BYTECODE_NAME, "<init>", IInvokeInstruction.Dispatch.SPECIAL));
 						w.emit(InvokeInstruction.make("()V", AC_WW_BYTECODE_NAME, "run",
 								IInvokeInstruction.Dispatch.INTERFACE));
-					} else if(working.getThreadType()==ThreadType.MULTI) {
-						Runtime.getRuntime().availableProcessors();
-						if(procIndex==0) {
+					} else if (working.getThreadType() == ThreadType.MULTI) {
+						if (procIndex == 0) {
 							procIndex = LocalAllocator.allocate(editor.getData(), "I");
 							threadAIndex = LocalAllocator.allocate(editor.getData(), "[Ljava/lang/Thread;");
 							loopIndex = LocalAllocator.allocate(editor.getData(), "I");
@@ -661,13 +662,13 @@ class BytecodeInstrumenter {
 						}
 						w.emit(ConstantInstruction.make(0));
 						w.emit(StoreInstruction.make("I", loopIndex));
-						
+
 						// First loop: creation and start of threads.
 						w.emitLabel(allocatedLabels.get(forLabelCounter));
 						w.emit(LoadInstruction.make("I", loopIndex));
 						w.emit(LoadInstruction.make("I", procIndex));
 						w.emit(ConditionalBranchInstruction.make("I", IConditionalBranchInstruction.Operator.GE,
-								allocatedLabels.get(forLabelCounter+1)));
+								allocatedLabels.get(forLabelCounter + 1)));
 						w.emit(LoadInstruction.make("[Ljava/lang/Thread;", threadAIndex));
 						w.emit(LoadInstruction.make("I", loopIndex));
 						w.emit(NewInstruction.make("Ljava/lang/Thread;", 0));
@@ -677,8 +678,8 @@ class BytecodeInstrumenter {
 						w.emit(LoadInstruction.make(AC_BYTECODE_NAME, 0));
 						w.emit(DupInstruction.make(0));
 						w.emit(ConstantInstruction.make(i));
-						w.emit(InvokeInstruction.make("("+AC_BYTECODE_NAME+AC_BYTECODE_NAME+"I)V", AC_WW_BYTECODE_NAME,
-								"<init>", IInvokeInstruction.Dispatch.SPECIAL));
+						w.emit(InvokeInstruction.make("(" + AC_BYTECODE_NAME + AC_BYTECODE_NAME + "I)V",
+								AC_WW_BYTECODE_NAME, "<init>", IInvokeInstruction.Dispatch.SPECIAL));
 						w.emit(InvokeInstruction.make("(Ljava/lang/Runnable;)V", "Ljava/lang/Thread;", "<init>",
 								IInvokeInstruction.Dispatch.SPECIAL));
 						w.emit(ArrayStoreInstruction.make("[Ljava/lang/Thread;"));
@@ -692,20 +693,20 @@ class BytecodeInstrumenter {
 						w.emit(BinaryOpInstruction.make("I", IBinaryOpInstruction.Operator.ADD));
 						w.emit(StoreInstruction.make("I", loopIndex));
 						w.emit(GotoInstruction.make(allocatedLabels.get(forLabelCounter)));
-						
+
 						// Second loop: every thread will be joined.
-						w.emitLabel(allocatedLabels.get(forLabelCounter+1));
+						w.emitLabel(allocatedLabels.get(forLabelCounter + 1));
 						w.emit(ConstantInstruction.make(0));
 						w.emit(StoreInstruction.make("I", loopIndex));
-						w.emitLabel(allocatedLabels.get(forLabelCounter+2));
+						w.emitLabel(allocatedLabels.get(forLabelCounter + 2));
 						w.emit(LoadInstruction.make("I", loopIndex));
 						w.emit(LoadInstruction.make("I", procIndex));
 						w.emit(ConditionalBranchInstruction.make("I", IConditionalBranchInstruction.Operator.GE,
-								allocatedLabels.get(forLabelCounter+3)));
+								allocatedLabels.get(forLabelCounter + 3)));
 						w.emit(LoadInstruction.make("[Ljava/lang/Thread;", threadAIndex));
 						w.emit(LoadInstruction.make("I", loopIndex));
 						w.emit(ArrayLoadInstruction.make("[Ljava/lang/Thread;"));
-						ExceptionHandler h = new ExceptionHandler(allocatedLabels.get(forLabelCounter+4),
+						ExceptionHandler h = new ExceptionHandler(allocatedLabels.get(forLabelCounter + 4),
 								"Ljava/lang/InterruptedException;");
 						w.emit(InvokeInstruction.make("()V", "Ljava/lang/Thread;", "join",
 								IInvokeInstruction.Dispatch.VIRTUAL), new ExceptionHandler[] {h});
@@ -713,105 +714,104 @@ class BytecodeInstrumenter {
 						w.emit(ConstantInstruction.make(1));
 						w.emit(BinaryOpInstruction.make("I", IBinaryOpInstruction.Operator.ADD));
 						w.emit(StoreInstruction.make("I", loopIndex));
-						w.emit(GotoInstruction.make(allocatedLabels.get(forLabelCounter+2)));
-						
+						w.emit(GotoInstruction.make(allocatedLabels.get(forLabelCounter + 2)));
+
 						// Exception handling of InterruptedException that can occur during join().
-						w.emitLabel(allocatedLabels.get(forLabelCounter+4));
+						w.emitLabel(allocatedLabels.get(forLabelCounter + 4));
 						w.emit(PopInstruction.make(1));
-						w.emit(GotoInstruction.make(allocatedLabels.get(forLabelCounter+2)));
-						
+						w.emit(GotoInstruction.make(allocatedLabels.get(forLabelCounter + 2)));
+
 						// End of loops.
-						w.emitLabel(allocatedLabels.get(forLabelCounter+3));
-						forLabelCounter+=5;
+						w.emitLabel(allocatedLabels.get(forLabelCounter + 3));
+						forLabelCounter += 5;
 					}
-					
 				}
 			}
 		});
-		for(int i=0; i<workingPhases.size(); i++) {
+		for (int i = 0; i < workingPhases.size(); i++) {
 			WorkingPhase working = workingPhases.get(i);
-			MethodData data = clInstr.createEmptyMethodData("w"+i, "()V", Constants.ACC_PROTECTED);
+			MethodData data = clInstr.createEmptyMethodData("w" + i, "()V", Constants.ACC_PROTECTED);
 			MethodEditor wEditor = new MethodEditor(data);
 			instrumentActualWorkingPhaseContent(wEditor, working);
 			workingDatas.add(data);
 		}
 	}
-	
+
 	/**
 	 * Instruments a new ArtificialClass method with the actual content of a working phase.
-	 * 
+	 *
 	 * @param editor the edtior for bytecode instrumentation.
 	 * @param working the working phase.
 	 */
-	private void instrumentActualWorkingPhaseContent(MethodEditor editor, WorkingPhase working) {
+	private void instrumentActualWorkingPhaseContent(final MethodEditor editor, final WorkingPhase working) {
 		editor.beginPass();
 		editor.replaceWith(0, new MethodEditor.Patch() {
 			@Override
-			public void emitTo(MethodEditor.Output w) {
+			public void emitTo(final MethodEditor.Output w) {
 			}
 		});
 		NonDeterministicLoopInstrumenter loop = new NonDeterministicLoopInstrumenter();
 		NonDeterministicIfInstrumenter ifInstr = new NonDeterministicIfInstrumenter();
 		loop.instrumentLoopBeginning(editor);
 		int caseCounter = 0;
-		for(Rule r : working.getRules()) {
-			if(r.getClass()==MethodCollector.class) {
-				MethodCollector coll = (MethodCollector)r;
-				for(IClass cl : coll.getFrameworkClasses()) {
-					caseCounter += coll.getMethodCollection(cl).size()*wrapper.getInstancesCount(cl);
+		for (Rule r : working.getRules()) {
+			if (r.getClass() == MethodCollector.class) {
+				MethodCollector coll = (MethodCollector) r;
+				for (IClass cl : coll.getFrameworkClasses()) {
+					caseCounter += coll.getMethodCollection(cl).size() * wrapper.getInstancesCount(cl);
 				}
-			} else if(r.getClass()==Block.class) {
-				caseCounter += countBlocks((Block)r);
+			} else if (r.getClass() == Block.class) {
+				caseCounter += countBlocks((Block) r);
 			}
 		}
 		int caseCounterCopy = caseCounter;
 		int counterIndex = LocalAllocator.allocate(editor.getData(), "D");
 		editor.insertAfter(0, new MethodEditor.Patch() {
 			@Override
-			public void emitTo(MethodEditor.Output w) {
-				w.emit(ConstantInstruction.make((double)caseCounterCopy));
+			public void emitTo(final MethodEditor.Output w) {
+				w.emit(ConstantInstruction.make((double) caseCounterCopy));
 				w.emit(StoreInstruction.make("D", counterIndex));
 			}
 		});
 		ifInstr.instrumentBeginning(editor, counterIndex);
-		for(Rule r : working.getRules()) {
-			if(r.getClass()==MethodCollector.class) {
-				MethodCollector coll = (MethodCollector)r;
-				for(IClass cl : coll.getFrameworkClasses()) {
+		for (Rule r : working.getRules()) {
+			if (r.getClass() == MethodCollector.class) {
+				MethodCollector coll = (MethodCollector) r;
+				for (IClass cl : coll.getFrameworkClasses()) {
 					int instancesCount = wrapper.getInstancesCount(cl);
-					for(int i=0; i<instancesCount; i++) {
+					for (int i = 0; i < instancesCount; i++) {
 						int exLabel = editor.allocateLabel();
 						int afterExLabel = editor.allocateLabel();
 						ExceptionHandler[] handlers = new ExceptionHandler[] {new ExceptionHandler(exLabel,
 								"Ljava/lang/IndexOutOfBoundsException;")};
-						for(IMethod m : coll.getMethodCollection(cl)) {
+						for (IMethod m : coll.getMethodCollection(cl)) {
 							ifInstr.instrumentCaseBeginning(editor);
 							instrumentForGettingInstanceCollection(editor, cl);
 							int index = i;
 							editor.insertAfter(0, new MethodEditor.Patch() {
 								@Override
-								public void emitTo(MethodEditor.Output w) {
+								public void emitTo(final MethodEditor.Output w) {
 									w.emit(ConstantInstruction.make(index));
 									w.emit(InvokeInstruction.make("(I)Ljava/lang/Object;", "Ljava/util/List;", "get",
 											IInvokeInstruction.Dispatch.INTERFACE), handlers);
-									w.emit(CheckCastInstruction.make(cl.getName().toString()+";"));
+									w.emit(CheckCastInstruction.make(cl.getName().toString() + ";"));
 								}
 							});
 							instantiateParameters(editor, m);
 							editor.insertAfter(0, new MethodEditor.Patch() {
 								@Override
-								public void emitTo(MethodEditor.Output w) {
+								public void emitTo(final MethodEditor.Output w) {
 									w.emit(InvokeInstruction.make(m.getDescriptor().toString(),
-											cl.getName().toString()+";",
+											cl.getName().toString() + ";",
 											m.getName().toString(), cl.isInterface()
-											?IInvokeInstruction.Dispatch.INTERFACE
-													:IInvokeInstruction.Dispatch.VIRTUAL));
+											? IInvokeInstruction.Dispatch.INTERFACE
+													: IInvokeInstruction.Dispatch.VIRTUAL));
 								}
 							});
 						}
 						editor.insertAfter(0, new MethodEditor.Patch() {
 							@Override
-							public void emitTo(MethodEditor.Output w) {
+							public void emitTo(final MethodEditor.Output w) {
 								w.emit(GotoInstruction.make(afterExLabel));
 								w.emitLabel(exLabel);
 								w.emit(PopInstruction.make(1));
@@ -820,89 +820,92 @@ class BytecodeInstrumenter {
 						});
 					}
 				}
-			} else if(r.getClass()==Block.class) {
-				instrumentBlock(editor, ifInstr, (Block)r);
+			} else if (r.getClass() == Block.class) {
+				instrumentBlock(editor, ifInstr, (Block) r);
 			}
 		}
 		ifInstr.instrumentEnd(editor);
 		loop.instrumentLoopEnd(editor);
 		editor.insertAfter(0, new MethodEditor.Patch() {
 			@Override
-			public void emitTo(MethodEditor.Output w) {
+			public void emitTo(final MethodEditor.Output w) {
 				w.emit(ReturnInstruction.make("V"));
 			}
 		});
 		editor.applyPatches();
 		editor.endPass();
 	}
-	
+
 	/**
 	 * Counts the number of resulting blocks for a block rule.
-	 * 
+	 *
 	 * @param b the block rule.
 	 * @return the number of blocks.
 	 */
-	private int countBlocks(Block b) {
-		return wrapper.getInstancesCount(b.getIClass())*(b.getInnerBlock()!=null?countBlocks(b.getInnerBlock()):0);
+	private int countBlocks(final Block b) {
+		return wrapper.getInstancesCount(b.getIClass()) * (b.getInnerBlock() != null ? countBlocks(b.getInnerBlock())
+				: 0);
 	}
-	
+
 	/**
 	 * Instruments the bytecode with a block rule.
-	 * 
+	 *
 	 * @param editor the editor for bytecode instrumentation.
 	 * @param ifInstr instrumenter for the non-deterministic if-else-if-clause in the working phase.
 	 * @param b the block rule.
 	 */
-	private void instrumentBlock(MethodEditor editor, NonDeterministicIfInstrumenter ifInstr, Block b) {
-		if(b.getInnerBlock()==null) {
-			for(int i=0; i<wrapper.getInstancesCount(b.getIClass()); i++) {
+	private void instrumentBlock(final MethodEditor editor, final NonDeterministicIfInstrumenter ifInstr,
+			final Block b) {
+		if (b.getInnerBlock() == null) {
+			for (int i = 0; i < wrapper.getInstancesCount(b.getIClass()); i++) {
 				ifInstr.instrumentCaseBeginning(editor);
 				instrumentForGettingInstanceCollection(editor, b.getIClass());
 				int index = i;
 				int instanceIndex = LocalAllocator.allocate(editor.getData(), b.getClassName());
 				editor.insertAfter(0, new MethodEditor.Patch() {
 					@Override
-					public void emitTo(MethodEditor.Output w) {
+					public void emitTo(final MethodEditor.Output w) {
 						w.emit(ConstantInstruction.make(index));
 						w.emit(InvokeInstruction.make("(I)Ljava/lang/Object;", "Ljava/util/List;", "get",
 								IInvokeInstruction.Dispatch.INTERFACE));
-						w.emit(CheckCastInstruction.make(b.getClassName()+";"));
-						w.emit(StoreInstruction.make(b.getClassName()+";", instanceIndex));
+						w.emit(CheckCastInstruction.make(b.getClassName() + ";"));
+						w.emit(StoreInstruction.make(b.getClassName() + ";", instanceIndex));
 					}
 				});
 				instrumentExplicitDeclaration(editor, b.getDeclaration(), instanceIndex, b.getIClass());
 			}
 		} else {
-			for(int i=0; i<wrapper.getInstancesCount(b.getIClass()); i++) {
+			for (int i = 0; i < wrapper.getInstancesCount(b.getIClass()); i++) {
 				instrumentBlock(editor, ifInstr, b.getInnerBlock());
 			}
 		}
 	}
-	
+
 	/**
 	 * Instruments the bytecode of the runnable class used in the working phase.
-	 * 
+	 *
 	 * @param editor the editor for byteocde instrumentation.
 	 */
-	private void instrumentRunnableClassForWorkingPhase(MethodEditor editor) {
+	private void instrumentRunnableClassForWorkingPhase(final MethodEditor editor) {
 		int cases = wrapper.getFramework().getWorkingPhases().size();
 		ArrayList<Integer> allocatedLabels = new ArrayList<>();
-		for(int i=0; i<=cases; i++) {
+		for (int i = 0; i <= cases; i++) {
 			allocatedLabels.add(editor.allocateLabel());
 		}
 		editor.insertAfter(0, new MethodEditor.Patch() {
 			@Override
-			public void emitTo(MethodEditor.Output w) {
-				for(int i=0; i<cases; i++) {
+			public void emitTo(final MethodEditor.Output w) {
+				for (int i = 0; i < cases; i++) {
 					w.emitLabel(allocatedLabels.get(i));
 					w.emit(LoadInstruction.make(AC_WW_BYTECODE_NAME, 0));
 					w.emit(GetInstruction.make("I", AC_WW_BYTECODE_NAME, "phaseNumber", false));
 					w.emit(ConstantInstruction.make(i));
 					w.emit(ConditionalBranchInstruction.make("I", IConditionalBranchInstruction.Operator.NE,
-							allocatedLabels.get(i+1)));
+							allocatedLabels.get(i + 1)));
 					w.emit(LoadInstruction.make(AC_WW_BYTECODE_NAME, 0));
 					w.emit(GetInstruction.make(AC_BYTECODE_NAME, AC_WW_BYTECODE_NAME, "outerInstance", false));
-					w.emit(InvokeInstruction.make("()V", AC_BYTECODE_NAME, "w"+i, IInvokeInstruction.Dispatch.VIRTUAL));
+					w.emit(InvokeInstruction.make("()V", AC_BYTECODE_NAME, "w" + i,
+							IInvokeInstruction.Dispatch.VIRTUAL));
 				}
 				w.emitLabel(allocatedLabels.get(cases));
 				w.emit(ReturnInstruction.make("V"));
@@ -912,7 +915,7 @@ class BytecodeInstrumenter {
 
 	/**
 	 * Instruments bytecode with a non-deterministic if-else-if-clause.
-	 * 
+	 *
 	 * @author Martin Armbruster
 	 */
 	private class NonDeterministicIfInstrumenter {
@@ -928,20 +931,20 @@ class BytecodeInstrumenter {
 		 * Stores the counter of the current case.
 		 */
 		private int caseCounter;
-		
+
 		/**
 		 * Instruments bytecode with the beginning of the clause.
-		 * 
+		 *
 		 * @param editor the editor for bytecode instrumentation.
 		 * @param maxCasesIndex index where the number of the overall cases is stored.
 		 */
-		private void instrumentBeginning(MethodEditor editor, int maxCasesIndex) {
+		private void instrumentBeginning(final MethodEditor editor, final int maxCasesIndex) {
 			randomIndex = LocalAllocator.allocate(editor.getData(), "I");
 			allocatedCaseLabels = new ArrayList<>();
 			caseCounter = 0;
 			editor.insertAfter(0, new MethodEditor.Patch() {
 				@Override
-				public void emitTo(MethodEditor.Output w) {
+				public void emitTo(final MethodEditor.Output w) {
 					w.emit(InvokeInstruction.make("()D", "Ljava/lang/Math;", "random",
 							IInvokeInstruction.Dispatch.STATIC));
 					w.emit(LoadInstruction.make("D", maxCasesIndex));
@@ -951,50 +954,50 @@ class BytecodeInstrumenter {
 				}
 			});
 		}
-		
+
 		/**
 		 * Instruments bytecode with the beginning of a case. Must be called before the actual content of the case is
 		 * added.
-		 * 
+		 *
 		 * @param editor the editor for bytecode instrumentation.
 		 */
-		private void instrumentCaseBeginning(MethodEditor editor) {
-			if(caseCounter==0) {
+		private void instrumentCaseBeginning(final MethodEditor editor) {
+			if (caseCounter == 0) {
 				allocatedCaseLabels.add(editor.allocateLabel());
 			}
 			allocatedCaseLabels.add(editor.allocateLabel());
 			int caseCounterCopy = caseCounter;
 			editor.insertAfter(0, new MethodEditor.Patch() {
 				@Override
-				public void emitTo(MethodEditor.Output w) {
+				public void emitTo(final MethodEditor.Output w) {
 					w.emitLabel(allocatedCaseLabels.get(caseCounterCopy));
 					w.emit(LoadInstruction.make("I", randomIndex));
 					w.emit(ConstantInstruction.make(caseCounterCopy));
 					w.emit(ConditionalBranchInstruction.make("I", IConditionalBranchInstruction.Operator.NE,
-							allocatedCaseLabels.get(caseCounterCopy+1)));
+							allocatedCaseLabels.get(caseCounterCopy + 1)));
 				}
 			});
 			caseCounter++;
 		}
-		
+
 		/**
 		 * Instruments bytecode with the end of the clause.
-		 * 
+		 *
 		 * @param editor the editor for bytecode instrumentation.
 		 */
-		private void instrumentEnd(MethodEditor editor) {
+		private void instrumentEnd(final MethodEditor editor) {
 			editor.insertAfter(0, new MethodEditor.Patch() {
 				@Override
-				public void emitTo(MethodEditor.Output w) {
+				public void emitTo(final MethodEditor.Output w) {
 					w.emitLabel(allocatedCaseLabels.get(caseCounter));
 				}
 			});
 		}
 	}
-	
+
 	/**
 	 * Instruments bytecode with a non-deterministic loop.
-	 * 
+	 *
 	 * @author Martin Armbruster
 	 */
 	private class NonDeterministicLoopInstrumenter {
@@ -1010,23 +1013,24 @@ class BytecodeInstrumenter {
 		 * Stores the label where the loop ends.
 		 */
 		private int endLabel;
-		
+
 		/**
 		 * Instruments the bytecode with the beginning of the loop.
-		 * 
+		 *
 		 * @param editor the editor for bytecode instrumentation.
 		 */
-		private void instrumentLoopBeginning(MethodEditor editor) {
+		private void instrumentLoopBeginning(final MethodEditor editor) {
 			loopIndex = LocalAllocator.allocate(editor.getData(), "I");
 			int randomIndex = LocalAllocator.allocate(editor.getData(), "I");
 			beginLabel = editor.allocateLabel();
 			endLabel = editor.allocateLabel();
 			editor.insertAfter(0, new MethodEditor.Patch() {
 				@Override
-				public void emitTo(MethodEditor.Output w) {
+				public void emitTo(final MethodEditor.Output w) {
 					w.emit(InvokeInstruction.make("()D", "Ljava/lang/Math;", "random",
 							IInvokeInstruction.Dispatch.STATIC));
-					w.emit(ConstantInstruction.make(1000000.0));
+					final double maxLoops = 1000000.0;
+					w.emit(ConstantInstruction.make(maxLoops));
 					w.emit(BinaryOpInstruction.make("D", IBinaryOpInstruction.Operator.MUL));
 					w.emit(ConversionInstruction.make("D", "I"));
 					w.emit(StoreInstruction.make("I", randomIndex));
@@ -1039,16 +1043,16 @@ class BytecodeInstrumenter {
 				}
 			});
 		}
-		
+
 		/**
 		 * Instruments the bytecode with th end of the loop.
-		 * 
+		 *
 		 * @param editor the editor for bytecode instrumentation.
 		 */
-		private void instrumentLoopEnd(MethodEditor editor) {
+		private void instrumentLoopEnd(final MethodEditor editor) {
 			editor.insertAfter(0, new MethodEditor.Patch() {
 				@Override
-				public void emitTo(MethodEditor.Output w) {
+				public void emitTo(final MethodEditor.Output w) {
 					w.emit(LoadInstruction.make("I", loopIndex));
 					w.emit(ConstantInstruction.make(1));
 					w.emit(BinaryOpInstruction.make("I", IBinaryOpInstruction.Operator.ADD));

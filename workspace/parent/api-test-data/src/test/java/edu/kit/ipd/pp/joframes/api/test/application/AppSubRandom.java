@@ -4,7 +4,7 @@ import edu.kit.ipd.pp.joframes.api.test.framework.SubRandom;
 
 /**
  * Application subclass of SubRandom.
- * 
+ *
  * @author Martin Armbruster
  */
 public class AppSubRandom extends SubRandom {

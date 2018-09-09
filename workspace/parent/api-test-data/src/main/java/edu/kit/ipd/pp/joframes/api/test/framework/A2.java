@@ -2,7 +2,7 @@ package edu.kit.ipd.pp.joframes.api.test.framework;
 
 /**
  * Represents a second class that can control the framework's life-cycle.
- * 
+ *
  * @author Martin Armbruster
  */
 public interface A2 {
@@ -14,7 +14,7 @@ public interface A2 {
 	}
 	/**
 	 * Initializes the framework.
-	 * 
+	 *
 	 * @param s a random parameter.
 	 */
 	void initialize(String s);

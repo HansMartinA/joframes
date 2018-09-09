@@ -8,7 +8,7 @@ import java.util.Set;
 
 /**
  * Represents a sequence of method calls.
- * 
+ *
  * @author Martin Armbruster
  */
 public class ExplicitDeclaration implements AstBaseClass {
@@ -28,7 +28,7 @@ public class ExplicitDeclaration implements AstBaseClass {
 	 * Stores all calls related to this explicit declaration.
 	 */
 	private ArrayList<AstBaseClass> calls;
-	
+
 	/**
 	 * Creates a new instance.
 	 */
@@ -36,110 +36,110 @@ public class ExplicitDeclaration implements AstBaseClass {
 		calls = new ArrayList<>();
 		applicationClassToInit = new HashMap<>();
 	}
-	
+
 	/**
 	 * Creates a new instance.
-	 * 
-	 * @param className the optional class name associated with the newly created explicit declaration.
+	 *
+	 * @param clName the optional class name associated with the newly created explicit declaration.
 	 */
-	public ExplicitDeclaration(String className) {
+	public ExplicitDeclaration(final String clName) {
 		this();
-		this.className = className;
+		this.className = clName;
 	}
-	
+
 	/**
 	 * Returns the class name associated with this explicit declaration.
-	 * 
+	 *
 	 * @return the class name or null if no class was given.
 	 */
 	public String getClassName() {
 		return className;
 	}
-	
+
 	/**
 	 * Sets the class corresponding to the contained class name.
-	 * 
-	 * @param correspondingClass the corresponding class.
+	 *
+	 * @param correspondingCl the corresponding class.
 	 */
-	public void setIClass(IClass correspondingClass) {
-		this.correspondingClass = correspondingClass;
+	public void setIClass(final IClass correspondingCl) {
+		this.correspondingClass = correspondingCl;
 	}
-	
+
 	/**
 	 * Returns the class corresponding to the contained class name.
-	 * 
+	 *
 	 * @return the corresponding class or null if the class name is null.
 	 */
 	public IClass getIClass() {
 		return correspondingClass;
 	}
-	
+
 	/**
 	 * Adds an application class which is a subclass to the corresponding class of this explicit declaration
 	 * and its constructor.
-	 * 
+	 *
 	 * @param cl the application class.
 	 * @param init constructor of the application class.
 	 */
-	public void addApplicationClass(IClass cl, IMethod init) {
+	public void addApplicationClass(final IClass cl, final IMethod init) {
 		applicationClassToInit.put(cl, init);
 	}
-	
+
 	/**
 	 * Returns a set of all application classes that are subclasses of the corresponding class of this explicit
 	 * declaration.
-	 * 
+	 *
 	 * @return the set of all application classes.
 	 */
 	public Set<IClass> getApplicationClasses() {
 		return applicationClassToInit.keySet();
 	}
-	
+
 	/**
 	 * Returns the constructor for an application class.
-	 * 
+	 *
 	 * @param appClass the application class.
 	 * @return the constructor.
 	 */
-	public IMethod getConstructor(IClass appClass) {
+	public IMethod getConstructor(final IClass appClass) {
 		return applicationClassToInit.get(appClass);
 	}
-	
+
 	/**
 	 * Adds a call to this explicit declaration.
-	 * 
+	 *
 	 * @param call the call to add.
 	 */
-	public void addCall(Call call) {
+	public void addCall(final Call call) {
 		calls.add(call);
 	}
-	
+
 	/**
 	 * Adds an explicit declaration.
-	 * 
+	 *
 	 * @param declaration the explicit declaration to add.
 	 */
-	public void addExplicitDeclaration(ExplicitDeclaration declaration) {
+	public void addExplicitDeclaration(final ExplicitDeclaration declaration) {
 		calls.add(declaration);
 	}
-	
+
 	/**
 	 * Returns the number of added method and static method calls and explicit declarations.
-	 * 
+	 *
 	 * @return the number.
 	 */
 	public int getNumberOfCallsAndDeclarations() {
 		return calls.size();
 	}
-	
+
 	/**
-	 * Returns an added method or static method call or explicit declaration. 
-	 * 
+	 * Returns an added method or static method call or explicit declaration.
+	 *
 	 * @param number the number of the call or explicit declaration to return. Must be within 0 and
 	 *               getNumberOfCallsAndDeclarations().
 	 * @return the call or explicit declaration.
 	 */
-	public AstBaseClass getCallOrDeclaration(int number) {
+	public AstBaseClass getCallOrDeclaration(final int number) {
 		return calls.get(number);
 	}
 }

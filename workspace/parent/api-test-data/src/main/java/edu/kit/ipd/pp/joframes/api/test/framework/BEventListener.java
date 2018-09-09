@@ -4,7 +4,7 @@ import java.util.EventListener;
 
 /**
  * Represents an EventListener in the framework.
- * 
+ *
  * @author Martin Armbruster
  */
 public interface BEventListener extends EventListener {

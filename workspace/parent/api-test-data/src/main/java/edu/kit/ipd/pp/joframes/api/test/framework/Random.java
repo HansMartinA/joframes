@@ -2,7 +2,7 @@ package edu.kit.ipd.pp.joframes.api.test.framework;
 
 /**
  * Represents a random framework class.
- * 
+ *
  * @author Martin Armbruster
  */
 public abstract class Random {

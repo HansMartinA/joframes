@@ -5,7 +5,7 @@ import edu.kit.ipd.pp.joframes.api.test.framework.CEventListener;
 
 /**
  * Subclass of BlockC.
- * 
+ *
  * @author Martin Armbruster
  */
 public class SubBlockC extends BlockC {

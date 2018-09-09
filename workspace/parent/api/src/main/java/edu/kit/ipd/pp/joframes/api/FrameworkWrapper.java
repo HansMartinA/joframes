@@ -8,7 +8,7 @@ import java.util.Set;
 
 /**
  * Wraps a framework with additional information for exchange between different stages within the pipeline.
- * 
+ *
  * @author Martin Armbruster
  */
 class FrameworkWrapper {
@@ -25,83 +25,83 @@ class FrameworkWrapper {
 	 * instances during bytecode instrumentation.
 	 */
 	private HashMap<IClass, Integer> frameworkClassesToInstancesCount;
-	
+
 	/**
 	 * Creates a new instance.
-	 * 
-	 * @param framework the wrapped framework.
+	 *
+	 * @param wrapFramework the wrapped framework.
 	 */
-	FrameworkWrapper(Framework framework) {
-		this.framework = framework;
+	FrameworkWrapper(final Framework wrapFramework) {
+		this.framework = wrapFramework;
 		frameworkClassesToInstancesCount = new HashMap<>();
 	}
-	
+
 	/**
 	 * Returns the wrapped framework.
-	 * 
+	 *
 	 * @return the wrapped framework.
 	 */
 	Framework getFramework() {
 		return framework;
 	}
-	
+
 	/**
 	 * Sets the class hierarchy to wrap.
-	 * 
-	 * @param hierarchy the class hierarchy.
+	 *
+	 * @param wrapHierarchy the class hierarchy.
 	 */
-	void setClassHierarchy(ClassHierarchy hierarchy) {
-		this.hierarchy = hierarchy;
+	void setClassHierarchy(final ClassHierarchy wrapHierarchy) {
+		this.hierarchy = wrapHierarchy;
 	}
-	
+
 	/**
 	 * Returns the wrapped class hierarchy.
-	 * 
+	 *
 	 * @return the class hierarchy.
 	 */
 	ClassHierarchy getClassHierarchy() {
 		return hierarchy;
 	}
-	
+
 	/**
 	 * Adds a framework class.
-	 * 
+	 *
 	 * @param frameworkClass the framework class.
 	 */
-	void addFrameworkClass(IClass frameworkClass) {
+	void addFrameworkClass(final IClass frameworkClass) {
 		frameworkClassesToInstancesCount.put(frameworkClass, 0);
 	}
-	
+
 	/**
 	 * Returns the framework classes in form of WALA classes.
-	 * 
+	 *
 	 * @return the set with the framework classes.
 	 */
 	Set<IClass> getFrameworkClasses() {
 		return frameworkClassesToInstancesCount.keySet();
 	}
-	
+
 	/**
 	 * Counts one instance for a class. For every registered supertype of someClass, the instance is counted towards
 	 * the supertype.
-	 * 
+	 *
 	 * @param someClass the class.
 	 */
-	void countOneInstance(IClass someClass) {
-		for(IClass cl : frameworkClassesToInstancesCount.keySet()) {
-			if(hierarchy.isSubclassOf(someClass, cl)) {
-				frameworkClassesToInstancesCount.put(cl, frameworkClassesToInstancesCount.get(cl)+1);
+	void countOneInstance(final IClass someClass) {
+		for (IClass cl : frameworkClassesToInstancesCount.keySet()) {
+			if (hierarchy.isSubclassOf(someClass, cl)) {
+				frameworkClassesToInstancesCount.put(cl, frameworkClassesToInstancesCount.get(cl) + 1);
 			}
 		}
 	}
-	
+
 	/**
 	 * Returns the counted instances for a framework class.
-	 * 
+	 *
 	 * @param frameworkClass the framework class.
 	 * @return the number of found and created instances.
 	 */
-	int getInstancesCount(IClass frameworkClass) {
+	int getInstancesCount(final IClass frameworkClass) {
 		return frameworkClassesToInstancesCount.get(frameworkClass);
 	}
 }

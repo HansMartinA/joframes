@@ -25,7 +25,7 @@ import static org.junit.Assert.fail;
 
 /**
  * Test class for the ClassHierarchyAnalysis class.
- * 
+ *
  * @author Martin Armbruster
  */
 public class ClassHierarchyAnalysisTest {
@@ -37,10 +37,10 @@ public class ClassHierarchyAnalysisTest {
 	 * Stores the wrapped framework after the ClassHierarchyAnalysis.
 	 */
 	private FrameworkWrapper wrapper;
-	
+
 	/**
 	 * Tests the test framework and application.
-	 * 
+	 *
 	 * @throws ParseException when parsing of the framework specification fails.
 	 * @throws ClassHierarchyCreationException when creation of the class hierarchy fails.
 	 */
@@ -64,7 +64,7 @@ public class ClassHierarchyAnalysisTest {
 		assertTrue(set.contains(TestConstants.EVENT_LISTENER));
 		assertTrue(set.contains(TestConstants.CLASS_RANDOM));
 		assertTrue(set.contains(TestConstants.CLASS_SUB_RANDOM));
-		for(ExplicitDeclaration declaration : wrapper.getFramework().getStartPhase().getDeclarations()) {
+		for (ExplicitDeclaration declaration : wrapper.getFramework().getStartPhase().getDeclarations()) {
 			validateExplicitDeclaration(declaration);
 		}
 		validateStartPhaseOfTestSpec();
@@ -72,9 +72,9 @@ public class ClassHierarchyAnalysisTest {
 		assertEquals(2, wrapper.getFramework().getWorkingPhases().size());
 		WorkingPhase working = wrapper.getFramework().getWorkingPhases().get(0);
 		assertEquals(ThreadType.MULTI, working.getThreadType());
-		for(Rule r : working.getRules()) {
-			if(r.getClass()==MethodCollector.class) {
-				MethodCollector c = (MethodCollector)r;
+		for (Rule r : working.getRules()) {
+			if (r.getClass() == MethodCollector.class) {
+				MethodCollector c = (MethodCollector) r;
 				validateMethodCollectorOfTestSpec(c, true);
 			} else {
 				fail("First working phase contains an illegal block, regex or supertype rule.");
@@ -82,142 +82,142 @@ public class ClassHierarchyAnalysisTest {
 		}
 		working = wrapper.getFramework().getWorkingPhases().get(1);
 		assertEquals(ThreadType.SINGLE, working.getThreadType());
-		for(Rule r : working.getRules()) {
-			if(r.getClass()==MethodCollector.class) {
-				MethodCollector c = (MethodCollector)r;
+		for (Rule r : working.getRules()) {
+			if (r.getClass() == MethodCollector.class) {
+				MethodCollector c = (MethodCollector) r;
 				validateMethodCollectorOfTestSpec(c, false);
-			} else if(r.getClass()==Block.class) {
-				validateBlock((Block)r);
+			} else if (r.getClass() == Block.class) {
+				validateBlock((Block) r);
 			} else {
 				fail("The second working phase contains an illegal regex or supertype rule.");
 			}
 		}
 	}
-	
+
 	/**
 	 * Validates the start phase for the TestSpec.
 	 */
 	private void validateStartPhaseOfTestSpec() {
-		for(ExplicitDeclaration declaration : wrapper.getFramework().getStartPhase().getDeclarations()) {
+		for (ExplicitDeclaration declaration : wrapper.getFramework().getStartPhase().getDeclarations()) {
 			assertEquals(1, declaration.getApplicationClasses().size());
-			if(declaration.getClassName().equals(TestConstants.CLASS_A)) {
-				for(IClass cl : declaration.getApplicationClasses()) {
+			if (declaration.getClassName().equals(TestConstants.CLASS_A)) {
+				for (IClass cl : declaration.getApplicationClasses()) {
 					assertEquals(TestConstants.CLASS_B, cl.getName().toString());
 				}
-			} else if(declaration.getClassName().equals(TestConstants.CLASS_A2)) {
-				for(IClass cl : declaration.getApplicationClasses()) {
+			} else if (declaration.getClassName().equals(TestConstants.CLASS_A2)) {
+				for (IClass cl : declaration.getApplicationClasses()) {
 					assertEquals(TestConstants.CLASS_B2, cl.getName().toString());
 				}
 			} else {
-				fail("Unexpected class found in the start phase: "+declaration.getClassName());
+				fail("Unexpected class found in the start phase: " + declaration.getClassName());
 			}
 		}
 	}
-	
+
 	/**
 	 * Validates a MethodCollector object created during the class hierarchy analysis of the TestSpec.
-	 * 
+	 *
 	 * @param coll the MethodCollector object.
 	 * @param regexIncluded true if the regex rule (from working phase one) is included. false if not (in working phase
 	 *                      two).
 	 */
-	private void validateMethodCollectorOfTestSpec(MethodCollector coll, boolean regexIncluded) {
-		int expectedInstances = regexIncluded?7:5;
+	private void validateMethodCollectorOfTestSpec(final MethodCollector coll, final boolean regexIncluded) {
+		int expectedInstances = regexIncluded ? 7 : 5;
 		assertEquals(expectedInstances, coll.getFrameworkClasses().size());
-		for(IClass cl : coll.getFrameworkClasses()) {
+		for (IClass cl : coll.getFrameworkClasses()) {
 			Set<IMethod> methods = coll.getMethodCollection(cl);
-			switch(cl.getName().toString()) {
+			switch (cl.getName().toString()) {
 				case TestConstants.CLASS_A_EVENT_LISTENER:
 					assertEquals(1, methods.size());
-					for(IMethod m : methods) {
+					for (IMethod m : methods) {
 						assertEquals(cl, m.getDeclaringClass());
 						assertEquals(TestConstants.METHOD_HANDLE, m.getSelector().toString());
 					}
 					break;
 				case TestConstants.CLASS_B_EVENT_LISTENER:
 					assertEquals(1, methods.size());
-					for(IMethod m : methods) {
+					for (IMethod m : methods) {
 						assertEquals(cl, m.getDeclaringClass());
 						assertEquals(TestConstants.METHOD_HANDLE, m.getSelector().toString());
 					}
 					break;
 				case TestConstants.CLASS_C_EVENT_LISTENER:
 					assertEquals(1, methods.size());
-					for(IMethod m : methods) {
+					for (IMethod m : methods) {
 						assertEquals(cl, m.getDeclaringClass());
 						assertEquals(TestConstants.METHOD_DO_SOMETHING, m.getSelector().toString());
 					}
 					break;
 				case TestConstants.CLASS_AA_EVENT_LISTENER:
 					assertEquals(1, methods.size());
-					for(IMethod m : methods) {
+					for (IMethod m : methods) {
 						assertEquals(cl, m.getDeclaringClass());
 						assertEquals(TestConstants.METHOD_HANDLE_AA, m.getSelector().toString());
 					}
 					break;
 				case TestConstants.CLASS_CONCRETE_FRAMEWORK_C_EVENT_LISTENER:
 					assertEquals(1, methods.size());
-					for(IMethod m : methods) {
+					for (IMethod m : methods) {
 						assertEquals(cl, m.getDeclaringClass());
 						assertEquals(TestConstants.METHOD_DO_SOMETHING, m.getSelector().toString());
 					}
 					break;
 				case TestConstants.CLASS_RANDOM:
 					assertEquals(1, methods.size());
-					for(IMethod m : methods) {
+					for (IMethod m : methods) {
 						assertEquals(cl, m.getDeclaringClass());
 						assertEquals(TestConstants.METHOD_DO_SOMETHING, m.getSelector().toString());
 					}
 					break;
 				case TestConstants.CLASS_SUB_RANDOM:
 					assertEquals(1, methods.size());
-					for(IMethod m : methods) {
+					for (IMethod m : methods) {
 						assertEquals(cl, m.getDeclaringClass());
 						assertEquals(TestConstants.METHOD_DO_SOMETHING, m.getSelector().toString());
 					}
 					break;
 				default:
-					fail("The MethodCollector contains the unexpected class or interface: "+cl.getName().toString());
+					fail("The MethodCollector contains the unexpected class or interface: " + cl.getName().toString());
 					break;
 			}
 		}
 	}
-	
+
 	/**
 	 * Tests the analysis of the class hierarchy with no framework jars.
-	 * 
+	 *
 	 * @throws ParseException when parsing of the test framework specification fails.
 	 * @throws ClassHierarchyCreationException when the creation of the class hierarchy fails.
 	 */
-	@Test(expected=ClassHierarchyCreationException.class)
+	@Test(expected = ClassHierarchyCreationException.class)
 	public void testTestSpecWithNonExistingFrameworkJars() throws ParseException, ClassHierarchyCreationException {
 		analyzeClassHierarchy(TestConstants.TEST_SPEC_PATH, new String[] {}, new String[]
 				{TestConstants.TEST_APPLICATION_JAR_PATH});
 	}
-	
+
 	/**
 	 * Tests the analysis of the class hierarchy with a non-existent application jar.
-	 * 
+	 *
 	 * @throws ParseException when parsing of the test framework specification fails.
 	 * @throws ClassHierarchyCreationException when the creation of the class hierarchy fails.
 	 */
-	@Test(expected=ClassHierarchyCreationException.class)
+	@Test(expected = ClassHierarchyCreationException.class)
 	public void testTestSpecWithNonExistingApplicationJars() throws ParseException, ClassHierarchyCreationException {
 		analyzeClassHierarchy(TestConstants.TEST_SPEC_PATH,
 				new String[] {TestConstants.TEST_FRAMEWORK_JAR_PATH}, new String[] {TestConstants.NON_EXISTING_JAR});
 	}
-	
+
 	/**
 	 * Parses a framework specification and analyzes its class hierarchy.
-	 * 
+	 *
 	 * @param frameworkSpecification file path to the framework specification.
 	 * @param frameworkJars array with paths to the jar files containing the framework classes.
 	 * @param applicationJars array with paths to the jar files containing the application classes.
 	 * @throws ParseException when parsing of the framework specification fails.
 	 * @throws ClassHierarchyCreationException when creation of the class hierarchy fails.
 	 */
-	private void analyzeClassHierarchy(String frameworkSpecification, String[] frameworkJars, String[] applicationJars)
-			throws ParseException, ClassHierarchyCreationException {
+	private void analyzeClassHierarchy(final String frameworkSpecification, final String[] frameworkJars,
+			final String[] applicationJars) throws ParseException, ClassHierarchyCreationException {
 		FrameworkSpecificationParser parser = new FrameworkSpecificationParser();
 		framework = parser.parse(frameworkSpecification);
 		ClassHierarchyAnalyzer analyzer = new ClassHierarchyAnalyzer();
@@ -227,49 +227,49 @@ public class ClassHierarchyAnalysisTest {
 		assertEquals(framework, wrapper.getFramework());
 		assertNotNull(wrapper.getClassHierarchy());
 		assertNotNull(wrapper.getFrameworkClasses());
-		for(IClass cl : wrapper.getFrameworkClasses()) {
+		for (IClass cl : wrapper.getFrameworkClasses()) {
 			// Instances are counted during the bytecode instrumentation.
-			assertTrue(wrapper.getInstancesCount(cl)==0);
+			assertTrue(wrapper.getInstancesCount(cl) == 0);
 		}
 	}
-	
+
 	/**
 	 * Converts a set of WALA classes to a set containing the class names.
-	 * 
+	 *
 	 * @param classSet the set of WALA classes.
 	 * @return the set with the class names.
 	 */
-	private HashSet<String> convertToStringSet(Set<IClass> classSet) {
+	private HashSet<String> convertToStringSet(final Set<IClass> classSet) {
 		HashSet<String> stringSet = new HashSet<>();
-		for(IClass cl : classSet) {
+		for (IClass cl : classSet) {
 			stringSet.add(cl.getName().toString());
 		}
 		return stringSet;
 	}
-	
+
 	/**
 	 * Validates an explicit declaration.
-	 * 
+	 *
 	 * @param declaration the explicit declaration.
 	 */
-	private void validateExplicitDeclaration(ExplicitDeclaration declaration) {
-		if(declaration.getClassName()!=null) {
+	private void validateExplicitDeclaration(final ExplicitDeclaration declaration) {
+		if (declaration.getClassName() != null) {
 			assertNotNull(declaration.getIClass());
 			assertEquals(declaration.getClassName(), declaration.getIClass().getName().toString());
 		} else {
 			assertNull(declaration.getIClass());
 		}
-		for(int i=0; i<declaration.getNumberOfCallsAndDeclarations(); i++) {
+		for (int i = 0; i < declaration.getNumberOfCallsAndDeclarations(); i++) {
 			AstBaseClass abc = declaration.getCallOrDeclaration(i);
-			if(abc.getClass()==ExplicitDeclaration.class) {
+			if (abc.getClass() == ExplicitDeclaration.class) {
 				validateExplicitDeclaration((ExplicitDeclaration) abc);
-			} else if(abc.getClass()==Method.class) {
-				Method m = (Method)abc;
+			} else if (abc.getClass() == Method.class) {
+				Method m = (Method) abc;
 				assertNotNull(m.getSignature());
-				if(m.getSignature().equals("Constructor")) {
-					for(IClass cl : declaration.getApplicationClasses()) {
+				if (m.getSignature().equals("Constructor")) {
+					for (IClass cl : declaration.getApplicationClasses()) {
 						assertTrue(wrapper.getClassHierarchy().isSubclassOf(cl, declaration.getIClass())
-								||wrapper.getClassHierarchy().implementsInterface(cl, declaration.getIClass()));
+								|| wrapper.getClassHierarchy().implementsInterface(cl, declaration.getIClass()));
 						IMethod init = declaration.getConstructor(cl);
 						assertNotNull(init);
 						assertTrue(init.getName().toString().equals("<init>"));
@@ -280,8 +280,8 @@ public class ClassHierarchyAnalysisTest {
 					assertTrue(m.getMethod().getSignature().endsWith(m.getSignature()));
 					assertEquals(declaration.getIClass(), m.getMethod().getDeclaringClass());
 				}
-			} else if(abc.getClass()==StaticMethod.class) {
-				StaticMethod sm = (StaticMethod)abc;
+			} else if (abc.getClass() == StaticMethod.class) {
+				StaticMethod sm = (StaticMethod) abc;
 				assertNotNull(sm.getClassString());
 				assertNotNull(sm.getIClass());
 				assertEquals(sm.getClassString(), sm.getIClass().getName().toString());
@@ -292,17 +292,17 @@ public class ClassHierarchyAnalysisTest {
 			}
 		}
 	}
-	
+
 	/**
 	 * Validates a block rule.
-	 * 
+	 *
 	 * @param b the block rule.
 	 */
-	private void validateBlock(Block b) {
+	private void validateBlock(final Block b) {
 		assertNotNull(b.getClassName());
 		assertNotNull(b.getIClass());
 		assertEquals(b.getClassName(), b.getIClass().getName().toString());
-		if(b.getInnerBlock()==null) {
+		if (b.getInnerBlock() == null) {
 			assertNotNull(b.getDeclaration());
 			validateExplicitDeclaration(b.getDeclaration());
 		} else {

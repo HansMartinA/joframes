@@ -30,26 +30,26 @@ import java.util.jar.JarFile;
 
 /**
  * Analyzes the framework and application class hierarchy considering the parsed framework specification.
- * 
+ *
  * @author Martin Armbruster
  */
 class ClassHierarchyAnalyzer {
 	/**
 	 * Framework name for Swing.
 	 */
-	private final static String SWING = "Swing";
+	private static final String SWING = "Swing";
 	/**
 	 * Classes belonging to AWT include this string in their package name.
 	 */
-	private final static String AWT = "awt";
+	private static final String AWT = "awt";
 	/**
 	 * Framework name for JavaFX.
 	 */
-	private final static String JAVAFX = "JavaFX";
+	private static final String JAVAFX = "JavaFX";
 	/**
-	 * Method name within the framework specification to identify constructors. 
+	 * Method name within the framework specification to identify constructors.
 	 */
-	private final static String CONSTRUCTOR = "Constructor";
+	private static final String CONSTRUCTOR = "Constructor";
 	/**
 	 * Stores the wrapper of the framework.
 	 */
@@ -66,34 +66,34 @@ class ClassHierarchyAnalyzer {
 	 * Stores the name of the class containing the main method.
 	 */
 	private String mainClassName;
-	
+
 	/**
 	 * Analyzes the class hierarchy of the framework and application.
-	 * 
+	 *
 	 * @param framework the framework specification that will be modified.
 	 * @param frameworkJars list of all jar files containing the framework classes. Can be null.
 	 * @param applicationJars list of all jar files containing the application classes.
-	 * @return the modified framework with additional information in a FrameworkWrapper.
-	 * @throws ClassHierarchyCreationException
-	 */
-	FrameworkWrapper analyzeClassHierarchy(Framework framework, String[] frameworkJars, String[] applicationJars) throws
-		ClassHierarchyCreationException {
-		return analyzeClassHierarchy(framework, frameworkJars, applicationJars, null);
-	}
-	
-	/**
-	 * Analyzes the class hierarchy of the framework and application.
-	 * 
-	 * @param framework the framework specification that will be modified.
-	 * @param frameworkJars list of all jar files containing the framework classes. Can be null.
-	 * @param applicationJars list of all jar files containing the application classes.
-	 * @param mainClassName name of the class containing the main method.
 	 * @return the modified framework with additional information in a FrameworkWrapper.
 	 * @throws ClassHierarchyCreationException when the creation of the class hierarchy fails.
 	 */
-	FrameworkWrapper analyzeClassHierarchy(Framework framework, String[] frameworkJars, String[] applicationJars,
-			String mainClassName) throws ClassHierarchyCreationException {
-		this.mainClassName = mainClassName;
+	FrameworkWrapper analyzeClassHierarchy(final Framework framework, final String[] frameworkJars,
+			final String[] applicationJars) throws ClassHierarchyCreationException {
+		return analyzeClassHierarchy(framework, frameworkJars, applicationJars, null);
+	}
+
+	/**
+	 * Analyzes the class hierarchy of the framework and application.
+	 *
+	 * @param framework the framework specification that will be modified.
+	 * @param frameworkJars list of all jar files containing the framework classes. Can be null.
+	 * @param applicationJars list of all jar files containing the application classes.
+	 * @param mainClass name of the class containing the main method.
+	 * @return the modified framework with additional information in a FrameworkWrapper.
+	 * @throws ClassHierarchyCreationException when the creation of the class hierarchy fails.
+	 */
+	FrameworkWrapper analyzeClassHierarchy(final Framework framework, final String[] frameworkJars,
+			final String[] applicationJars, final String mainClass) throws ClassHierarchyCreationException {
+		this.mainClassName = mainClass;
 		wrapper = new FrameworkWrapper(framework);
 		ClassHierarchy hierarchy = makeClassHierarchy(frameworkJars, applicationJars);
 		wrapper.setClassHierarchy(hierarchy);
@@ -102,114 +102,115 @@ class ClassHierarchyAnalyzer {
 		analyzeFramework(hierarchy);
 		return wrapper;
 	}
-	
+
 	/**
 	 * Creates the class hierarchy for the framework and application.
-	 * 
+	 *
 	 * @param frameworkJars list of all jar files containing the framework classes. Can be null.
 	 * @param applicationJars list of all jar files containing the application classes.
 	 * @return the created class hierarchy.
 	 * @throws ClassHierarchyCreationException when the creation of the class hierarchy fails.
 	 */
-	private ClassHierarchy makeClassHierarchy(String[] frameworkJars, String[] applicationJars) throws
+	private ClassHierarchy makeClassHierarchy(final String[] frameworkJars, final String[] applicationJars) throws
 		ClassHierarchyCreationException {
 		try {
 			AnalysisScope scope = AnalysisScopeReader.makePrimordialScope(new File("cha-exclusions.txt"));
-			if(!wrapper.getFramework().getName().equals(SWING) && !wrapper.getFramework().getName().equals(JAVAFX)) {
-				if(frameworkJars.length==0) {
+			if (!wrapper.getFramework().getName().equals(SWING) && !wrapper.getFramework().getName().equals(JAVAFX)) {
+				if (frameworkJars.length == 0) {
 					throw new ClassHierarchyCreationException("There are no framework jar files.");
 				}
-				for(String fwJar : frameworkJars) {
-					if(!new File(fwJar).exists()) {
-						throw new ClassHierarchyCreationException("The given framework jar file ("+fwJar+") does not "
-								+"exist.");
+				for (String fwJar : frameworkJars) {
+					if (!new File(fwJar).exists()) {
+						throw new ClassHierarchyCreationException("The given framework jar file (" + fwJar
+								+ ") does not exist.");
 					}
 					scope.addToScope(scope.getExtensionLoader(), new JarFile(fwJar));
 				}
 			}
-			if(applicationJars.length==0) {
+			if (applicationJars.length == 0) {
 				throw new ClassHierarchyCreationException("There are no application jar files.");
 			}
-			for(String appJar : applicationJars) {
-				if(!new File(appJar).exists()) {
-					throw new ClassHierarchyCreationException("The given application jar file ("+appJar+") does not "
-							+"exist.");
+			for (String appJar : applicationJars) {
+				if (!new File(appJar).exists()) {
+					throw new ClassHierarchyCreationException("The given application jar file (" + appJar
+							+ ") does not exist.");
 				}
 				scope.addToScope(scope.getApplicationLoader(), new JarFile(appJar));
 			}
 			return ClassHierarchyFactory.make(scope);
-		} catch(IOException e) {
+		} catch (IOException e) {
 			throw new ClassHierarchyCreationException("An IO exception occurred while creating the class hierarchy.",
 					e);
 		} catch (ClassHierarchyException e) {
 			throw new ClassHierarchyCreationException("The class hierarchy could not be created.", e);
 		}
 	}
-	
+
 	/**
 	 * Analyzes the framework and its classes.
-	 * 
+	 *
 	 * @param hierarchy the class hierarchy.
 	 */
-	private void analyzeFramework(ClassHierarchy hierarchy) {
-		for(ExplicitDeclaration declaration : wrapper.getFramework().getStartPhase().getDeclarations()) {
+	private void analyzeFramework(final ClassHierarchy hierarchy) {
+		for (ExplicitDeclaration declaration : wrapper.getFramework().getStartPhase().getDeclarations()) {
 			analyzeForExplicitDeclaration(hierarchy, declaration, null);
 		}
 		analyzeForExplicitDeclaration(hierarchy, wrapper.getFramework().getEndPhase().getEnd(), null);
-		for(WorkingPhase working : wrapper.getFramework().getWorkingPhases()) {
+		for (WorkingPhase working : wrapper.getFramework().getWorkingPhases()) {
 			analyzeForWorkingPhase(hierarchy, working);
 		}
 	}
-	
+
 	/**
 	 * Analyzes the class hierarchy for an explicit declaration.
-	 * 
+	 *
 	 * @param hierarchy the class hierarchy.
 	 * @param declaration the explicit declaration.
 	 * @param boundClass the class to which the explicit declaration is bound. Can be null.
 	 */
-	private void analyzeForExplicitDeclaration(ClassHierarchy hierarchy, ExplicitDeclaration declaration,
-			IClass boundClass) {
-		if(declaration.getClassName()!=null) {
-			boundClass = hierarchy.lookupClass(TypeReference.findOrCreate(extensionLoader,
+	private void analyzeForExplicitDeclaration(final ClassHierarchy hierarchy, final ExplicitDeclaration declaration,
+			final IClass boundClass) {
+		IClass actualBoundClass = boundClass;
+		if (declaration.getClassName() != null) {
+			actualBoundClass = hierarchy.lookupClass(TypeReference.findOrCreate(extensionLoader,
 					declaration.getClassName()));
-			declaration.setIClass(boundClass);
-			wrapper.addFrameworkClass(boundClass);
+			declaration.setIClass(actualBoundClass);
+			wrapper.addFrameworkClass(actualBoundClass);
 		}
-		for(int i=0; i<declaration.getNumberOfCallsAndDeclarations(); i++) {
+		for (int i = 0; i < declaration.getNumberOfCallsAndDeclarations(); i++) {
 			AstBaseClass abc = declaration.getCallOrDeclaration(i);
-			if(abc.getClass()==ExplicitDeclaration.class) {
-				analyzeForExplicitDeclaration(hierarchy, (ExplicitDeclaration)abc, boundClass);
-			} else if(abc.getClass()==Method.class) {
-				Method method = (Method)abc;
+			if (abc.getClass() == ExplicitDeclaration.class) {
+				analyzeForExplicitDeclaration(hierarchy, (ExplicitDeclaration) abc, actualBoundClass);
+			} else if (abc.getClass() == Method.class) {
+				Method method = (Method) abc;
 				IMethod m = null;
-				if(method.getSignature().equals(CONSTRUCTOR)) {
-					if(boundClass.isInterface()) {
-						for(IClass cl : hierarchy.getImplementors(boundClass.getReference())) {
-							if(checkSubclassForExplicitDeclaration(cl)) {
+				if (method.getSignature().equals(CONSTRUCTOR)) {
+					if (actualBoundClass.isInterface()) {
+						for (IClass cl : hierarchy.getImplementors(actualBoundClass.getReference())) {
+							if (checkSubclassForExplicitDeclaration(cl)) {
 								declaration.addApplicationClass(cl, findInit(cl));
 							}
 						}
 					} else {
 						ArrayDeque<IClass> subclasses = new ArrayDeque<>();
-						subclasses.addAll(hierarchy.getImmediateSubclasses(boundClass));
-						while(!subclasses.isEmpty()) {
+						subclasses.addAll(hierarchy.getImmediateSubclasses(actualBoundClass));
+						while (!subclasses.isEmpty()) {
 							IClass cl = subclasses.poll();
 							subclasses.addAll(hierarchy.getImmediateSubclasses(cl));
-							if(checkSubclassForExplicitDeclaration(cl)) {
+							if (checkSubclassForExplicitDeclaration(cl)) {
 								declaration.addApplicationClass(cl, findInit(cl));
 							}
 						}
 					}
 				} else {
-					m = boundClass.getMethod(Selector.make(method.getSignature()));
+					m = actualBoundClass.getMethod(Selector.make(method.getSignature()));
 				}
 				method.setMethod(m);
-			} else if(abc.getClass()==StaticMethod.class) {
-				StaticMethod stMethod = (StaticMethod)abc;
-				if(stMethod.getClassString()==null&&
-						stMethod.getSignature().equals(FrameworkSpecificationParser.MAIN_SIGNATURE)) {
-					if(mainClassName==null) {
+			} else if (abc.getClass() == StaticMethod.class) {
+				StaticMethod stMethod = (StaticMethod) abc;
+				if (stMethod.getClassString() == null
+						&& stMethod.getSignature().equals(FrameworkSpecificationParser.MAIN_SIGNATURE)) {
+					if (mainClassName == null) {
 						stMethod.setIClass(findNextMainClass(hierarchy));
 					} else {
 						stMethod.setIClass(hierarchy.lookupClass(
@@ -223,29 +224,29 @@ class ClassHierarchyAnalyzer {
 			}
 		}
 	}
-	
+
 	/**
-	 * Checks if a subclass of a framework class in an explicit declaration is an concrete application class. 
-	 * 
+	 * Checks if a subclass of a framework class in an explicit declaration is an concrete application class.
+	 *
 	 * @param cl the subclass.
 	 * @return true if the subclass is a concrete application class. false otherwise.
 	 */
-	private boolean checkSubclassForExplicitDeclaration(IClass cl) {
-		return cl.getClassLoader().getReference()==applicationLoader&&
-				!(cl.isAbstract()||cl.isInterface()||cl.isPrivate());
+	private boolean checkSubclassForExplicitDeclaration(final IClass cl) {
+		return cl.getClassLoader().getReference() == applicationLoader
+				&& !(cl.isAbstract() || cl.isInterface() || cl.isPrivate());
 	}
-	
+
 	/**
 	 * Searches a class for a constructor.
-	 * 
+	 *
 	 * @param cl the class.
 	 * @return the constructor of null if no can be found.
 	 */
-	private IMethod findInit(IClass cl) {
+	private IMethod findInit(final IClass cl) {
 		IMethod m = cl.getMethod(Selector.make("<init>()V"));
-		if(m==null) {
-			for(IMethod possibleInitMethod : cl.getDeclaredMethods()) {
-				if(possibleInitMethod.isInit()) {
+		if (m == null) {
+			for (IMethod possibleInitMethod : cl.getDeclaredMethods()) {
+				if (possibleInitMethod.isInit()) {
 					m = possibleInitMethod;
 					break;
 				}
@@ -253,103 +254,104 @@ class ClassHierarchyAnalyzer {
 		}
 		return m;
 	}
-	
+
 	/**
 	 * When a call to a main method is given without a class, this method looks for the next class containing a main
 	 * method. First, lookups in application classes are performed. Afterwards, there are lookups in framework classes
 	 * and last in all classes.
-	 * 
+	 *
 	 * @param hierarchy the class hierarchy for analysis.
 	 * @return the first found class with a main method or null if no class can be found.
 	 */
-	private IClass findNextMainClass(ClassHierarchy hierarchy) {
-		for(IClass cl : hierarchy) {
-			if(cl.getClassLoader().getReference()==applicationLoader&&checkClassForMain(cl)) {
+	private IClass findNextMainClass(final ClassHierarchy hierarchy) {
+		for (IClass cl : hierarchy) {
+			if (cl.getClassLoader().getReference() == applicationLoader && checkClassForMain(cl)) {
 				return cl;
 			}
 		}
-		for(IClass cl : hierarchy) {
-			if(isClassInFramework(cl)&&checkClassForMain(cl)) {
+		for (IClass cl : hierarchy) {
+			if (isClassInFramework(cl) && checkClassForMain(cl)) {
 				return cl;
 			}
 		}
-		for(IClass cl : hierarchy) {
-			if(checkClassForMain(cl)) {
+		for (IClass cl : hierarchy) {
+			if (checkClassForMain(cl)) {
 				return cl;
 			}
 		}
 		return null;
 	}
-	
+
 	/**
 	 * Checks if a class contains a main method.
-	 * 
+	 *
 	 * @param cl the class to check.
 	 * @return true if the class contains a main method. false otherwise.
 	 */
-	private boolean checkClassForMain(IClass cl) {
+	private boolean checkClassForMain(final IClass cl) {
 		IMethod possibleMain = cl.getMethod(Selector.make(FrameworkSpecificationParser.MAIN_SIGNATURE));
-		return possibleMain!=null&&possibleMain.isStatic()&&possibleMain.isPublic();
+		return possibleMain != null && possibleMain.isStatic() && possibleMain.isPublic();
 	}
-	
+
 	/**
-	 * Analyzes the class hierarchy for a working phase. 
-	 * 
+	 * Analyzes the class hierarchy for a working phase.
+	 *
 	 * @param hierarchy the class hierarchy.
 	 * @param working the working phase.
 	 */
-	private void analyzeForWorkingPhase(ClassHierarchy hierarchy, WorkingPhase working) {
+	private void analyzeForWorkingPhase(final ClassHierarchy hierarchy, final WorkingPhase working) {
 		MethodCollector methods = new MethodCollector();
-		for(Rule r : working.getRules()) {
-			if(r.getClass()==Regex.class) {
-				Regex rr = (Regex)r;
+		for (Rule r : working.getRules()) {
+			if (r.getClass() == Regex.class) {
+				Regex rr = (Regex) r;
 				analyzeForRegexRule(hierarchy, rr.getRegularExpression(), methods);
 				working.removeRule(r);
-			} else if(r.getClass()==Supertype.class) {
-				Supertype st = (Supertype)r;
+			} else if (r.getClass() == Supertype.class) {
+				Supertype st = (Supertype) r;
 				IClass type = hierarchy.lookupClass(TypeReference.findOrCreate(extensionLoader, st.getSuperType()));
 				analyzeForSupertypeRule(hierarchy, type, methods);
 				working.removeRule(r);
-			} else if(r.getClass()==Block.class) {
-				analyzeForBlock(hierarchy, (Block)r);
+			} else if (r.getClass() == Block.class) {
+				analyzeForBlock(hierarchy, (Block) r);
 			}
 		}
 		working.addRule(methods);
 	}
-	
+
 	/**
 	 * Analyzes the class hierarchy for a block rule.
-	 * 
+	 *
 	 * @param hierarchy the class hierarchy.
 	 * @param block the block rule.
 	 */
-	private void analyzeForBlock(ClassHierarchy hierarchy, Block block) {
+	private void analyzeForBlock(final ClassHierarchy hierarchy, final Block block) {
 		IClass blockClass = hierarchy.lookupClass(TypeReference.findOrCreate(extensionLoader,
 				block.getClassName()));
 		block.setIClass(blockClass);
 		wrapper.addFrameworkClass(blockClass);
-		if(block.getInnerBlock()==null) {
+		if (block.getInnerBlock() == null) {
 			analyzeForExplicitDeclaration(hierarchy, block.getDeclaration(), blockClass);
 		} else {
 			analyzeForBlock(hierarchy, block.getInnerBlock());
 		}
 	}
-	
+
 	/**
 	 * Analyzes the class hierarchy, to be specific framework classes and their methods, with a regular expression from
 	 * a regex rule and adds matching methods to a method collection.
-	 * 
+	 *
 	 * @param hierarchy the class hierarchy.
 	 * @param regex the regular expression which is matched against method names.
 	 * @param collector the method collection.
 	 */
-	private void analyzeForRegexRule(ClassHierarchy hierarchy, String regex, MethodCollector collector) {
+	private void analyzeForRegexRule(final ClassHierarchy hierarchy, final String regex,
+			final MethodCollector collector) {
 		Iterator<IClass> iterator = hierarchy.iterator();
-		while(iterator.hasNext()) {
+		while (iterator.hasNext()) {
 			IClass type = iterator.next();
-			if(isClassInFramework(type)) {
-				for(IMethod method : type.getDeclaredMethods()) {
-					if(method.getName().toString().matches(regex)&&checkMethodForObjectMethod(method)) {
+			if (isClassInFramework(type)) {
+				for (IMethod method : type.getDeclaredMethods()) {
+					if (method.getName().toString().matches(regex) && checkMethodForObjectMethod(method)) {
 						collector.addMethod(method);
 						wrapper.addFrameworkClass(method.getDeclaringClass());
 					}
@@ -357,22 +359,23 @@ class ClassHierarchyAnalyzer {
 			}
 		}
 	}
-	
+
 	/**
 	 * Analyzes the class hierarchy for the supertype rule.
-	 * 
+	 *
 	 * @param hierarchy the class hierarchy.
 	 * @param supertype the supertype.
 	 * @param collector the method collection.
 	 */
-	private void analyzeForSupertypeRule(ClassHierarchy hierarchy, IClass supertype, MethodCollector collector) {
+	private void analyzeForSupertypeRule(final ClassHierarchy hierarchy, final IClass supertype,
+			final MethodCollector collector) {
 		collector.addAllMethods(supertype.getDeclaredMethods());
 		wrapper.addFrameworkClass(supertype);
-		if(supertype.isInterface()) {
-			for(IClass cl : hierarchy.getImplementors(supertype.getReference())) {
-				if(isClassInFramework(cl)) {
-					for(IMethod m : cl.getDeclaredMethods()) {
-						if(checkMethodForObjectMethod(m)) {
+		if (supertype.isInterface()) {
+			for (IClass cl : hierarchy.getImplementors(supertype.getReference())) {
+				if (isClassInFramework(cl)) {
+					for (IMethod m : cl.getDeclaredMethods()) {
+						if (checkMethodForObjectMethod(m)) {
 							collector.addMethod(m);
 						}
 					}
@@ -382,12 +385,12 @@ class ClassHierarchyAnalyzer {
 		} else {
 			ArrayDeque<IClass> types = new ArrayDeque<>();
 			types.add(supertype);
-			while(!types.isEmpty()) {
+			while (!types.isEmpty()) {
 				IClass type = types.poll();
 				types.addAll(hierarchy.getImmediateSubclasses(type));
-				if(isClassInFramework(type)) {
-					for(IMethod m : type.getDeclaredMethods()) {
-						if(checkMethodForObjectMethod(m)) {
+				if (isClassInFramework(type)) {
+					for (IMethod m : type.getDeclaredMethods()) {
+						if (checkMethodForObjectMethod(m)) {
 							collector.addMethod(m);
 						}
 					}
@@ -396,36 +399,36 @@ class ClassHierarchyAnalyzer {
 			}
 		}
 	}
-	
+
 	/**
 	 * Checks if a method is a callable object method.
-	 * 
+	 *
 	 * @param m the method
 	 * @return true if the method is callable. false otherwise.
 	 */
-	private boolean checkMethodForObjectMethod(IMethod m) {
-		return !(m.isClinit()||m.isInit()||m.isPrivate()||m.isStatic());
+	private boolean checkMethodForObjectMethod(final IMethod m) {
+		return !(m.isClinit() || m.isInit() || m.isPrivate() || m.isStatic());
 	}
-	
+
 	/**
 	 * Checks if a class belongs to the framework. Usually, the extension loader is used to load framework classes.
 	 * In case of Swing or JavaFX, the primordial loader loads the classes so that the classes are identified based
-	 * on their package name. 
-	 * 
+	 * on their package name.
+	 *
 	 * @param cl the class that will be checked.
 	 * @return true if the class belongs to the framework. false otherwise.
 	 */
-	private boolean isClassInFramework(IClass cl) {
-		if(cl.getClassLoader().getReference()==applicationLoader) {
+	private boolean isClassInFramework(final IClass cl) {
+		if (cl.getClassLoader().getReference() == applicationLoader) {
 			return false;
 		}
 		String packageName = cl.getName().getPackage().toString();
-		if(wrapper.getFramework().getName().equals(SWING)) {
+		if (wrapper.getFramework().getName().equals(SWING)) {
 			return packageName.contains(SWING.toLowerCase()) || packageName.contains(AWT);
-		} else if(wrapper.getFramework().getName().equals(JAVAFX)) {
+		} else if (wrapper.getFramework().getName().equals(JAVAFX)) {
 			return packageName.contains(JAVAFX.toLowerCase());
 		} else {
-			return cl.getClassLoader().getReference()==extensionLoader;
+			return cl.getClassLoader().getReference() == extensionLoader;
 		}
 	}
 }

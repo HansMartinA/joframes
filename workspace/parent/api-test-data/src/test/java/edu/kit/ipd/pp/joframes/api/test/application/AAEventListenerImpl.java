@@ -5,7 +5,7 @@ import edu.kit.ipd.pp.joframes.api.test.framework.ConcreteFrameworkCEventListene
 
 /**
  * Implementation of the AAEventListener.
- * 
+ *
  * @author Martin Armbruster
  */
 public class AAEventListenerImpl implements AAEventListener {
@@ -13,7 +13,7 @@ public class AAEventListenerImpl implements AAEventListener {
 	public void handle() {
 		System.out.println("AAEventListenerImpl handle()");
 	}
-	
+
 	@Override
 	public void handleAA() {
 		System.out.println("AAEventListenerImpl handleAA()");

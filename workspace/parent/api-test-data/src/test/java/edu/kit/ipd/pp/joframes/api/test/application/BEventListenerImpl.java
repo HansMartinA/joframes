@@ -4,7 +4,7 @@ import edu.kit.ipd.pp.joframes.api.test.framework.BEventListener;
 
 /**
  * Implementation of the BEventListener.
- * 
+ *
  * @author Martin Armbruster
  */
 public class BEventListenerImpl implements BEventListener {

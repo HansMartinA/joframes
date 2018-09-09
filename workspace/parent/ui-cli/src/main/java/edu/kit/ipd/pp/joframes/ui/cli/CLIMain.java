@@ -1,10 +1,13 @@
 package edu.kit.ipd.pp.joframes.ui.cli;
 
 import edu.kit.ipd.pp.joframes.api.Pipeline;
+import edu.kit.ipd.pp.joframes.api.exceptions.ClassHierarchyCreationException;
+import edu.kit.ipd.pp.joframes.api.exceptions.InstrumenterException;
+import edu.kit.ipd.pp.joframes.api.exceptions.ParseException;
 
 /**
  * This class provides a command-line interface.
- * 
+ *
  * @author Martin Armbruster
  */
 public final class CLIMain {
@@ -13,46 +16,46 @@ public final class CLIMain {
 	 */
 	private CLIMain() {
 	}
-	
+
 	/**
 	 * Main method for processing a framework and application.
-	 * 
+	 *
 	 * @param args the arguments.
 	 */
-	public static void main(String[] args) {
+	public static void main(final String[] args) {
 		try {
-			if(args.length==0||args[0].toLowerCase().equals("help")) {
+			if (args.length == 0 || args[0].toLowerCase().equals("help")) {
 				printUsage();
 				return;
 			}
 			String frameworkSpecification = args[0];
 			int counter = 0;
-			for(int i=1; i<args.length&&!args[i].equals(";"); i++) {
+			for (int i = 1; i < args.length && !args[i].equals(";"); i++) {
 				counter++;
 			}
 			String[] frameworkJars = new String[counter];
-			for(int i=1; i<=counter; i++) {
-				frameworkJars[i-1] = args[i];
+			for (int i = 1; i <= counter; i++) {
+				frameworkJars[i - 1] = args[i];
 			}
-			counter +=2;
+			counter += 2;
 			int appCounter = 0;
-			for(int i=counter; i<args.length&&!args[i].equals(";"); i++) {
+			for (int i = counter; i < args.length && !args[i].equals(";"); i++) {
 				appCounter++;
 			}
 			String[] applicationJars = new String[appCounter];
-			for(int i=counter; i<counter+appCounter; i++) {
-				applicationJars[i-counter] = args[i];
+			for (int i = counter; i < counter + appCounter; i++) {
+				applicationJars[i - counter] = args[i];
 			}
-			counter += appCounter+1;
+			counter += appCounter + 1;
 			String output = null;
-			if(!args[counter].equals(";")) {
+			if (!args[counter].equals(";")) {
 				output = args[counter];
 				counter += 2;
 			} else {
 				counter++;
 			}
 			String mainClassName = null;
-			if(counter<args.length) {
+			if (counter < args.length) {
 				mainClassName = args[counter];
 			}
 			Pipeline p = new Pipeline(frameworkSpecification, frameworkJars, applicationJars);
@@ -60,17 +63,17 @@ public final class CLIMain {
 			p.setMainClass(mainClassName);
 			try {
 				p.process();
-			} catch(Exception e) {
+			} catch (ParseException | ClassHierarchyCreationException | InstrumenterException e) {
 				System.out.println("An exception occurred while processing the framework and its application: "
-						+e.getMessage());
+						+ e.getMessage());
 				e.printStackTrace();
 			}
-		} catch(ArrayIndexOutOfBoundsException e) {
-			System.out.println("There were too few arguments: "+e.getMessage());
+		} catch (ArrayIndexOutOfBoundsException e) {
+			System.out.println("There were too few arguments: " + e.getMessage());
 			printUsage();
 		}
 	}
-	
+
 	/**
 	 * Prints the usage of the command-line interface.
 	 */
