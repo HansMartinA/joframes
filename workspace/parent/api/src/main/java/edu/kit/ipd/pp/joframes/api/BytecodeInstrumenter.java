@@ -67,34 +67,65 @@ class BytecodeInstrumenter {
 	 */
 	private static final String OWN_JAR_FILE = ".jar#" + PACKAGE;
 	/**
-	 * Name of the InstanceCollector class.
+	 * Simple name of the InstanceCollector class.
 	 */
-	private static final String IC_NAME = "InstanceCollector.class";
+	private static final String IC = "InstanceCollector";
 	/**
-	 * Name of the ArtifcialClass class.
+	 * Name of the InstanceCollector class file.
 	 */
-	private static final String AC_NAME = "ArtificialClass.class";
+	private static final String IC_NAME = IC + ".class";
+	/**
+	 * Bytecode name of the InstanceCollector class.
+	 */
+	private static final String IC_BYTECODE_NAME = "L" + PACKAGE + IC + ";";
+	/**
+	 * Simple name of the ArtificialClass class.
+	 */
+	private static final String AC = "ArtificialClass";
+	/**
+	 * Name of the ArtifcialClass class file.
+	 */
+	private static final String AC_NAME = AC + ".class";
 	/**
 	 * Bytecode name of the ArtificialClass class.
 	 */
-	private static final String AC_BYTECODE_NAME = "L" + PACKAGE + "ArtificialClass;";
+	private static final String AC_BYTECODE_NAME = "L" + PACKAGE + AC + ";";
 	/**
-	 * Name of the WorkingWorker class within the artificial class.
+	 * Simple name of the WorkingWorker class within the ArtificialClass class.
 	 */
-	private static final String AC_WW_NAME = "ArtificialClass$WorkingWorker.class";
+	private static final String AC_WWW = AC + "$WorkingWorker";
+	/**
+	 * Name of the WorkingWorker class file.
+	 */
+	private static final String AC_WW_NAME = AC_WWW + ".class";
 	/**
 	 * Bytecode name of the WorkingWorker class within the ArtificialClass class.
 	 */
-	private static final String AC_WW_BYTECODE_NAME = AC_BYTECODE_NAME.substring(0, AC_BYTECODE_NAME.length() - 1)
-			+ "$WorkingWorker;";
+	private static final String AC_WW_BYTECODE_NAME = "L" + PACKAGE + AC_WWW + ";";
 	/**
-	 * Name of a constructor in bytecode.
+	 * Bytecode name of the List interface.
 	 */
-	private static final String INIT = "<init>";
+	private static final String LIST_BYTECODE_NAME = "Ljava/util/List;";
+	/**
+	 * Bytecode name of the Iterator interface.
+	 */
+	private static final String ITERATOR_BYTECODE_NAME = "Ljava/util/Iterator;";
+	/**
+	 * Bytecode name of the Thread class.
+	 */
+	private static final String THREAD_BYTECODE_NAME = "Ljava/lang/Thread;";
+	/**
+	 * Bytecode name of the Runtime class.
+	 */
+	private static final String RUNTIME_BYTECODE_NAME = "Ljava/lang/Runtime";
 	/**
 	 * Name of the static initializer method.
 	 */
 	private static final String CLINIT = "<clinit>";
+	/**
+	 * Name of the forName method in the Class class.
+	 */
+	private static final String CLASS_FOR_NAME_METHOD = "forName";
 	/**
 	 * Name of the method in which the start phase instructions are put.
 	 */
@@ -185,10 +216,11 @@ class BytecodeInstrumenter {
 										// name is converted to a fully qualified class name.
 										w.emit(ConstantInstruction.makeString(cl.getName().toString()
 												.substring(1).replace("/", ".")));
-										w.emit(InvokeInstruction.make("(Ljava/lang/String;)Ljava/lang/Class;",
-												"Ljava/lang/Class;", "forName", IInvokeInstruction.Dispatch.STATIC));
-										w.emit(InvokeInstruction.make("(Ljava/lang/Class;)V",
-												"L" + PACKAGE + "InstanceCollector;", "addClass",
+										w.emit(InvokeInstruction.make("(" + Constants.TYPE_String + ")"
+												+ Constants.TYPE_Class, Constants.TYPE_Class, CLASS_FOR_NAME_METHOD,
+												IInvokeInstruction.Dispatch.STATIC));
+										w.emit(InvokeInstruction.make("(" + Constants.TYPE_Class + ")"
+												+ Constants.TYPE_void, IC_BYTECODE_NAME, "addClass",
 												IInvokeInstruction.Dispatch.STATIC));
 									}
 								}
@@ -218,17 +250,17 @@ class BytecodeInstrumenter {
 						public void visitInvoke(final IInvokeInstruction instruction) {
 							String invokedClass = instruction.getClassType()
 									.substring(0, instruction.getClassType().length() - 1);
-							if (instruction.getMethodName().equals(INIT)
+							if (instruction.getMethodName().equals(APIConstants.INIT)
 									&& isSubclassOfFrameworkClasses(invokedClass)
-									&& !(data.getName().equals(INIT)
+									&& !(data.getName().equals(APIConstants.INIT)
 											&& areDirectSubclasses(invokedClass, data.getClassType()
 													.substring(0, data.getClassType().length() - 1)))) {
 								this.insertAfter(new MethodEditor.Patch() {
 									@Override
 									public void emitTo(final MethodEditor.Output w) {
 										w.emit(DupInstruction.make(0));
-										w.emit(InvokeInstruction.make("(Ljava/lang/Object;)V",
-												"L" + PACKAGE + "InstanceCollector;", "addInstance",
+										w.emit(InvokeInstruction.make("(" + Constants.TYPE_Object + ")"
+												+ Constants.TYPE_void, IC_BYTECODE_NAME, "addInstance",
 												IInvokeInstruction.Dispatch.STATIC));
 									}
 								});
@@ -272,7 +304,7 @@ class BytecodeInstrumenter {
 							editor.insertAfter(0, new MethodEditor.Patch() {
 								@Override
 								public void emitTo(final MethodEditor.Output w) {
-									w.emit(ReturnInstruction.make("V"));
+									w.emit(ReturnInstruction.make(Constants.TYPE_void));
 								}
 							});
 						}
@@ -398,15 +430,15 @@ class BytecodeInstrumenter {
 			public void emitTo(final MethodEditor.Output w) {
 				ExceptionHandler h = new ExceptionHandler(exLabel, "Ljava/lang/ClassNotFoundException;");
 				w.emit(ConstantInstruction.makeString(cl.getName().toString().substring(1).replace("/", ".")));
-				w.emit(InvokeInstruction.make("(Ljava/lang/String;)Ljava/lang/Class;",
-						"Ljava/lang/Class;", "forName", IInvokeInstruction.Dispatch.STATIC),
+				w.emit(InvokeInstruction.make("(" + Constants.TYPE_String + ")" + Constants.TYPE_Class,
+						Constants.TYPE_Class, CLASS_FOR_NAME_METHOD, IInvokeInstruction.Dispatch.STATIC),
 						new ExceptionHandler[] {h});
-				w.emit(InvokeInstruction.make("(Ljava/lang/Class;)Ljava/util/List;",
-						"L" + PACKAGE + "InstanceCollector;", "getInstances",
+				w.emit(InvokeInstruction.make("(" + Constants.TYPE_Class + ")" + LIST_BYTECODE_NAME,
+						IC_BYTECODE_NAME, "getInstances",
 						IInvokeInstruction.Dispatch.STATIC));
 				w.emit(GotoInstruction.make(afterExLabel));
 				w.emitLabel(exLabel);
-				w.emit(ReturnInstruction.make("V"));
+				w.emit(ReturnInstruction.make(Constants.TYPE_void));
 				w.emitLabel(afterExLabel);
 			}
 		});
@@ -430,7 +462,7 @@ class BytecodeInstrumenter {
 		int afterLoopLabel = 0;
 		if (useForLoop) {
 			actualInstanceType = declaration.getIClass();
-			iteratorIndex = LocalAllocator.allocate(editor.getData(), "Ljava/util/Iterator;");
+			iteratorIndex = LocalAllocator.allocate(editor.getData(), ITERATOR_BYTECODE_NAME);
 			localInstanceIndex = LocalAllocator.allocate(editor.getData(), declaration.getClassName());
 			beginLoopLabel = editor.allocateLabel();
 			afterLoopLabel = editor.allocateLabel();
@@ -442,18 +474,18 @@ class BytecodeInstrumenter {
 			editor.insertAfter(0, new MethodEditor.Patch() {
 				@Override
 				public void emitTo(final MethodEditor.Output w) {
-					w.emit(InvokeInstruction.make("()Ljava/util/Iterator;", "Ljava/util/List;", "iterator",
+					w.emit(InvokeInstruction.make("()" + ITERATOR_BYTECODE_NAME, LIST_BYTECODE_NAME, "iterator",
 							IInvokeInstruction.Dispatch.INTERFACE));
-					w.emit(StoreInstruction.make("Ljava/util/Iterator;", iteratorIndexCopy));
+					w.emit(StoreInstruction.make(ITERATOR_BYTECODE_NAME, iteratorIndexCopy));
 					w.emitLabel(beginLoopLabelCopy);
-					w.emit(LoadInstruction.make("Ljava/util/Iterator;", iteratorIndexCopy));
-					w.emit(InvokeInstruction.make("()Z", "Ljava/util/Iterator;", "hasNext",
+					w.emit(LoadInstruction.make(ITERATOR_BYTECODE_NAME, iteratorIndexCopy));
+					w.emit(InvokeInstruction.make("()" + Constants.TYPE_boolean, ITERATOR_BYTECODE_NAME, "hasNext",
 							IInvokeInstruction.Dispatch.INTERFACE));
 					w.emit(ConstantInstruction.make(0));
-					w.emit(ConditionalBranchInstruction.make("I", IConditionalBranchInstruction.Operator.EQ,
-							afterLoopLabelCopy));
-					w.emit(LoadInstruction.make("Ljava/util/Iterator;", iteratorIndexCopy));
-					w.emit(InvokeInstruction.make("()Ljava/lang/Object;", "Ljava/util/Iterator;", "next",
+					w.emit(ConditionalBranchInstruction.make(Constants.TYPE_int,
+							IConditionalBranchInstruction.Operator.EQ, afterLoopLabelCopy));
+					w.emit(LoadInstruction.make(ITERATOR_BYTECODE_NAME, iteratorIndexCopy));
+					w.emit(InvokeInstruction.make("()" + Constants.TYPE_Object, ITERATOR_BYTECODE_NAME, "next",
 							IInvokeInstruction.Dispatch.INTERFACE));
 					w.emit(CheckCastInstruction.make(declaration.getClassName() + ";"));
 					w.emit(StoreInstruction.make(declaration.getClassName() + ";", localInstanceIndexCopy));
@@ -493,7 +525,7 @@ class BytecodeInstrumenter {
 			AstBaseClass abc = declaration.getCallOrDeclaration(i);
 			if (abc.getClass() == Method.class) {
 				Method m = (Method) abc;
-				if (m.getSignature().equals("Constructor")) {
+				if (m.getSignature().equals(APIConstants.CONSTRUCTOR)) {
 					IMethod init = declaration.getConstructor(instanceType);
 					if (init == null) {
 						continue;
@@ -510,11 +542,11 @@ class BytecodeInstrumenter {
 						@Override
 						public void emitTo(final MethodEditor.Output w) {
 							w.emit(InvokeInstruction.make(init.getDescriptor().toString(),
-									instanceType.getName().toString() + ";", "<init>",
+									instanceType.getName().toString() + ";", APIConstants.INIT,
 									IInvokeInstruction.Dispatch.SPECIAL));
 							w.emit(DupInstruction.make(0));
-							w.emit(InvokeInstruction.make("(Ljava/lang/Object;)V", "L" + PACKAGE + "InstanceCollector;",
-									"addInstance", IInvokeInstruction.Dispatch.STATIC));
+							w.emit(InvokeInstruction.make("(" + Constants.TYPE_Object + ")" + Constants.TYPE_void,
+									IC_BYTECODE_NAME, "addInstance", IInvokeInstruction.Dispatch.STATIC));
 							w.emit(StoreInstruction.make(instanceType.getName().toString() + ";", instanceIndex));
 						}
 					});
@@ -582,12 +614,12 @@ class BytecodeInstrumenter {
 	private void instrumentStartPhase(final MethodEditor editor) {
 		NonDeterministicIfInstrumenter ifInstr = new NonDeterministicIfInstrumenter();
 		Set<ExplicitDeclaration> declarations = wrapper.getFramework().getStartPhase().getDeclarations();
-		int maxUsesIndex = LocalAllocator.allocate(editor.getData(), "D");
+		int maxUsesIndex = LocalAllocator.allocate(editor.getData(), Constants.TYPE_double);
 		editor.insertAfter(0, new MethodEditor.Patch() {
 			@Override
 			public void emitTo(final MethodEditor.Output w) {
 				w.emit(ConstantInstruction.make((double) declarations.size()));
-				w.emit(StoreInstruction.make("D", maxUsesIndex));
+				w.emit(StoreInstruction.make(Constants.TYPE_double, maxUsesIndex));
 			}
 		});
 		ifInstr.instrumentBeginning(editor, maxUsesIndex);
@@ -642,78 +674,80 @@ class BytecodeInstrumenter {
 						w.emit(LoadInstruction.make(AC_BYTECODE_NAME, 0));
 						w.emit(DupInstruction.make(0));
 						w.emit(ConstantInstruction.make(i));
-						w.emit(InvokeInstruction.make("(" + AC_BYTECODE_NAME + AC_BYTECODE_NAME + "I)V",
-								AC_WW_BYTECODE_NAME, "<init>", IInvokeInstruction.Dispatch.SPECIAL));
-						w.emit(InvokeInstruction.make("()V", AC_WW_BYTECODE_NAME, "run",
+						w.emit(InvokeInstruction.make("(" + AC_BYTECODE_NAME + AC_BYTECODE_NAME + Constants.TYPE_int
+								+ ")" + Constants.TYPE_void, AC_WW_BYTECODE_NAME, APIConstants.INIT,
+								IInvokeInstruction.Dispatch.SPECIAL));
+						w.emit(InvokeInstruction.make("()" + Constants.TYPE_void, AC_WW_BYTECODE_NAME, "run",
 								IInvokeInstruction.Dispatch.INTERFACE));
 					} else if (working.getThreadType() == ThreadType.MULTI) {
 						if (procIndex == 0) {
-							procIndex = LocalAllocator.allocate(editor.getData(), "I");
-							threadAIndex = LocalAllocator.allocate(editor.getData(), "[Ljava/lang/Thread;");
-							loopIndex = LocalAllocator.allocate(editor.getData(), "I");
-							w.emit(InvokeInstruction.make("()Ljava/lang/Runtime;", "Ljava/lang/Runtime;", "getRuntime",
-									IInvokeInstruction.Dispatch.STATIC));
-							w.emit(InvokeInstruction.make("()I", "Ljava/lang/Runtime;", "availableProcessors",
-									IInvokeInstruction.Dispatch.VIRTUAL));
-							w.emit(StoreInstruction.make("I", procIndex));
-							w.emit(LoadInstruction.make("I", procIndex));
-							w.emit(NewInstruction.make("[Ljava/lang/Thread;", 1));
-							w.emit(StoreInstruction.make("[Ljava/lang/Thread;", threadAIndex));
+							procIndex = LocalAllocator.allocate(editor.getData(), Constants.TYPE_int);
+							threadAIndex = LocalAllocator.allocate(editor.getData(), "[" + THREAD_BYTECODE_NAME);
+							loopIndex = LocalAllocator.allocate(editor.getData(), Constants.TYPE_int);
+							w.emit(InvokeInstruction.make("()" + RUNTIME_BYTECODE_NAME, RUNTIME_BYTECODE_NAME,
+									"getRuntime", IInvokeInstruction.Dispatch.STATIC));
+							w.emit(InvokeInstruction.make("()" + Constants.TYPE_int, RUNTIME_BYTECODE_NAME,
+									"availableProcessors", IInvokeInstruction.Dispatch.VIRTUAL));
+							w.emit(StoreInstruction.make(Constants.TYPE_int, procIndex));
+							w.emit(LoadInstruction.make(Constants.TYPE_int, procIndex));
+							w.emit(NewInstruction.make("[" + THREAD_BYTECODE_NAME, 1));
+							w.emit(StoreInstruction.make("[" + THREAD_BYTECODE_NAME, threadAIndex));
 						}
 						w.emit(ConstantInstruction.make(0));
-						w.emit(StoreInstruction.make("I", loopIndex));
+						w.emit(StoreInstruction.make(Constants.TYPE_int, loopIndex));
 
 						// First loop: creation and start of threads.
 						w.emitLabel(allocatedLabels.get(forLabelCounter));
-						w.emit(LoadInstruction.make("I", loopIndex));
-						w.emit(LoadInstruction.make("I", procIndex));
-						w.emit(ConditionalBranchInstruction.make("I", IConditionalBranchInstruction.Operator.GE,
-								allocatedLabels.get(forLabelCounter + 1)));
-						w.emit(LoadInstruction.make("[Ljava/lang/Thread;", threadAIndex));
-						w.emit(LoadInstruction.make("I", loopIndex));
-						w.emit(NewInstruction.make("Ljava/lang/Thread;", 0));
+						w.emit(LoadInstruction.make(Constants.TYPE_int, loopIndex));
+						w.emit(LoadInstruction.make(Constants.TYPE_int, procIndex));
+						w.emit(ConditionalBranchInstruction.make(Constants.TYPE_int,
+								IConditionalBranchInstruction.Operator.GE, allocatedLabels.get(forLabelCounter + 1)));
+						w.emit(LoadInstruction.make("[" + THREAD_BYTECODE_NAME, threadAIndex));
+						w.emit(LoadInstruction.make(Constants.TYPE_int, loopIndex));
+						w.emit(NewInstruction.make(THREAD_BYTECODE_NAME, 0));
 						w.emit(DupInstruction.make(0));
 						w.emit(NewInstruction.make(AC_WW_BYTECODE_NAME, 0));
 						w.emit(DupInstruction.make(0));
 						w.emit(LoadInstruction.make(AC_BYTECODE_NAME, 0));
 						w.emit(DupInstruction.make(0));
 						w.emit(ConstantInstruction.make(i));
-						w.emit(InvokeInstruction.make("(" + AC_BYTECODE_NAME + AC_BYTECODE_NAME + "I)V",
-								AC_WW_BYTECODE_NAME, "<init>", IInvokeInstruction.Dispatch.SPECIAL));
-						w.emit(InvokeInstruction.make("(Ljava/lang/Runnable;)V", "Ljava/lang/Thread;", "<init>",
+						w.emit(InvokeInstruction.make("(" + AC_BYTECODE_NAME + AC_BYTECODE_NAME + Constants.TYPE_int
+								+ ")" + Constants.TYPE_void, AC_WW_BYTECODE_NAME, APIConstants.INIT,
 								IInvokeInstruction.Dispatch.SPECIAL));
-						w.emit(ArrayStoreInstruction.make("[Ljava/lang/Thread;"));
-						w.emit(LoadInstruction.make("[Ljava/lang/Thread;", threadAIndex));
-						w.emit(LoadInstruction.make("I", loopIndex));
-						w.emit(ArrayLoadInstruction.make("[Ljava/lang/Thread;"));
-						w.emit(InvokeInstruction.make("()V", "Ljava/lang/Thread;", "start",
+						w.emit(InvokeInstruction.make("(Ljava/lang/Runnable;)" + Constants.TYPE_void,
+								THREAD_BYTECODE_NAME, APIConstants.INIT, IInvokeInstruction.Dispatch.SPECIAL));
+						w.emit(ArrayStoreInstruction.make("[" + THREAD_BYTECODE_NAME));
+						w.emit(LoadInstruction.make("[" + THREAD_BYTECODE_NAME, threadAIndex));
+						w.emit(LoadInstruction.make(Constants.TYPE_int, loopIndex));
+						w.emit(ArrayLoadInstruction.make("[" + THREAD_BYTECODE_NAME));
+						w.emit(InvokeInstruction.make("()" + Constants.TYPE_void, THREAD_BYTECODE_NAME, "start",
 								IInvokeInstruction.Dispatch.VIRTUAL));
-						w.emit(LoadInstruction.make("I", loopIndex));
+						w.emit(LoadInstruction.make(Constants.TYPE_int, loopIndex));
 						w.emit(ConstantInstruction.make(1));
-						w.emit(BinaryOpInstruction.make("I", IBinaryOpInstruction.Operator.ADD));
-						w.emit(StoreInstruction.make("I", loopIndex));
+						w.emit(BinaryOpInstruction.make(Constants.TYPE_int, IBinaryOpInstruction.Operator.ADD));
+						w.emit(StoreInstruction.make(Constants.TYPE_int, loopIndex));
 						w.emit(GotoInstruction.make(allocatedLabels.get(forLabelCounter)));
 
 						// Second loop: every thread will be joined.
 						w.emitLabel(allocatedLabels.get(forLabelCounter + 1));
 						w.emit(ConstantInstruction.make(0));
-						w.emit(StoreInstruction.make("I", loopIndex));
+						w.emit(StoreInstruction.make(Constants.TYPE_int, loopIndex));
 						w.emitLabel(allocatedLabels.get(forLabelCounter + 2));
-						w.emit(LoadInstruction.make("I", loopIndex));
-						w.emit(LoadInstruction.make("I", procIndex));
-						w.emit(ConditionalBranchInstruction.make("I", IConditionalBranchInstruction.Operator.GE,
-								allocatedLabels.get(forLabelCounter + 3)));
-						w.emit(LoadInstruction.make("[Ljava/lang/Thread;", threadAIndex));
-						w.emit(LoadInstruction.make("I", loopIndex));
-						w.emit(ArrayLoadInstruction.make("[Ljava/lang/Thread;"));
+						w.emit(LoadInstruction.make(Constants.TYPE_int, loopIndex));
+						w.emit(LoadInstruction.make(Constants.TYPE_int, procIndex));
+						w.emit(ConditionalBranchInstruction.make(Constants.TYPE_int,
+								IConditionalBranchInstruction.Operator.GE, allocatedLabels.get(forLabelCounter + 3)));
+						w.emit(LoadInstruction.make("[" + THREAD_BYTECODE_NAME, threadAIndex));
+						w.emit(LoadInstruction.make(Constants.TYPE_int, loopIndex));
+						w.emit(ArrayLoadInstruction.make("[" + THREAD_BYTECODE_NAME));
 						ExceptionHandler h = new ExceptionHandler(allocatedLabels.get(forLabelCounter + 4),
 								"Ljava/lang/InterruptedException;");
-						w.emit(InvokeInstruction.make("()V", "Ljava/lang/Thread;", "join",
+						w.emit(InvokeInstruction.make("()" + Constants.TYPE_void, THREAD_BYTECODE_NAME, "join",
 								IInvokeInstruction.Dispatch.VIRTUAL), new ExceptionHandler[] {h});
-						w.emit(LoadInstruction.make("I", loopIndex));
+						w.emit(LoadInstruction.make(Constants.TYPE_int, loopIndex));
 						w.emit(ConstantInstruction.make(1));
-						w.emit(BinaryOpInstruction.make("I", IBinaryOpInstruction.Operator.ADD));
-						w.emit(StoreInstruction.make("I", loopIndex));
+						w.emit(BinaryOpInstruction.make(Constants.TYPE_int, IBinaryOpInstruction.Operator.ADD));
+						w.emit(StoreInstruction.make(Constants.TYPE_int, loopIndex));
 						w.emit(GotoInstruction.make(allocatedLabels.get(forLabelCounter + 2)));
 
 						// Exception handling of InterruptedException that can occur during join().
@@ -730,7 +764,8 @@ class BytecodeInstrumenter {
 		});
 		for (int i = 0; i < workingPhases.size(); i++) {
 			WorkingPhase working = workingPhases.get(i);
-			MethodData data = clInstr.createEmptyMethodData("w" + i, "()V", Constants.ACC_PROTECTED);
+			MethodData data = clInstr.createEmptyMethodData("w" + i, "()" + Constants.TYPE_void,
+					Constants.ACC_PROTECTED);
 			MethodEditor wEditor = new MethodEditor(data);
 			instrumentActualWorkingPhaseContent(wEditor, working);
 			workingDatas.add(data);
@@ -765,12 +800,12 @@ class BytecodeInstrumenter {
 			}
 		}
 		int caseCounterCopy = caseCounter;
-		int counterIndex = LocalAllocator.allocate(editor.getData(), "D");
+		int counterIndex = LocalAllocator.allocate(editor.getData(), Constants.TYPE_double);
 		editor.insertAfter(0, new MethodEditor.Patch() {
 			@Override
 			public void emitTo(final MethodEditor.Output w) {
 				w.emit(ConstantInstruction.make((double) caseCounterCopy));
-				w.emit(StoreInstruction.make("D", counterIndex));
+				w.emit(StoreInstruction.make(Constants.TYPE_double, counterIndex));
 			}
 		});
 		ifInstr.instrumentBeginning(editor, counterIndex);
@@ -792,7 +827,8 @@ class BytecodeInstrumenter {
 								@Override
 								public void emitTo(final MethodEditor.Output w) {
 									w.emit(ConstantInstruction.make(index));
-									w.emit(InvokeInstruction.make("(I)Ljava/lang/Object;", "Ljava/util/List;", "get",
+									w.emit(InvokeInstruction.make("(" + Constants.TYPE_int + ")"
+											+ Constants.TYPE_Object, LIST_BYTECODE_NAME, "get",
 											IInvokeInstruction.Dispatch.INTERFACE), handlers);
 									w.emit(CheckCastInstruction.make(cl.getName().toString() + ";"));
 								}
@@ -829,7 +865,7 @@ class BytecodeInstrumenter {
 		editor.insertAfter(0, new MethodEditor.Patch() {
 			@Override
 			public void emitTo(final MethodEditor.Output w) {
-				w.emit(ReturnInstruction.make("V"));
+				w.emit(ReturnInstruction.make(Constants.TYPE_void));
 			}
 		});
 		editor.applyPatches();
@@ -866,8 +902,8 @@ class BytecodeInstrumenter {
 					@Override
 					public void emitTo(final MethodEditor.Output w) {
 						w.emit(ConstantInstruction.make(index));
-						w.emit(InvokeInstruction.make("(I)Ljava/lang/Object;", "Ljava/util/List;", "get",
-								IInvokeInstruction.Dispatch.INTERFACE));
+						w.emit(InvokeInstruction.make("(" + Constants.TYPE_int + ")" + Constants.TYPE_Object,
+								LIST_BYTECODE_NAME, "get", IInvokeInstruction.Dispatch.INTERFACE));
 						w.emit(CheckCastInstruction.make(b.getClassName() + ";"));
 						w.emit(StoreInstruction.make(b.getClassName() + ";", instanceIndex));
 					}
@@ -898,17 +934,17 @@ class BytecodeInstrumenter {
 				for (int i = 0; i < cases; i++) {
 					w.emitLabel(allocatedLabels.get(i));
 					w.emit(LoadInstruction.make(AC_WW_BYTECODE_NAME, 0));
-					w.emit(GetInstruction.make("I", AC_WW_BYTECODE_NAME, "phaseNumber", false));
+					w.emit(GetInstruction.make(Constants.TYPE_int, AC_WW_BYTECODE_NAME, "phaseNumber", false));
 					w.emit(ConstantInstruction.make(i));
-					w.emit(ConditionalBranchInstruction.make("I", IConditionalBranchInstruction.Operator.NE,
-							allocatedLabels.get(i + 1)));
+					w.emit(ConditionalBranchInstruction.make(Constants.TYPE_int,
+							IConditionalBranchInstruction.Operator.NE, allocatedLabels.get(i + 1)));
 					w.emit(LoadInstruction.make(AC_WW_BYTECODE_NAME, 0));
 					w.emit(GetInstruction.make(AC_BYTECODE_NAME, AC_WW_BYTECODE_NAME, "outerInstance", false));
-					w.emit(InvokeInstruction.make("()V", AC_BYTECODE_NAME, "w" + i,
+					w.emit(InvokeInstruction.make("()" + Constants.TYPE_void, AC_BYTECODE_NAME, "w" + i,
 							IInvokeInstruction.Dispatch.VIRTUAL));
 				}
 				w.emitLabel(allocatedLabels.get(cases));
-				w.emit(ReturnInstruction.make("V"));
+				w.emit(ReturnInstruction.make(Constants.TYPE_void));
 			}
 		});
 	}
@@ -939,18 +975,18 @@ class BytecodeInstrumenter {
 		 * @param maxCasesIndex index where the number of the overall cases is stored.
 		 */
 		private void instrumentBeginning(final MethodEditor editor, final int maxCasesIndex) {
-			randomIndex = LocalAllocator.allocate(editor.getData(), "I");
+			randomIndex = LocalAllocator.allocate(editor.getData(), Constants.TYPE_int);
 			allocatedCaseLabels = new ArrayList<>();
 			caseCounter = 0;
 			editor.insertAfter(0, new MethodEditor.Patch() {
 				@Override
 				public void emitTo(final MethodEditor.Output w) {
-					w.emit(InvokeInstruction.make("()D", "Ljava/lang/Math;", "random",
+					w.emit(InvokeInstruction.make("()" + Constants.TYPE_double, "Ljava/lang/Math;", "random",
 							IInvokeInstruction.Dispatch.STATIC));
-					w.emit(LoadInstruction.make("D", maxCasesIndex));
-					w.emit(BinaryOpInstruction.make("D", IBinaryOpInstruction.Operator.MUL));
-					w.emit(ConversionInstruction.make("D", "I"));
-					w.emit(StoreInstruction.make("I", randomIndex));
+					w.emit(LoadInstruction.make(Constants.TYPE_double, maxCasesIndex));
+					w.emit(BinaryOpInstruction.make(Constants.TYPE_double, IBinaryOpInstruction.Operator.MUL));
+					w.emit(ConversionInstruction.make(Constants.TYPE_double, Constants.TYPE_int));
+					w.emit(StoreInstruction.make(Constants.TYPE_int, randomIndex));
 				}
 			});
 		}
@@ -971,10 +1007,10 @@ class BytecodeInstrumenter {
 				@Override
 				public void emitTo(final MethodEditor.Output w) {
 					w.emitLabel(allocatedCaseLabels.get(caseCounterCopy));
-					w.emit(LoadInstruction.make("I", randomIndex));
+					w.emit(LoadInstruction.make(Constants.TYPE_int, randomIndex));
 					w.emit(ConstantInstruction.make(caseCounterCopy));
-					w.emit(ConditionalBranchInstruction.make("I", IConditionalBranchInstruction.Operator.NE,
-							allocatedCaseLabels.get(caseCounterCopy + 1)));
+					w.emit(ConditionalBranchInstruction.make(Constants.TYPE_int,
+							IConditionalBranchInstruction.Operator.NE, allocatedCaseLabels.get(caseCounterCopy + 1)));
 				}
 			});
 			caseCounter++;
@@ -1020,26 +1056,27 @@ class BytecodeInstrumenter {
 		 * @param editor the editor for bytecode instrumentation.
 		 */
 		private void instrumentLoopBeginning(final MethodEditor editor) {
-			loopIndex = LocalAllocator.allocate(editor.getData(), "I");
-			int randomIndex = LocalAllocator.allocate(editor.getData(), "I");
+			loopIndex = LocalAllocator.allocate(editor.getData(), Constants.TYPE_int);
+			int randomIndex = LocalAllocator.allocate(editor.getData(), Constants.TYPE_int);
 			beginLabel = editor.allocateLabel();
 			endLabel = editor.allocateLabel();
 			editor.insertAfter(0, new MethodEditor.Patch() {
 				@Override
 				public void emitTo(final MethodEditor.Output w) {
-					w.emit(InvokeInstruction.make("()D", "Ljava/lang/Math;", "random",
+					w.emit(InvokeInstruction.make("()" + Constants.TYPE_double, "Ljava/lang/Math;", "random",
 							IInvokeInstruction.Dispatch.STATIC));
 					final double maxLoops = 1000000.0;
 					w.emit(ConstantInstruction.make(maxLoops));
-					w.emit(BinaryOpInstruction.make("D", IBinaryOpInstruction.Operator.MUL));
-					w.emit(ConversionInstruction.make("D", "I"));
-					w.emit(StoreInstruction.make("I", randomIndex));
+					w.emit(BinaryOpInstruction.make(Constants.TYPE_double, IBinaryOpInstruction.Operator.MUL));
+					w.emit(ConversionInstruction.make(Constants.TYPE_double, Constants.TYPE_int));
+					w.emit(StoreInstruction.make(Constants.TYPE_int, randomIndex));
 					w.emit(ConstantInstruction.make(0));
-					w.emit(StoreInstruction.make("I", loopIndex));
+					w.emit(StoreInstruction.make(Constants.TYPE_int, loopIndex));
 					w.emitLabel(beginLabel);
-					w.emit(LoadInstruction.make("I", loopIndex));
-					w.emit(LoadInstruction.make("I", randomIndex));
-					w.emit(ConditionalBranchInstruction.make("I", IConditionalBranchInstruction.Operator.GE, endLabel));
+					w.emit(LoadInstruction.make(Constants.TYPE_int, loopIndex));
+					w.emit(LoadInstruction.make(Constants.TYPE_int, randomIndex));
+					w.emit(ConditionalBranchInstruction.make(Constants.TYPE_int,
+							IConditionalBranchInstruction.Operator.GE, endLabel));
 				}
 			});
 		}
@@ -1053,10 +1090,10 @@ class BytecodeInstrumenter {
 			editor.insertAfter(0, new MethodEditor.Patch() {
 				@Override
 				public void emitTo(final MethodEditor.Output w) {
-					w.emit(LoadInstruction.make("I", loopIndex));
+					w.emit(LoadInstruction.make(Constants.TYPE_int, loopIndex));
 					w.emit(ConstantInstruction.make(1));
-					w.emit(BinaryOpInstruction.make("I", IBinaryOpInstruction.Operator.ADD));
-					w.emit(StoreInstruction.make("I", loopIndex));
+					w.emit(BinaryOpInstruction.make(Constants.TYPE_int, IBinaryOpInstruction.Operator.ADD));
+					w.emit(StoreInstruction.make(Constants.TYPE_int, loopIndex));
 					w.emit(GotoInstruction.make(beginLabel));
 					w.emitLabel(endLabel);
 				}

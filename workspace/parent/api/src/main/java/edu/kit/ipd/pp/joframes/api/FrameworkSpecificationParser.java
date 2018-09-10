@@ -39,10 +39,6 @@ import org.xml.sax.SAXException;
  */
 class FrameworkSpecificationParser {
 	/**
-	 * Signature of a main method.
-	 */
-	static final String MAIN_SIGNATURE = "main([Ljava/lang/String;)V";
-	/**
 	 * Name of the root element.
 	 */
 	private static final String ELEMENT_FRAMEWORK = "framework-specification";
@@ -389,7 +385,7 @@ class FrameworkSpecificationParser {
 			switch (xmlStream.getEventType()) {
 				case XMLStreamConstants.CHARACTERS:
 					String[] splittedText = xmlStream.getText().trim().split(" ");
-					if (splittedText.length == 1 && splittedText[0].equals(MAIN_SIGNATURE)) {
+					if (splittedText.length == 1 && splittedText[0].equals(APIConstants.MAIN_SIGNATURE)) {
 						return new StaticMethod(null, splittedText[1]);
 					}
 					return new StaticMethod(splittedText[0], splittedText[1]);

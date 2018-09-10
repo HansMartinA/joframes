@@ -47,10 +47,6 @@ class ClassHierarchyAnalyzer {
 	 */
 	private static final String JAVAFX = "JavaFX";
 	/**
-	 * Method name within the framework specification to identify constructors.
-	 */
-	private static final String CONSTRUCTOR = "Constructor";
-	/**
 	 * Stores the wrapper of the framework.
 	 */
 	private FrameworkWrapper wrapper;
@@ -184,7 +180,7 @@ class ClassHierarchyAnalyzer {
 			} else if (abc.getClass() == Method.class) {
 				Method method = (Method) abc;
 				IMethod m = null;
-				if (method.getSignature().equals(CONSTRUCTOR)) {
+				if (method.getSignature().equals(APIConstants.CONSTRUCTOR)) {
 					if (actualBoundClass.isInterface()) {
 						for (IClass cl : hierarchy.getImplementors(actualBoundClass.getReference())) {
 							if (checkSubclassForExplicitDeclaration(cl)) {
@@ -209,7 +205,7 @@ class ClassHierarchyAnalyzer {
 			} else if (abc.getClass() == StaticMethod.class) {
 				StaticMethod stMethod = (StaticMethod) abc;
 				if (stMethod.getClassString() == null
-						&& stMethod.getSignature().equals(FrameworkSpecificationParser.MAIN_SIGNATURE)) {
+						&& stMethod.getSignature().equals(APIConstants.MAIN_SIGNATURE)) {
 					if (mainClassName == null) {
 						stMethod.setIClass(findNextMainClass(hierarchy));
 					} else {
@@ -243,7 +239,7 @@ class ClassHierarchyAnalyzer {
 	 * @return the constructor of null if no can be found.
 	 */
 	private IMethod findInit(final IClass cl) {
-		IMethod m = cl.getMethod(Selector.make("<init>()V"));
+		IMethod m = cl.getMethod(Selector.make(APIConstants.DEFAULT_CONSTRUCTOR_SIGNATURE));
 		if (m == null) {
 			for (IMethod possibleInitMethod : cl.getDeclaredMethods()) {
 				if (possibleInitMethod.isInit()) {
@@ -289,7 +285,7 @@ class ClassHierarchyAnalyzer {
 	 * @return true if the class contains a main method. false otherwise.
 	 */
 	private boolean checkClassForMain(final IClass cl) {
-		IMethod possibleMain = cl.getMethod(Selector.make(FrameworkSpecificationParser.MAIN_SIGNATURE));
+		IMethod possibleMain = cl.getMethod(Selector.make(APIConstants.MAIN_SIGNATURE));
 		return possibleMain != null && possibleMain.isStatic() && possibleMain.isPublic();
 	}
 
