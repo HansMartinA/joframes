@@ -79,4 +79,18 @@ public class ClassInstrumenterWrapper {
 		}
 		return null;
 	}
+
+	/**
+	 * Visits all methods of the class.
+	 *
+	 * @param visitor visitor for the visit.
+	 */
+	public void visitMethods(final MethodVisitor visitor) {
+		for (MethodWrapper m : methods) {
+			visitor.visitMethod(m);
+		}
+		for (MethodWrapper m : additionalMethods) {
+			visitor.visitMethod(m);
+		}
+	}
 }
