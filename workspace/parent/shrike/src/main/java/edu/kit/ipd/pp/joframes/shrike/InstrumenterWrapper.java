@@ -60,13 +60,29 @@ public class InstrumenterWrapper {
 	 */
 	public void addInputJar(final String jarFile) throws IOException {
 		if (clInstrs != null) {
-			throw new IllegalStateException("A jar file can only be added .");
+			throw new IllegalStateException("A jar file can only be added directly after the object construction.");
 		}
 		File jar = new File(jarFile);
 		if (!jarFile.endsWith(".jar") || !jar.exists()) {
 			throw new IllegalArgumentException("The given jar file (" + jarFile + ") is not valid.");
 		}
 		offInstr.addInputJar(jar);
+	}
+
+	/**
+	 * Adds an entry within a jar file to the instrumenter.
+	 *
+	 * @param jarEntry the jar entry in the form "path-to-jar-file".jar#"path-to-entry".
+	 * @throws IOException if an IOException occurs.
+	 */
+	public void addInputJarEntry(final String jarEntry) throws IOException {
+		if (clInstrs != null) {
+			throw new IllegalStateException("A jar entry can only be added directly after the obejct construction.");
+		}
+		if (!jarEntry.contains(".jar#")) {
+			throw new IllegalArgumentException("The given jar entry (" + jarEntry + ") is not valid.");
+		}
+		offInstr.addInputElement(new File(""), jarEntry);
 	}
 
 	/**

@@ -49,6 +49,15 @@ public class MethodWrapper {
 	}
 
 	/**
+	 * Returns the class type to which this method belongs.
+	 *
+	 * @return the class type.
+	 */
+	public String getClassType() {
+		return editor.getData().getClassType();
+	}
+
+	/**
 	 * Returns the name of the method.
 	 *
 	 * @return the method name.
@@ -83,6 +92,15 @@ public class MethodWrapper {
 	 */
 	public int allocateLabel() {
 		return editor.allocateLabel();
+	}
+
+	/**
+	 * Adds a label.
+	 *
+	 * @param label the label.
+	 */
+	public void addLabelAtEnd(final int label) {
+		addInstructionAtEnd(label, null, null);
 	}
 
 	/**
@@ -151,8 +169,9 @@ public class MethodWrapper {
 	 * Instruments the method with the added instructions.
 	 */
 	public void instrumentMethod() {
-		editor.beginPass();
 		int lastInstructionIndex = editor.getInstructions().length - 1;
+		Instruction lastInstruction = (Instruction) editor.getInstructions()[lastInstructionIndex];
+		editor.beginPass();
 		editor.replaceWith(lastInstructionIndex, new MethodEditor.Patch() {
 			@Override
 			public void emitTo(final MethodEditor.Output w) {
@@ -168,13 +187,16 @@ public class MethodWrapper {
 					}
 					ExceptionHandler[] handlers = endExHandlers.get(i);
 					Instruction instruction = endInstructions.get(i);
+					if (instruction == null) {
+						continue;
+					}
 					if (handlers == null) {
 						w.emit(instruction);
 					} else {
 						w.emit(instruction, handlers);
 					}
 				}
-				w.emit((Instruction) editor.getInstructions()[lastInstructionIndex]);
+				w.emit(lastInstruction);
 				for (Instruction ins : afterReturnInstructions) {
 					w.emit(ins);
 				}
