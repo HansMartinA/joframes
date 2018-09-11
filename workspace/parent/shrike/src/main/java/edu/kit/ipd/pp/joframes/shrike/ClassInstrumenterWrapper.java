@@ -68,10 +68,14 @@ public class ClassInstrumenterWrapper {
 	 */
 	public MethodWrapper getMethod(final String name, final String signature) {
 		for (MethodWrapper m : methods) {
-			// Check for method name and signature.
+			if (m.getMethodName().equals(name) && m.getMethodSignature().equals(signature)) {
+				return m;
+			}
 		}
 		for (MethodWrapper m : additionalMethods) {
-			// Check for method name and signature.
+			if (m.getMethodName().equals(name) && m.getMethodSignature().equals(signature)) {
+				return m;
+			}
 		}
 		return null;
 	}
