@@ -87,6 +87,24 @@ public class InstrumenterWrapper {
 	}
 
 	/**
+	 * Creates the wrappers for all input classes.
+	 */
+	private void createClassInstrumenterWrapper() {
+		clInstrs = new ArrayList<>();
+		try {
+			offInstr.beginTraversal();
+			for (int i = 0; i < offInstr.getNumInputClasses(); i++) {
+				ClassInstrumenter clInstr = offInstr.nextClass();
+				if (clInstr == null) {
+					continue;
+				}
+				clInstrs.add(new ClassInstrumenterWrapper(clInstr));
+			}
+		} catch (IOException | InvalidClassFileException e) {
+		}
+	}
+
+	/**
 	 * Returns an instrumenter for a class.
 	 *
 	 * @param className name of the class for which the instrumenter is returned.
@@ -94,18 +112,7 @@ public class InstrumenterWrapper {
 	 */
 	public ClassInstrumenterWrapper getClassInstrumenter(final String className) {
 		if (clInstrs == null) {
-			clInstrs = new ArrayList<>();
-			try {
-				offInstr.beginTraversal();
-				for (int i = 0; i < offInstr.getNumInputClasses(); i++) {
-					ClassInstrumenter clInstr = offInstr.nextClass();
-					if (clInstr == null) {
-						continue;
-					}
-					clInstrs.add(new ClassInstrumenterWrapper(clInstr));
-				}
-			} catch (IOException | InvalidClassFileException e) {
-			}
+			createClassInstrumenterWrapper();
 		}
 		for (ClassInstrumenterWrapper wrap : clInstrs) {
 			if (wrap.getClassInputName().contains(className)) {
@@ -113,6 +120,20 @@ public class InstrumenterWrapper {
 			}
 		}
 		return null;
+	}
+
+	/**
+	 * Visit all classes.
+	 *
+	 * @param visitor the visitor.
+	 */
+	public void visitClasses(final ClassVisitor visitor) {
+		if (clInstrs == null) {
+			createClassInstrumenterWrapper();
+		}
+		for (ClassInstrumenterWrapper wrapper : clInstrs) {
+			visitor.visitClass(wrapper);
+		}
 	}
 
 	/**
