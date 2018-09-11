@@ -117,7 +117,7 @@ class BytecodeInstrumenter {
 	/**
 	 * Bytecode name of the Runtime class.
 	 */
-	private static final String RUNTIME_BYTECODE_NAME = "Ljava/lang/Runtime";
+	private static final String RUNTIME_BYTECODE_NAME = "Ljava/lang/Runtime;";
 	/**
 	 * Name of the static initializer method.
 	 */
