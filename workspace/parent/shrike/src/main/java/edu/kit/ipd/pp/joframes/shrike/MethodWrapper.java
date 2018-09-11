@@ -25,6 +25,10 @@ public class MethodWrapper {
 	 * emitted for the instruction.
 	 */
 	private ArrayList<Integer> endLabels;
+	/**
+	 * Stores all instructions that will be inserted after the last return instruction.
+	 */
+	private ArrayList<Instruction> afterReturnInstructions;
 
 	/**
 	 * Creates a new instance.
@@ -35,6 +39,7 @@ public class MethodWrapper {
 		editor = new MethodEditor(data);
 		endInstructions = new ArrayList<>();
 		endLabels = new ArrayList<>();
+		afterReturnInstructions = new ArrayList<>();
 	}
 
 	/**
@@ -95,6 +100,15 @@ public class MethodWrapper {
 	}
 
 	/**
+	 * Adds an instruction that will be inserted at the end of the method after the last return instruction.
+	 *
+	 * @param ins the instruction.
+	 */
+	public void addInstructionAtLast(final Instruction ins) {
+		afterReturnInstructions.add(ins);
+	}
+
+	/**
 	 * Instruments the method with the added instructions.
 	 */
 	public void instrumentMethod() {
@@ -117,6 +131,9 @@ public class MethodWrapper {
 					w.emit(instruction);
 				}
 				w.emit((Instruction) editor.getInstructions()[lastInstructionIndex]);
+				for (Instruction ins : afterReturnInstructions) {
+					w.emit(ins);
+				}
 			}
 		});
 		editor.applyPatches();
