@@ -1,5 +1,6 @@
 package edu.kit.ipd.pp.joframes.shrike;
 
+import com.ibm.wala.shrikeBT.ConstantInstruction;
 import com.ibm.wala.shrikeBT.shrikeCT.ClassInstrumenter;
 import com.ibm.wala.shrikeBT.shrikeCT.OfflineInstrumenter;
 import com.ibm.wala.shrikeCT.InvalidClassFileException;
@@ -155,7 +156,12 @@ public class InstrumenterWrapper {
 			// instrumented and written once more.
 			offInstr = new OfflineInstrumenter();
 			offInstr.addInputJar(new File(output + tempEnd));
-			// Visit all classes and methods.
+			visitClasses(classWrapper -> {
+				classWrapper.visitMethods(methodWrapper -> {
+					methodWrapper.addInstructionAtLast(ConstantInstruction.make(0));
+					methodWrapper.addInstructionAtLast(InstructionFactory.makePop());
+				});
+			});
 			offInstr.setOutputJar(new File(output));
 			for (ClassInstrumenterWrapper wrapper : clInstrs) {
 				wrapper.outputClass(offInstr);
