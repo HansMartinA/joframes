@@ -1,6 +1,8 @@
 package edu.kit.ipd.pp.joframes.shrike;
 
 import com.ibm.wala.shrikeBT.shrikeCT.ClassInstrumenter;
+import com.ibm.wala.shrikeCT.InvalidClassFileException;
+import java.util.ArrayList;
 
 /**
  * Wraps a ClassInstrumenter and, therefore, a class.
@@ -12,13 +14,65 @@ public class ClassInstrumenterWrapper {
 	 * Stores the wrapped ClassInstrumenter.
 	 */
 	private ClassInstrumenter clInstr;
+	/**
+	 * Stores all original methods of the class.
+	 */
+	private ArrayList<MethodWrapper> methods;
+	/**
+	 * Stores all newly created methods.
+	 */
+	private ArrayList<MethodWrapper> additionalMethods;
 
 	/**
 	 * Creates a new instance.
 	 *
 	 * @param clInstrWrap class instrumenter that will be wrapped.
+	 * @throws InvalidClassFileException if the class is invalid.
 	 */
-	ClassInstrumenterWrapper(final ClassInstrumenter clInstrWrap) {
+	ClassInstrumenterWrapper(final ClassInstrumenter clInstrWrap) throws InvalidClassFileException {
 		clInstr = clInstrWrap;
+		methods = new ArrayList<>();
+		clInstr.visitMethods(data -> methods.add(new MethodWrapper(data)));
+		additionalMethods = new ArrayList<>();
+	}
+
+	/**
+	 * Returns the file input name of the class file.
+	 *
+	 * @return the class file name.
+	 */
+	public String getClassInputName() {
+		return clInstr.getInputName();
+	}
+
+	/**
+	 * Creates a method and adds it to the class.
+	 *
+	 * @param access access restriction for the method.
+	 * @param name name of the new method.
+	 * @param signature signature of the method.
+	 * @return wrapper of the newly created method.
+	 */
+	public MethodWrapper createMethod(final int access, final String name, final String signature) {
+		MethodWrapper wrapper = new MethodWrapper(clInstr.createEmptyMethodData(name, signature, access));
+		additionalMethods.add(wrapper);
+		return wrapper;
+	}
+
+	/**
+	 * Returns a method of the class.
+	 *
+	 * @param name name of the method.
+	 * @param signature signature of the method.
+	 * @return the method or null if it cannot be found.
+	 */
+	public MethodWrapper getMethod(final String name, final String signature) {
+		for (MethodWrapper m : methods) {
+			// Check for method name and signature.
+		}
+		for (MethodWrapper m : additionalMethods) {
+			// Check for method name and signature.
+		}
+		return null;
 	}
 }

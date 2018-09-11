@@ -2,6 +2,7 @@ package edu.kit.ipd.pp.joframes.shrike;
 
 import com.ibm.wala.shrikeBT.shrikeCT.ClassInstrumenter;
 import com.ibm.wala.shrikeBT.shrikeCT.OfflineInstrumenter;
+import com.ibm.wala.shrikeCT.InvalidClassFileException;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -80,11 +81,13 @@ public class InstrumenterWrapper {
 					}
 					clInstrs.add(new ClassInstrumenterWrapper(clInstr));
 				}
-			} catch (IOException e) {
+			} catch (IOException | InvalidClassFileException e) {
 			}
 		}
 		for (ClassInstrumenterWrapper wrap : clInstrs) {
-			// Test class name with className.
+			if (wrap.getClassInputName().contains(className)) {
+				return wrap;
+			}
 		}
 		return null;
 	}
