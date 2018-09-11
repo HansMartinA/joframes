@@ -138,4 +138,13 @@ public class MethodWrapper {
 		editor.applyPatches();
 		editor.endPass();
 	}
+
+	/**
+	 * Returns the wrapped method data.
+	 *
+	 * @return the wrapped method.
+	 */
+	MethodData getMethodData() {
+		return editor.getData();
+	}
 }

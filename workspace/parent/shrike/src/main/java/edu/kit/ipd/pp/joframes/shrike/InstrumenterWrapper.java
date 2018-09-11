@@ -18,6 +18,10 @@ public class InstrumenterWrapper {
 	 */
 	private OfflineInstrumenter offInstr;
 	/**
+	 * Stores the output jar file.
+	 */
+	private String output;
+	/**
 	 * Stores all wrapped class instrumenter.
 	 */
 	private ArrayList<ClassInstrumenterWrapper> clInstrs;
@@ -27,6 +31,7 @@ public class InstrumenterWrapper {
 	 */
 	public InstrumenterWrapper() {
 		offInstr = new OfflineInstrumenter();
+		offInstr.setPassUnmodifiedClasses(true);
 	}
 
 	/**
@@ -64,6 +69,24 @@ public class InstrumenterWrapper {
 	}
 
 	/**
+	 * Sets the output jar file for the resulting classes.
+	 *
+	 * @param outputJar the output jar file.
+	 */
+	public void setOutput(final String outputJar) {
+		output = outputJar;
+	}
+
+	/**
+	 * Returns the path to the output jar file.
+	 *
+	 * @return the path.
+	 */
+	public String getOutput() {
+		return output;
+	}
+
+	/**
 	 * Returns an instrumenter for a class.
 	 *
 	 * @param className name of the class for which the instrumenter is returned.
@@ -90,5 +113,41 @@ public class InstrumenterWrapper {
 			}
 		}
 		return null;
+	}
+
+	/**
+	 * Outputs all classes.
+	 *
+	 * @throws IOException if a class cannot be written.
+	 * @throws InvalidClassFileException if a class is invalid.
+	 */
+	public void outputClasses() throws IOException, InvalidClassFileException {
+		String tempEnd = "-temp.jar";
+		try {
+			offInstr.setOutputJar(new File(output + tempEnd));
+			for (ClassInstrumenterWrapper wrapper : clInstrs) {
+				wrapper.outputClass(offInstr);
+			}
+			offInstr.writeUnmodifiedClasses();
+			offInstr.close();
+			// For newly created methods, no stack map table is created. Therefore, all classes are loaded,
+			// instrumented and written once more.
+			offInstr = new OfflineInstrumenter();
+			offInstr.addInputJar(new File(output + tempEnd));
+			// Visit all classes and methods.
+			offInstr.setOutputJar(new File(output));
+			for (ClassInstrumenterWrapper wrapper : clInstrs) {
+				wrapper.outputClass(offInstr);
+			}
+			offInstr.writeUnmodifiedClasses();
+			offInstr.close();
+			new File(output + tempEnd).delete();
+		} catch (IOException e) {
+			new File(output + tempEnd).delete();
+			throw e;
+		} catch (InvalidClassFileException e) {
+			new File(output + tempEnd).delete();
+			throw e;
+		}
 	}
 }

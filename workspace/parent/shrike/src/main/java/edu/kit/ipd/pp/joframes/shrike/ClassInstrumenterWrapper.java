@@ -1,7 +1,11 @@
 package edu.kit.ipd.pp.joframes.shrike;
 
+import com.ibm.wala.shrikeBT.shrikeCT.CTUtils;
 import com.ibm.wala.shrikeBT.shrikeCT.ClassInstrumenter;
+import com.ibm.wala.shrikeBT.shrikeCT.OfflineInstrumenter;
+import com.ibm.wala.shrikeCT.ClassWriter;
 import com.ibm.wala.shrikeCT.InvalidClassFileException;
+import java.io.IOException;
 import java.util.ArrayList;
 
 /**
@@ -92,5 +96,20 @@ public class ClassInstrumenterWrapper {
 		for (MethodWrapper m : additionalMethods) {
 			visitor.visitMethod(m);
 		}
+	}
+
+	/**
+	 * Outputs the class.
+	 *
+	 * @param offInstr general instrumenter that writes the class out.
+	 * @throws IOException if the class cannot be written.
+	 * @throws InvalidClassFileException if the class is invalid.
+	 */
+	void outputClass(final OfflineInstrumenter offInstr) throws IOException, InvalidClassFileException {
+		ClassWriter writer = clInstr.emitClass();
+		for (MethodWrapper m : additionalMethods) {
+			CTUtils.compileAndAddMethodToClassWriter(m.getMethodData(), writer, null);
+		}
+		offInstr.outputModifiedClass(clInstr, writer);
 	}
 }
