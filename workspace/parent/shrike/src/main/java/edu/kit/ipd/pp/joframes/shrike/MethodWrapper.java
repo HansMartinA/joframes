@@ -1,5 +1,6 @@
 package edu.kit.ipd.pp.joframes.shrike;
 
+import com.ibm.wala.shrikeBT.ExceptionHandler;
 import com.ibm.wala.shrikeBT.Instruction;
 import com.ibm.wala.shrikeBT.MethodData;
 import com.ibm.wala.shrikeBT.MethodEditor;
@@ -17,14 +18,18 @@ public class MethodWrapper {
 	 */
 	private MethodEditor editor;
 	/**
-	 * Stores a list of all added instructions that will be inserted at the end, before the return instruction.
-	 */
-	private ArrayList<Instruction> endInstructions;
-	/**
 	 * Stores all labels associated to the endInstructions. If a label equals -1, then no label was allocated and
 	 * emitted for the instruction.
 	 */
 	private ArrayList<Integer> endLabels;
+	/**
+	 * Stores a list of all added instructions that will be inserted at the end, before the return instruction.
+	 */
+	private ArrayList<Instruction> endInstructions;
+	/**
+	 * Stores a list of all ExceptionHandlers for the endInstructions.
+	 */
+	private ArrayList<ExceptionHandler[]> endExHandlers;
 	/**
 	 * Stores all instructions that will be inserted after the last return instruction.
 	 */
@@ -39,6 +44,7 @@ public class MethodWrapper {
 		editor = new MethodEditor(data);
 		endInstructions = new ArrayList<>();
 		endLabels = new ArrayList<>();
+		endExHandlers = new ArrayList<>();
 		afterReturnInstructions = new ArrayList<>();
 	}
 
@@ -80,12 +86,33 @@ public class MethodWrapper {
 	}
 
 	/**
+	 * Adds instructions that will be inserted at the end.
+	 *
+	 * @param instructions array of all instructions.
+	 */
+	public void addInstructionsAtEnd(final Instruction[] instructions) {
+		for (Instruction ins : instructions) {
+			addInstructionAtEnd(ins);
+		}
+	}
+
+	/**
 	 * Adds an instruction that will be inserted at the end.
 	 *
 	 * @param ins the instruction.
 	 */
 	public void addInstructionAtEnd(final Instruction ins) {
-		addInstructionAtEnd(-1, ins);
+		addInstructionAtEnd(-1, ins, null);
+	}
+
+	/**
+	 * Adds an instruction that will be inserted at the end.
+	 *
+	 * @param ins the instruction.
+	 * @param handlers exception handlers for the instruction.
+	 */
+	public void addInstructionAtEnd(final Instruction ins, final ExceptionHandler[] handlers) {
+		addInstructionAtEnd(-1, ins, handlers);
 	}
 
 	/**
@@ -95,8 +122,20 @@ public class MethodWrapper {
 	 * @param ins the instruction.
 	 */
 	public void addInstructionAtEnd(final int label, final Instruction ins) {
+		addInstructionAtEnd(label, ins, null);
+	}
+
+	/**
+	 * Adds an instruction that will be inserted at the end.
+	 *
+	 * @param label label associated to the instruction.
+	 * @param ins the instruction.
+	 * @param handlers exception handlers for the instruction. Can be null.
+	 */
+	public void addInstructionAtEnd(final int label, final Instruction ins, final ExceptionHandler[] handlers) {
 		endLabels.add(label);
 		endInstructions.add(ins);
+		endExHandlers.add(handlers);
 	}
 
 	/**
@@ -127,8 +166,13 @@ public class MethodWrapper {
 					if (label != -1) {
 						w.emitLabel(label);
 					}
+					ExceptionHandler[] handlers = endExHandlers.get(i);
 					Instruction instruction = endInstructions.get(i);
-					w.emit(instruction);
+					if (handlers == null) {
+						w.emit(instruction);
+					} else {
+						w.emit(instruction, handlers);
+					}
 				}
 				w.emit((Instruction) editor.getInstructions()[lastInstructionIndex]);
 				for (Instruction ins : afterReturnInstructions) {
@@ -140,6 +184,8 @@ public class MethodWrapper {
 		editor.endPass();
 		endLabels.clear();
 		endInstructions.clear();
+		endExHandlers.clear();
+		afterReturnInstructions.clear();
 	}
 
 	/**
