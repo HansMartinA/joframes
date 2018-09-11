@@ -11,6 +11,8 @@ import edu.kit.ipd.pp.joframes.api.exceptions.ParseException;
 import edu.kit.ipd.pp.joframes.ast.base.Framework;
 import java.io.File;
 import java.io.IOException;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -26,6 +28,22 @@ public class BytecodeInstrumenterTest {
 	 * Counter for methods.
 	 */
 	private int methodCounter;
+
+	/**
+	 * Sets the test environment up.
+	 */
+	@BeforeClass
+	public static void setUpEnvironment() {
+		System.setProperty(APIConstants.TEST_SYSTEM_PROPERTY, "true");
+	}
+
+	/**
+	 * Clears the test environment.
+	 */
+	@AfterClass
+	public static void tearDownEnvironment() {
+		System.clearProperty(APIConstants.TEST_SYSTEM_PROPERTY);
+	}
 
 	/**
 	 * Tests the bytecode instrumentation with the test framework and application.

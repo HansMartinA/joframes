@@ -192,13 +192,17 @@ class BytecodeInstrumenter {
 			}
 			// For test purposes, the loading of the external api classes is done by assuming that
 			// the project is used within eclipse.
-			String path = new File("").getAbsoluteFile().getParentFile().getAbsolutePath()
-					+ "/api-external/target/classes/";
-			offInstr.addInputDirectory(new File(path), new File(path));
-			// Actual class loading for the stand-alone application.
-			// offInstr.addInputElement(new File("."), OWN_JAR_FILE + IC_NAME);
-			// offInstr.addInputElement(new File("."), OWN_JAR_FILE + AC_NAME);
-			// offInstr.addInputElement(new File("."), OWN_JAR_FILE + AC_WW_NAME);
+			if (Boolean.getBoolean(APIConstants.TEST_SYSTEM_PROPERTY)) {
+				String path = new File("").getAbsoluteFile().getParentFile().getAbsolutePath()
+						+ File.separator + "api-external" + File.separator + "target" + File.separator + "classes"
+						+ File.separator;
+				offInstr.addInputDirectory(new File(path), new File(path));
+			} else {
+				// Actual class loading for the stand-alone application.
+				offInstr.addInputElement(new File("."), OWN_JAR_FILE + IC_NAME);
+				offInstr.addInputElement(new File("."), OWN_JAR_FILE + AC_NAME);
+				offInstr.addInputElement(new File("."), OWN_JAR_FILE + AC_WW_NAME);
+			}
 			offInstr.beginTraversal();
 			for (int i = 0; i < offInstr.getNumInputClasses(); i++) {
 				ClassInstrumenter clInstr = offInstr.nextClass();
