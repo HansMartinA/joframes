@@ -89,7 +89,7 @@ class FrameworkWrapper {
 	 */
 	void countOneInstance(final IClass someClass) {
 		for (IClass cl : frameworkClassesToInstancesCount.keySet()) {
-			if (hierarchy.isSubclassOf(someClass, cl)) {
+			if (hierarchy.isSubclassOf(someClass, cl) || hierarchy.implementsInterface(someClass, cl)) {
 				frameworkClassesToInstancesCount.put(cl, frameworkClassesToInstancesCount.get(cl) + 1);
 			}
 		}
