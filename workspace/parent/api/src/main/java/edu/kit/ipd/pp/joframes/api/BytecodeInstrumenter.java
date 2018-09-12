@@ -138,6 +138,10 @@ class BytecodeInstrumenter {
 	 */
 	private static final String DEFAULT_SIGNATURE = "()" + Constants.TYPE_void;
 	/**
+	 * Stores the framework jar files that will be included in the output jar.
+	 */
+	private String[] frameworkJars;
+	/**
 	 * Stores the wrapper for the framework.
 	 */
 	private FrameworkWrapper wrapper;
@@ -153,6 +157,15 @@ class BytecodeInstrumenter {
 	 */
 	String getOutput() {
 		return actualOutput;
+	}
+
+	/**
+	 * Sets the paths to the jar files containing the framework classes. They will be included in the output jar file.
+	 *
+	 * @param fwJars the paths. Can be null.
+	 */
+	public void setFrameworkJars(final String[] fwJars) {
+		frameworkJars = fwJars;
 	}
 
 	/**
@@ -185,6 +198,9 @@ class BytecodeInstrumenter {
 			InstrumenterWrapper instrumenter = new InstrumenterWrapper();
 			for (String appJar : applicationJars) {
 				instrumenter.addInputJar(appJar);
+			}
+			for (String fwJar : frameworkJars) {
+				instrumenter.addInputJar(fwJar);
 			}
 			// For test purposes, the loading of the external api classes is done by assuming that
 			// the project is used within eclipse.

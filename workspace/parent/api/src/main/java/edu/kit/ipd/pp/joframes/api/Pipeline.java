@@ -91,6 +91,7 @@ public class Pipeline {
 			wrapper = analyzer.analyzeClassHierarchy(framework, frameworkJars, applicationJars, mainClassName);
 		}
 		BytecodeInstrumenter instrumenter = new BytecodeInstrumenter();
+		instrumenter.setFrameworkJars(frameworkJars);
 		if (output == null) {
 			instrumenter.instrumentBytecode(wrapper, applicationJars);
 		} else {
