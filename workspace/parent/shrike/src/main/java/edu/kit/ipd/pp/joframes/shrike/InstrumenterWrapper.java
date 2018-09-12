@@ -7,7 +7,10 @@ import com.ibm.wala.shrikeCT.InvalidClassFileException;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.HashSet;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 
 /**
  * Wrapper for the OfflineInstrumenter: this is the entry point for the abstraction API and collects all classes.
@@ -67,7 +70,15 @@ public class InstrumenterWrapper {
 		if (!jarFile.endsWith(".jar") || !jar.exists()) {
 			throw new IllegalArgumentException("The given jar file (" + jarFile + ") is not valid.");
 		}
-		offInstr.addInputJar(jar);
+		JarFile jo = new JarFile(jarFile);
+		Enumeration<JarEntry> entries = jo.entries();
+		while (entries.hasMoreElements()) {
+			JarEntry entry = entries.nextElement();
+			if (entry.getName().endsWith(".class")) {
+				offInstr.addInputJarEntry(jar, entry.getName());
+			}
+		}
+		jo.close();
 	}
 
 	/**
