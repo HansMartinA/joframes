@@ -7,6 +7,7 @@ import com.ibm.wala.shrikeCT.InvalidClassFileException;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 
 /**
  * Wrapper for the OfflineInstrumenter: this is the entry point for the abstraction API and collects all classes.
@@ -163,8 +164,9 @@ public class InstrumenterWrapper {
 		String tempEnd = "-temp.jar";
 		try {
 			offInstr.setOutputJar(new File(output + tempEnd));
+			HashSet<String> addedMethods = new HashSet<>();
 			for (ClassInstrumenterWrapper wrapper : clInstrs) {
-				wrapper.outputClass(offInstr);
+				wrapper.outputClass(offInstr, addedMethods);
 			}
 			offInstr.writeUnmodifiedClasses();
 			offInstr.close();
@@ -175,6 +177,10 @@ public class InstrumenterWrapper {
 			createClassInstrumenterWrapper();
 			visitClasses(classWrapper -> {
 				classWrapper.visitMethods(methodWrapper -> {
+					if (!addedMethods.contains(methodWrapper.getClassType() + methodWrapper.getMethodName()
+						+ methodWrapper.getMethodSignature())) {
+						return;
+					}
 					methodWrapper.addInstructionAtLast(ConstantInstruction.make(0));
 					methodWrapper.addInstructionAtLast(InstructionFactory.makePop());
 					methodWrapper.instrumentMethod();
@@ -182,7 +188,7 @@ public class InstrumenterWrapper {
 			});
 			offInstr.setOutputJar(new File(output));
 			for (ClassInstrumenterWrapper wrapper : clInstrs) {
-				wrapper.outputClass(offInstr);
+				wrapper.outputClass(offInstr, addedMethods);
 			}
 			offInstr.writeUnmodifiedClasses();
 			offInstr.close();

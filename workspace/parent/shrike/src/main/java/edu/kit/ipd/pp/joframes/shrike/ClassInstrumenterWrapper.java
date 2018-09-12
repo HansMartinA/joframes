@@ -7,6 +7,7 @@ import com.ibm.wala.shrikeCT.ClassWriter;
 import com.ibm.wala.shrikeCT.InvalidClassFileException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 
 /**
  * Wraps a ClassInstrumenter and, therefore, a class.
@@ -102,12 +103,15 @@ public class ClassInstrumenterWrapper {
 	 * Outputs the class.
 	 *
 	 * @param offInstr general instrumenter that writes the class out.
+	 * @param addedMethods a set of and for all newly created methods.
 	 * @throws IOException if the class cannot be written.
 	 * @throws InvalidClassFileException if the class is invalid.
 	 */
-	void outputClass(final OfflineInstrumenter offInstr) throws IOException, InvalidClassFileException {
+	void outputClass(final OfflineInstrumenter offInstr, final HashSet<String> addedMethods)
+			throws IOException, InvalidClassFileException {
 		ClassWriter writer = clInstr.emitClass();
 		for (MethodWrapper m : additionalMethods) {
+			addedMethods.add(m.getClassType() + m.getMethodName() + m.getMethodSignature());
 			CTUtils.compileAndAddMethodToClassWriter(m.getMethodData(), writer, null);
 		}
 		offInstr.outputModifiedClass(clInstr, writer);
