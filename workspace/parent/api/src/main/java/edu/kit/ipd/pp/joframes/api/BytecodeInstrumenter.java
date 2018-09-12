@@ -313,14 +313,13 @@ class BytecodeInstrumenter {
 	private void instrumentForGettingInstanceCollection(final MethodWrapper editor, final IClass cl) {
 		int exLabel = editor.allocateLabel();
 		int afterExLabel = editor.allocateLabel();
-		ExceptionHandler h = new ExceptionHandler(exLabel, "Ljava/lang/ClassNotFoundException;");
+		ExceptionHandler[] h = new ExceptionHandler[]
+				{new ExceptionHandler(exLabel, "Ljava/lang/ClassNotFoundException;")};
 		editor.addInstructionAtEnd(ConstantInstruction.makeString(Util.makeClass(cl.getName().toString() + ";")));
 		editor.addInstructionAtEnd(InvokeInstruction.make("(" + Constants.TYPE_String + ")" + Constants.TYPE_Class,
-				Constants.TYPE_Class, CLASS_FOR_NAME_METHOD, IInvokeInstruction.Dispatch.STATIC),
-				new ExceptionHandler[] {h});
+				Constants.TYPE_Class, CLASS_FOR_NAME_METHOD, IInvokeInstruction.Dispatch.STATIC), h);
 		editor.addInstructionAtEnd(InvokeInstruction.make("(" + Constants.TYPE_Class + ")" + LIST_BYTECODE_NAME,
-				IC_BYTECODE_NAME, "getInstances",
-				IInvokeInstruction.Dispatch.STATIC));
+				IC_BYTECODE_NAME, "getInstances", IInvokeInstruction.Dispatch.STATIC));
 		editor.addInstructionAtEnd(InstructionFactory.makeGoto(afterExLabel));
 		editor.addInstructionAtEnd(exLabel, ReturnInstruction.make(Constants.TYPE_void));
 		editor.addLabelAtEnd(afterExLabel);
@@ -348,33 +347,27 @@ class BytecodeInstrumenter {
 			localInstanceIndex = editor.allocateLocalVariable(declaration.getClassName() + ";");
 			beginLoopLabel = editor.allocateLabel();
 			afterLoopLabel = editor.allocateLabel();
-			int iteratorIndexCopy = iteratorIndex;
-			int localInstanceIndexCopy = localInstanceIndex;
-			int beginLoopLabelCopy = beginLoopLabel;
-			int afterLoopLabelCopy = afterLoopLabel;
 			instrumentForGettingInstanceCollection(editor, declaration.getIClass());
 			editor.addInstructionAtEnd(InvokeInstruction.make("()" + ITERATOR_BYTECODE_NAME, LIST_BYTECODE_NAME,
 					"iterator", IInvokeInstruction.Dispatch.INTERFACE));
-			editor.addInstructionAtEnd(StoreInstruction.make(ITERATOR_BYTECODE_NAME, iteratorIndexCopy));
-			editor.addInstructionAtEnd(beginLoopLabelCopy,
-					LoadInstruction.make(ITERATOR_BYTECODE_NAME, iteratorIndexCopy));
+			editor.addInstructionAtEnd(StoreInstruction.make(ITERATOR_BYTECODE_NAME, iteratorIndex));
+			editor.addInstructionAtEnd(beginLoopLabel,
+					LoadInstruction.make(ITERATOR_BYTECODE_NAME, iteratorIndex));
 			editor.addInstructionAtEnd(InvokeInstruction.make("()" + Constants.TYPE_boolean, ITERATOR_BYTECODE_NAME,
 					"hasNext", IInvokeInstruction.Dispatch.INTERFACE));
 			editor.addInstructionAtEnd(ConstantInstruction.make(0));
 			editor.addInstructionAtEnd(ConditionalBranchInstruction.make(Constants.TYPE_int,
-					IConditionalBranchInstruction.Operator.EQ, afterLoopLabelCopy));
-			editor.addInstructionAtEnd(LoadInstruction.make(ITERATOR_BYTECODE_NAME, iteratorIndexCopy));
+					IConditionalBranchInstruction.Operator.EQ, afterLoopLabel));
+			editor.addInstructionAtEnd(LoadInstruction.make(ITERATOR_BYTECODE_NAME, iteratorIndex));
 			editor.addInstructionAtEnd(InvokeInstruction.make("()" + Constants.TYPE_Object, ITERATOR_BYTECODE_NAME,
 					"next", IInvokeInstruction.Dispatch.INTERFACE));
 			editor.addInstructionAtEnd(CheckCastInstruction.make(declaration.getClassName() + ";"));
-			editor.addInstructionAtEnd(StoreInstruction.make(declaration.getClassName() + ";", localInstanceIndexCopy));
+			editor.addInstructionAtEnd(StoreInstruction.make(declaration.getClassName() + ";", localInstanceIndex));
 		}
 		instrumentExplicitDeclarationContent(editor, declaration, localInstanceIndex, actualInstanceType);
 		if (useForLoop) {
-			int beginLoopLabelCopy = beginLoopLabel;
-			int afterLoopLabelCopy = afterLoopLabel;
-			editor.addInstructionAtEnd(InstructionFactory.makeGoto(beginLoopLabelCopy));
-			editor.addLabelAtEnd(afterLoopLabelCopy);
+			editor.addInstructionAtEnd(InstructionFactory.makeGoto(beginLoopLabel));
+			editor.addLabelAtEnd(afterLoopLabel);
 		}
 		for (IClass appClass : declaration.getApplicationClasses()) {
 			wrapper.countOneInstance(appClass);
@@ -483,7 +476,7 @@ class BytecodeInstrumenter {
 	 * @param editor the editor for the end phase method.
 	 */
 	private void instrumentEndPhase(final MethodWrapper editor) {
-		instrumentExplicitDeclaration(editor, wrapper.getFramework().getEndPhase().getEnd(), 0, null);
+		instrumentExplicitDeclaration(editor, wrapper.getFramework().getEndPhase().getEnd(), -1, null);
 		editor.instrumentMethod();
 	}
 
@@ -614,9 +607,8 @@ class BytecodeInstrumenter {
 				caseCounter += countBlocks((Block) r);
 			}
 		}
-		int caseCounterCopy = caseCounter;
 		int counterIndex = editor.allocateLocalVariable(Constants.TYPE_double);
-		editor.addInstructionAtEnd(ConstantInstruction.make((double) caseCounterCopy));
+		editor.addInstructionAtEnd(ConstantInstruction.make((double) caseCounter));
 		editor.addInstructionAtEnd(StoreInstruction.make(Constants.TYPE_double, counterIndex));
 		ifInstr.instrumentBeginning(editor, counterIndex);
 		for (Rule r : working.getRules()) {
@@ -779,12 +771,11 @@ class BytecodeInstrumenter {
 				allocatedCaseLabels.add(editor.allocateLabel());
 			}
 			allocatedCaseLabels.add(editor.allocateLabel());
-			int caseCounterCopy = caseCounter;
-			editor.addInstructionAtEnd(allocatedCaseLabels.get(caseCounterCopy),
+			editor.addInstructionAtEnd(allocatedCaseLabels.get(caseCounter),
 					LoadInstruction.make(Constants.TYPE_int, randomIndex));
-			editor.addInstructionAtEnd(ConstantInstruction.make(caseCounterCopy));
+			editor.addInstructionAtEnd(ConstantInstruction.make(caseCounter));
 			editor.addInstructionAtEnd(ConditionalBranchInstruction.make(Constants.TYPE_int,
-					IConditionalBranchInstruction.Operator.NE, allocatedCaseLabels.get(caseCounterCopy + 1)));
+					IConditionalBranchInstruction.Operator.NE, allocatedCaseLabels.get(caseCounter + 1)));
 			caseCounter++;
 		}
 
@@ -794,7 +785,9 @@ class BytecodeInstrumenter {
 		 * @param editor the editor for bytecode instrumentation.
 		 */
 		private void instrumentEnd(final MethodWrapper editor) {
-			editor.addLabelAtEnd(allocatedCaseLabels.get(caseCounter));
+			if (caseCounter != 0) {
+				editor.addLabelAtEnd(allocatedCaseLabels.get(caseCounter));
+			}
 		}
 	}
 
