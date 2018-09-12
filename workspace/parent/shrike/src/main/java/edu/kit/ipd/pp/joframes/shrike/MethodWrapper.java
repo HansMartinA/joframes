@@ -46,6 +46,7 @@ public class MethodWrapper {
 		endLabels = new ArrayList<>();
 		endExHandlers = new ArrayList<>();
 		afterReturnInstructions = new ArrayList<>();
+		editor.beginPass();
 	}
 
 	/**
@@ -171,7 +172,6 @@ public class MethodWrapper {
 	public void instrumentMethod() {
 		int lastInstructionIndex = editor.getInstructions().length - 1;
 		Instruction lastInstruction = (Instruction) editor.getInstructions()[lastInstructionIndex];
-		editor.beginPass();
 		editor.replaceWith(lastInstructionIndex, new MethodEditor.Patch() {
 			@Override
 			public void emitTo(final MethodEditor.Output w) {
@@ -208,6 +208,7 @@ public class MethodWrapper {
 		endInstructions.clear();
 		endExHandlers.clear();
 		afterReturnInstructions.clear();
+		editor.beginPass();
 	}
 
 	/**
@@ -218,10 +219,10 @@ public class MethodWrapper {
 	 * @param visitor visitor for the instructions.
 	 */
 	public void visitInstructions(final MethodEditor.Visitor visitor) {
-		editor.beginPass();
 		editor.visitInstructions(visitor);
 		editor.applyPatches();
 		editor.endPass();
+		editor.beginPass();
 	}
 
 	/**

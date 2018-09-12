@@ -172,10 +172,12 @@ public class InstrumenterWrapper {
 			// instrumented and written once more.
 			offInstr = new OfflineInstrumenter();
 			offInstr.addInputJar(new File(output + tempEnd));
+			createClassInstrumenterWrapper();
 			visitClasses(classWrapper -> {
 				classWrapper.visitMethods(methodWrapper -> {
 					methodWrapper.addInstructionAtLast(ConstantInstruction.make(0));
 					methodWrapper.addInstructionAtLast(InstructionFactory.makePop());
+					methodWrapper.instrumentMethod();
 				});
 			});
 			offInstr.setOutputJar(new File(output));
