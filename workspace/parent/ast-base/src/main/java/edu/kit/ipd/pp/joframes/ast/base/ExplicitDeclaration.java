@@ -142,4 +142,22 @@ public class ExplicitDeclaration implements AstBaseClass {
 	public AstBaseClass getCallOrDeclaration(final int number) {
 		return calls.get(number);
 	}
+
+	/**
+	 * Visits all contained classes.
+	 *
+	 * @param visitor the visitor.
+	 */
+	public void visitContent(final ExplicitDeclarationVisitor visitor) {
+		for (int i = 0; i < getNumberOfCallsAndDeclarations(); i++) {
+			AstBaseClass nextElement = getCallOrDeclaration(i);
+			if (nextElement.getClass() == ExplicitDeclaration.class) {
+				visitor.visitExplicitDeclaration((ExplicitDeclaration) nextElement);
+			} else if (nextElement.getClass() == Method.class) {
+				visitor.visitMethod((Method) nextElement);
+			} else if (nextElement.getClass() == StaticMethod.class) {
+				visitor.visitStaticMethod((StaticMethod) nextElement);
+			}
+		}
+	}
 }
