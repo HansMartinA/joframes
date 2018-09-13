@@ -285,15 +285,12 @@ class BytecodeInstrumenter {
 	 * @return true if the class is a subclass of a framework class. false otherwise.
 	 */
 	private boolean isSubclassOfFrameworkClasses(final String className) {
-		IClass subclass = wrapper.getClassHierarchy().lookupClass(TypeReference.findOrCreate(
-				wrapper.getClassHierarchy().getScope().getApplicationLoader(), className));
+		IClass subclass = wrapper.getIClass(wrapper.getClassHierarchy().getScope().getApplicationLoader(), className);
 		if (subclass == null) {
 			return false;
 		}
-
 		for (IClass cl : wrapper.getFrameworkClasses()) {
-			if (wrapper.getClassHierarchy().isSubclassOf(subclass, cl)
-					|| wrapper.getClassHierarchy().implementsInterface(subclass, cl)) {
+			if (wrapper.isDirectSubtype(cl, subclass)) {
 				wrapper.countOneInstance(subclass);
 				return true;
 			}
@@ -324,17 +321,12 @@ class BytecodeInstrumenter {
 	 * @return true if both classes are equal or direct subclasses. false otherwise.
 	 */
 	private boolean areDirectSubclasses(final String classOne, final String classTwo) {
-		IClass one = wrapper.getClassHierarchy().lookupClass(TypeReference
-				.findOrCreate(wrapper.getClassHierarchy().getScope().getApplicationLoader(), classOne));
-		IClass two = wrapper.getClassHierarchy().lookupClass(TypeReference
-				.findOrCreate(wrapper.getClassHierarchy().getScope().getApplicationLoader(), classTwo));
+		IClass one = wrapper.getIClass(wrapper.getClassHierarchy().getScope().getApplicationLoader(), classOne);
+		IClass two = wrapper.getIClass(wrapper.getClassHierarchy().getScope().getApplicationLoader(), classTwo);
 		if (one == null || two == null) {
 			return false;
 		}
-		return one == two || wrapper.getClassHierarchy().isSubclassOf(one, two)
-				|| wrapper.getClassHierarchy().isSubclassOf(two, one)
-				|| wrapper.getClassHierarchy().implementsInterface(one, two)
-				|| wrapper.getClassHierarchy().implementsInterface(one, two);
+		return one == two || wrapper.isDirectSubtype(one, two) || wrapper.isDirectSubtype(two, one);
 	}
 
 	/**
