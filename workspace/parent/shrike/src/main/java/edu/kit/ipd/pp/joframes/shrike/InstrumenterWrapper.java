@@ -44,6 +44,8 @@ public class InstrumenterWrapper {
 	 *
 	 * @param directory the directory path.
 	 * @throws IOException if an IOException occurs.
+	 * @throws IllegalStateException when the method is called after all classes have been read.
+	 * @throws IllegalArgumentException when the given directory is not valid.
 	 */
 	public void addInputDirectory(final String directory) throws IOException {
 		if (clInstrs != null) {
@@ -61,6 +63,8 @@ public class InstrumenterWrapper {
 	 *
 	 * @param jarFile path to the jar file.
 	 * @throws IOException if an IOException occurs.
+	 * @throws IllegalStateException when the method is called after all classes have been read.
+	 * @throws IllegalArgumentException when the given jar file is not valid.
 	 */
 	public void addInputJar(final String jarFile) throws IOException {
 		if (clInstrs != null) {
@@ -86,12 +90,14 @@ public class InstrumenterWrapper {
 	 *
 	 * @param jarEntry the jar entry in the form "path-to-jar-file".jar#"path-to-entry".
 	 * @throws IOException if an IOException occurs.
+	 * @throws IllegalStateException when the method is called after all classes have been read.
+	 * @throws IllegalArgumentException when the given jar entry is not valid.
 	 */
 	public void addInputJarEntry(final String jarEntry) throws IOException {
 		if (clInstrs != null) {
 			throw new IllegalStateException("A jar entry can only be added directly after the obejct construction.");
 		}
-		if (!jarEntry.contains(".jar#")) {
+		if (!jarEntry.contains(".jar#") && !jarEntry.startsWith(".jar")) {
 			throw new IllegalArgumentException("The given jar entry (" + jarEntry + ") is not valid.");
 		}
 		offInstr.addInputElement(new File(""), jarEntry);

@@ -1,5 +1,6 @@
 package edu.kit.ipd.pp.joframes.api;
 
+import edu.kit.ipd.pp.joframes.api.exceptions.ClassHierarchyAnalysisException;
 import edu.kit.ipd.pp.joframes.api.exceptions.ClassHierarchyCreationException;
 import edu.kit.ipd.pp.joframes.api.exceptions.InstrumenterException;
 import edu.kit.ipd.pp.joframes.api.exceptions.ParseException;
@@ -78,9 +79,11 @@ public class Pipeline {
 	 *
 	 * @throws ParseException when parsing the framework specification fails.
 	 * @throws ClassHierarchyCreationException when the creation of the class hierarchy fails.
+	 * @throws ClassHierarchyAnalysisException if the class hierarchy analysis fails.
 	 * @throws InstrumenterException when the instrumentation of the bytecode fails.
 	 */
-	public void process() throws ParseException, ClassHierarchyCreationException, InstrumenterException {
+	public void process() throws ParseException, ClassHierarchyCreationException, ClassHierarchyAnalysisException,
+			InstrumenterException {
 		FrameworkSpecificationParser parser = new FrameworkSpecificationParser();
 		Framework framework = parser.parse(frameworkSpecification);
 		ClassHierarchyAnalyzer analyzer = new ClassHierarchyAnalyzer();

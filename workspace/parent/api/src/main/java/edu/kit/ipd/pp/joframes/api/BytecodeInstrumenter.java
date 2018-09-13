@@ -196,11 +196,17 @@ class BytecodeInstrumenter {
 		this.wrapper = frameworkWrapper;
 		try {
 			InstrumenterWrapper instrumenter = new InstrumenterWrapper();
-			for (String appJar : applicationJars) {
-				instrumenter.addInputJar(appJar);
-			}
-			for (String fwJar : frameworkJars) {
-				instrumenter.addInputJar(fwJar);
+			try {
+				for (String appJar : applicationJars) {
+					instrumenter.addInputJar(appJar);
+				}
+				if (frameworkJars != null) {
+					for (String fwJar : frameworkJars) {
+						instrumenter.addInputJar(fwJar);
+					}
+				}
+			} catch (IllegalArgumentException e) {
+				throw new InstrumenterException("A jar file is not valid.", e);
 			}
 			// For test purposes, the loading of the external api classes is done by assuming that
 			// the project is used within eclipse.

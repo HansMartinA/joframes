@@ -10,6 +10,15 @@ public class InstrumenterException extends Exception {
 	 * Creates a new instance.
 	 *
 	 * @param message message of the exception.
+	 */
+	public InstrumenterException(final String message) {
+		super(message);
+	}
+
+	/**
+	 * Creates a new instance.
+	 *
+	 * @param message message of the exception.
 	 * @param cause cause of the exception.
 	 */
 	public InstrumenterException(final String message, final Throwable cause) {

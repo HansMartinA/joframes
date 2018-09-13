@@ -2,6 +2,7 @@ package edu.kit.ipd.pp.joframes.api;
 
 import com.ibm.wala.classLoader.IClass;
 import com.ibm.wala.classLoader.IMethod;
+import edu.kit.ipd.pp.joframes.api.exceptions.ClassHierarchyAnalysisException;
 import edu.kit.ipd.pp.joframes.api.exceptions.ClassHierarchyCreationException;
 import edu.kit.ipd.pp.joframes.api.exceptions.ParseException;
 import edu.kit.ipd.pp.joframes.ast.acha.MethodCollector;
@@ -43,9 +44,10 @@ public class ClassHierarchyAnalysisTest {
 	 *
 	 * @throws ParseException when parsing of the framework specification fails.
 	 * @throws ClassHierarchyCreationException when creation of the class hierarchy fails.
+	 * @throws ClassHierarchyAnalysisException if the class hierarchy analysis fails.
 	 */
 	@Test
-	public void testTestSpec() throws ParseException, ClassHierarchyCreationException {
+	public void testTestSpec() throws ParseException, ClassHierarchyCreationException, ClassHierarchyAnalysisException {
 		analyzeClassHierarchy(TestConstants.TEST_SPEC_PATH, new String[]
 				{TestConstants.TEST_FRAMEWORK_JAR_PATH}, new String[]
 						{TestConstants.TEST_APPLICATION_JAR_PATH});
@@ -188,9 +190,11 @@ public class ClassHierarchyAnalysisTest {
 	 *
 	 * @throws ParseException when parsing of the test framework specification fails.
 	 * @throws ClassHierarchyCreationException when the creation of the class hierarchy fails.
+	 * @throws ClassHierarchyAnalysisException if the class hierarchy analysis fails.
 	 */
 	@Test(expected = ClassHierarchyCreationException.class)
-	public void testTestSpecWithNonExistingFrameworkJars() throws ParseException, ClassHierarchyCreationException {
+	public void testTestSpecWithNonExistingFrameworkJars() throws ParseException, ClassHierarchyCreationException,
+		ClassHierarchyAnalysisException {
 		analyzeClassHierarchy(TestConstants.TEST_SPEC_PATH, new String[] {}, new String[]
 				{TestConstants.TEST_APPLICATION_JAR_PATH});
 	}
@@ -200,9 +204,11 @@ public class ClassHierarchyAnalysisTest {
 	 *
 	 * @throws ParseException when parsing of the test framework specification fails.
 	 * @throws ClassHierarchyCreationException when the creation of the class hierarchy fails.
+	 * @throws ClassHierarchyAnalysisException if the class hierarchy analysis fails.
 	 */
 	@Test(expected = ClassHierarchyCreationException.class)
-	public void testTestSpecWithNonExistingApplicationJars() throws ParseException, ClassHierarchyCreationException {
+	public void testTestSpecWithNonExistingApplicationJars() throws ParseException, ClassHierarchyCreationException,
+		ClassHierarchyAnalysisException {
 		analyzeClassHierarchy(TestConstants.TEST_SPEC_PATH,
 				new String[] {TestConstants.TEST_FRAMEWORK_JAR_PATH}, new String[] {TestConstants.NON_EXISTING_JAR});
 	}
@@ -215,9 +221,11 @@ public class ClassHierarchyAnalysisTest {
 	 * @param applicationJars array with paths to the jar files containing the application classes.
 	 * @throws ParseException when parsing of the framework specification fails.
 	 * @throws ClassHierarchyCreationException when creation of the class hierarchy fails.
+	 * @throws ClassHierarchyAnalysisException if the class hierarchy analysis fails.
 	 */
 	private void analyzeClassHierarchy(final String frameworkSpecification, final String[] frameworkJars,
-			final String[] applicationJars) throws ParseException, ClassHierarchyCreationException {
+			final String[] applicationJars) throws ParseException, ClassHierarchyCreationException,
+			ClassHierarchyAnalysisException {
 		FrameworkSpecificationParser parser = new FrameworkSpecificationParser();
 		framework = parser.parse(frameworkSpecification);
 		ClassHierarchyAnalyzer analyzer = new ClassHierarchyAnalyzer();

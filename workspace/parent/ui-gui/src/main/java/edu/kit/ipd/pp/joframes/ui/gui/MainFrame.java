@@ -1,6 +1,7 @@
 package edu.kit.ipd.pp.joframes.ui.gui;
 
 import edu.kit.ipd.pp.joframes.api.Pipeline;
+import edu.kit.ipd.pp.joframes.api.exceptions.ClassHierarchyAnalysisException;
 import edu.kit.ipd.pp.joframes.api.exceptions.ClassHierarchyCreationException;
 import edu.kit.ipd.pp.joframes.api.exceptions.InstrumenterException;
 import edu.kit.ipd.pp.joframes.api.exceptions.ParseException;
@@ -305,7 +306,8 @@ public class MainFrame extends JFrame {
 				p.setOutput(output);
 				try {
 					p.process();
-				} catch (ParseException | ClassHierarchyCreationException | InstrumenterException e) {
+				} catch (ParseException | ClassHierarchyCreationException | ClassHierarchyAnalysisException
+						| InstrumenterException e) {
 					SwingUtilities.invokeLater(() -> JOptionPane.showConfirmDialog(this, "An exception occurred: "
 							+ e.getMessage() + ". Cause: " + e.getCause().getMessage(), "Occurred exception",
 							JOptionPane.DEFAULT_OPTION, JOptionPane.ERROR_MESSAGE));

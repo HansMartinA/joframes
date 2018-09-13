@@ -5,6 +5,7 @@ import com.ibm.wala.shrikeBT.analysis.Verifier;
 import com.ibm.wala.shrikeBT.shrikeCT.ClassInstrumenter;
 import com.ibm.wala.shrikeBT.shrikeCT.OfflineInstrumenter;
 import com.ibm.wala.shrikeCT.InvalidClassFileException;
+import edu.kit.ipd.pp.joframes.api.exceptions.ClassHierarchyAnalysisException;
 import edu.kit.ipd.pp.joframes.api.exceptions.ClassHierarchyCreationException;
 import edu.kit.ipd.pp.joframes.api.exceptions.InstrumenterException;
 import edu.kit.ipd.pp.joframes.api.exceptions.ParseException;
@@ -50,11 +51,12 @@ public class BytecodeInstrumenterTest {
 	 *
 	 * @throws ParseException when parsing the framework specification fails.
 	 * @throws ClassHierarchyCreationException when the creation of the class hierarchy fails.
+	 * @throws ClassHierarchyAnalysisException if the class hierarchy analysis fails.
 	 * @throws InstrumenterException when instrumentation of the bytecode fails.
 	 */
 	@Test
 	public void testBytecodeInstrumentationOfTestSpec() throws ParseException, ClassHierarchyCreationException,
-		InstrumenterException {
+		ClassHierarchyAnalysisException, InstrumenterException {
 		instrumentBytecode(TestConstants.TEST_SPEC_PATH, new String[] {TestConstants.TEST_FRAMEWORK_JAR_PATH},
 				new String[] {TestConstants.TEST_APPLICATION_JAR_PATH},
 				new String[] {TestConstants.TEST_APPLICATION_JAR_PATH}, TestConstants.OUTPUT_JAR);
@@ -135,11 +137,13 @@ public class BytecodeInstrumenterTest {
 	 * @param output path of the output jar file for the BytecodeInstrumenter.
 	 * @throws ParseException when parsing of the framework specification fails.
 	 * @throws ClassHierarchyCreationException when the creation of the class hierarchy fails.
+	 * @throws ClassHierarchyAnalysisException if the class hierarchy analysis fails.
 	 * @throws InstrumenterException when instrumenting the bytecode fails.
 	 */
 	private void instrumentBytecode(final String frameworkSpecification, final String[] frameworkJars,
 			final String[] applicationJars, final String[] applicationJarsForInstrumentation,
-			final String output) throws ParseException, ClassHierarchyCreationException, InstrumenterException {
+			final String output) throws ParseException, ClassHierarchyCreationException,
+			ClassHierarchyAnalysisException, InstrumenterException {
 		FrameworkSpecificationParser parser = new FrameworkSpecificationParser();
 		Framework framework = parser.parse(frameworkSpecification);
 		ClassHierarchyAnalyzer analyzer = new ClassHierarchyAnalyzer();
@@ -154,11 +158,12 @@ public class BytecodeInstrumenterTest {
 	 *
 	 * @throws ParseException when parsing of the framework specification fails.
 	 * @throws ClassHierarchyCreationException when the creation of the class hierarchy fails.
+	 * @throws ClassHierarchyAnalysisException if the class hierarchy analysis fails.
 	 * @throws InstrumenterException when instrumentation of the bytecode fails.
 	 */
 	@Test(expected = InstrumenterException.class)
 	public void testNonExistentApplicationJar() throws ParseException, ClassHierarchyCreationException,
-		InstrumenterException {
+		ClassHierarchyAnalysisException, InstrumenterException {
 		instrumentBytecode(TestConstants.TEST_SPEC_PATH, new String[] {TestConstants.TEST_FRAMEWORK_JAR_PATH},
 				new String[] {TestConstants.TEST_APPLICATION_JAR_PATH}, new String[] {TestConstants.NON_EXISTING_JAR},
 				"A.jar");
@@ -169,10 +174,12 @@ public class BytecodeInstrumenterTest {
 	 *
 	 * @throws ParseException when parsing the framework specification fails.
 	 * @throws ClassHierarchyCreationException when the creation of the class hierarchy fails.
+	 * @throws ClassHierarchyAnalysisException if the class hierarchy analysis fails.
 	 * @throws InstrumenterException when instrumentation of the bytecode fails.
 	 */
 	@Test(expected = InstrumenterException.class)
-	public void testIllegalOutputJar() throws ParseException, ClassHierarchyCreationException, InstrumenterException {
+	public void testIllegalOutputJar() throws ParseException, ClassHierarchyCreationException,
+			ClassHierarchyAnalysisException, InstrumenterException {
 		instrumentBytecode(TestConstants.TEST_SPEC_PATH, new String[] {TestConstants.TEST_FRAMEWORK_JAR_PATH},
 				new String[] {TestConstants.TEST_APPLICATION_JAR_PATH},
 				new String[] {TestConstants.TEST_APPLICATION_JAR_PATH}, "");

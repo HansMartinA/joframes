@@ -10,6 +10,7 @@ import com.ibm.wala.types.ClassLoaderReference;
 import com.ibm.wala.types.Selector;
 import com.ibm.wala.types.TypeReference;
 import com.ibm.wala.util.config.AnalysisScopeReader;
+import edu.kit.ipd.pp.joframes.api.exceptions.ClassHierarchyAnalysisException;
 import edu.kit.ipd.pp.joframes.api.exceptions.ClassHierarchyCreationException;
 import edu.kit.ipd.pp.joframes.ast.acha.MethodCollector;
 import edu.kit.ipd.pp.joframes.ast.ap.Block;
@@ -71,9 +72,10 @@ class ClassHierarchyAnalyzer {
 	 * @param applicationJars list of all jar files containing the application classes.
 	 * @return the modified framework with additional information in a FrameworkWrapper.
 	 * @throws ClassHierarchyCreationException when the creation of the class hierarchy fails.
+	 * @throws ClassHierarchyAnalysisException if the class hierarchy analysis fails.
 	 */
 	FrameworkWrapper analyzeClassHierarchy(final Framework framework, final String[] frameworkJars,
-			final String[] applicationJars) throws ClassHierarchyCreationException {
+			final String[] applicationJars) throws ClassHierarchyCreationException, ClassHierarchyAnalysisException {
 		return analyzeClassHierarchy(framework, frameworkJars, applicationJars, null);
 	}
 
@@ -86,9 +88,11 @@ class ClassHierarchyAnalyzer {
 	 * @param mainClass name of the class containing the main method.
 	 * @return the modified framework with additional information in a FrameworkWrapper.
 	 * @throws ClassHierarchyCreationException when the creation of the class hierarchy fails.
+	 * @throws ClassHierarchyAnalysisException if the class hierarchy analysis fails.
 	 */
 	FrameworkWrapper analyzeClassHierarchy(final Framework framework, final String[] frameworkJars,
-			final String[] applicationJars, final String mainClass) throws ClassHierarchyCreationException {
+			final String[] applicationJars, final String mainClass) throws ClassHierarchyCreationException,
+			ClassHierarchyAnalysisException {
 		this.mainClassName = mainClass;
 		wrapper = new FrameworkWrapper(framework);
 		ClassHierarchy hierarchy = makeClassHierarchy(frameworkJars, applicationJars);
@@ -146,8 +150,9 @@ class ClassHierarchyAnalyzer {
 	 * Analyzes the framework and its classes.
 	 *
 	 * @param hierarchy the class hierarchy.
+	 * @throws ClassHierarchyAnalysisException if the class hierarchy analysis fails.
 	 */
-	private void analyzeFramework(final ClassHierarchy hierarchy) {
+	private void analyzeFramework(final ClassHierarchy hierarchy) throws ClassHierarchyAnalysisException {
 		for (ExplicitDeclaration declaration : wrapper.getFramework().getStartPhase().getDeclarations()) {
 			analyzeForExplicitDeclaration(hierarchy, declaration, null);
 		}
@@ -163,13 +168,18 @@ class ClassHierarchyAnalyzer {
 	 * @param hierarchy the class hierarchy.
 	 * @param declaration the explicit declaration.
 	 * @param boundClass the class to which the explicit declaration is bound. Can be null.
+	 * @throws ClassHierarchyAnalysisException if the class hierarchy analysis fails.
 	 */
 	private void analyzeForExplicitDeclaration(final ClassHierarchy hierarchy, final ExplicitDeclaration declaration,
-			final IClass boundClass) {
+			final IClass boundClass) throws ClassHierarchyAnalysisException {
 		IClass actualBoundClass = boundClass;
 		if (declaration.getClassName() != null) {
 			actualBoundClass = hierarchy.lookupClass(TypeReference.findOrCreate(extensionLoader,
 					declaration.getClassName()));
+			if (actualBoundClass == null) {
+				throw new ClassHierarchyAnalysisException("The class " + declaration.getClassName()
+					+ "cannot be found.");
+			}
 			declaration.setIClass(actualBoundClass);
 			wrapper.addFrameworkClass(actualBoundClass);
 		}
@@ -200,6 +210,10 @@ class ClassHierarchyAnalyzer {
 					}
 				} else {
 					m = actualBoundClass.getMethod(Selector.make(method.getSignature()));
+					if (m == null) {
+						throw new ClassHierarchyAnalysisException("The method " + method.getSignature()
+							+ ") cannot be found.");
+					}
 				}
 				method.setMethod(m);
 			} else if (abc.getClass() == StaticMethod.class) {
@@ -216,7 +230,15 @@ class ClassHierarchyAnalyzer {
 					stMethod.setIClass(hierarchy.lookupClass(TypeReference.findOrCreate(
 							extensionLoader, stMethod.getClassString())));
 				}
+				if (stMethod.getIClass() == null) {
+					throw new ClassHierarchyAnalysisException("The class " + stMethod.getClassString()
+						+ "for the static method " + stMethod.getSignature() + " cannot be found.");
+				}
 				stMethod.setMethod(stMethod.getIClass().getMethod(Selector.make(stMethod.getSignature())));
+				if (stMethod.getMethod() == null) {
+					throw new ClassHierarchyAnalysisException("The static method " + stMethod.getClassString()
+							+ stMethod.getSignature() + "cannot be found.");
+				}
 			}
 		}
 	}
@@ -228,6 +250,7 @@ class ClassHierarchyAnalyzer {
 	 * @return true if the subclass is a concrete application class. false otherwise.
 	 */
 	private boolean checkSubclassForExplicitDeclaration(final IClass cl) {
+		assert cl != null;
 		return cl.getClassLoader().getReference() == applicationLoader
 				&& !(cl.isAbstract() || cl.isInterface() || cl.isPrivate());
 	}
@@ -294,8 +317,10 @@ class ClassHierarchyAnalyzer {
 	 *
 	 * @param hierarchy the class hierarchy.
 	 * @param working the working phase.
+	 * @throws ClassHierarchyAnalysisException if the class hierarchy analysis fails.
 	 */
-	private void analyzeForWorkingPhase(final ClassHierarchy hierarchy, final WorkingPhase working) {
+	private void analyzeForWorkingPhase(final ClassHierarchy hierarchy, final WorkingPhase working)
+		throws ClassHierarchyAnalysisException {
 		MethodCollector methods = new MethodCollector();
 		for (Rule r : working.getRules()) {
 			if (r.getClass() == Regex.class) {
@@ -305,6 +330,10 @@ class ClassHierarchyAnalyzer {
 			} else if (r.getClass() == Supertype.class) {
 				Supertype st = (Supertype) r;
 				IClass type = hierarchy.lookupClass(TypeReference.findOrCreate(extensionLoader, st.getSuperType()));
+				if (type == null) {
+					throw new ClassHierarchyAnalysisException("The super type " + st.getSuperType()
+						+ "cannot be found.");
+				}
 				analyzeForSupertypeRule(hierarchy, type, methods);
 				working.removeRule(r);
 			} else if (r.getClass() == Block.class) {
@@ -319,10 +348,15 @@ class ClassHierarchyAnalyzer {
 	 *
 	 * @param hierarchy the class hierarchy.
 	 * @param block the block rule.
+	 * @throws ClassHierarchyAnalysisException if the class hierarchy analysis fails.
 	 */
-	private void analyzeForBlock(final ClassHierarchy hierarchy, final Block block) {
+	private void analyzeForBlock(final ClassHierarchy hierarchy, final Block block)
+			throws ClassHierarchyAnalysisException {
 		IClass blockClass = hierarchy.lookupClass(TypeReference.findOrCreate(extensionLoader,
 				block.getClassName()));
+		if (blockClass == null) {
+			throw new ClassHierarchyAnalysisException("The block class " + block.getClassName() + "cannot be found.");
+		}
 		block.setIClass(blockClass);
 		wrapper.addFrameworkClass(blockClass);
 		if (block.getInnerBlock() == null) {

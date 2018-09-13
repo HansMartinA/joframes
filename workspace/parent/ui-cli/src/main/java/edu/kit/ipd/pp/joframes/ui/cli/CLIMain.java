@@ -1,6 +1,7 @@
 package edu.kit.ipd.pp.joframes.ui.cli;
 
 import edu.kit.ipd.pp.joframes.api.Pipeline;
+import edu.kit.ipd.pp.joframes.api.exceptions.ClassHierarchyAnalysisException;
 import edu.kit.ipd.pp.joframes.api.exceptions.ClassHierarchyCreationException;
 import edu.kit.ipd.pp.joframes.api.exceptions.InstrumenterException;
 import edu.kit.ipd.pp.joframes.api.exceptions.ParseException;
@@ -63,7 +64,8 @@ public final class CLIMain {
 			p.setMainClass(mainClassName);
 			try {
 				p.process();
-			} catch (ParseException | ClassHierarchyCreationException | InstrumenterException e) {
+			} catch (ParseException | ClassHierarchyCreationException | ClassHierarchyAnalysisException
+					| InstrumenterException e) {
 				System.out.println("An exception occurred while processing the framework and its application: "
 						+ e.getMessage());
 				e.printStackTrace();
