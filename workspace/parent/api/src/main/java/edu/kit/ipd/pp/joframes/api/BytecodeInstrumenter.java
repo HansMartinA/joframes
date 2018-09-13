@@ -239,13 +239,7 @@ class BytecodeInstrumenter {
 					methodWrapper.visitInstructions(new MethodEditor.Visitor() {
 						@Override
 						public void visitInvoke(final IInvokeInstruction instruction) {
-							String invokedClass = instruction.getClassType()
-									.substring(0, instruction.getClassType().length() - 1);
-							if (instruction.getMethodName().equals(APIConstants.INIT)
-									&& isSubclassOfFrameworkClasses(invokedClass)
-									&& !(methodWrapper.getMethodName().equals(APIConstants.INIT)
-											&& areDirectSubclasses(invokedClass, methodWrapper.getClassType()
-													.substring(0, methodWrapper.getClassType().length() - 1)))) {
+							if (checkInvokeInstruction(instruction, methodWrapper)) {
 								this.insertAfter(new MethodEditor.Patch() {
 									@Override
 									public void emitTo(final MethodEditor.Output w) {
@@ -308,6 +302,21 @@ class BytecodeInstrumenter {
 	}
 
 	/**
+	 * Checks that an instruction invokes a constructor which is not called in the constructor of a direct subclass.
+	 *
+	 * @param instruction the instruction.
+	 * @param method method in which the instruction resides.
+	 * @return true if the instruction invokes a constructor. false otherwise.
+	 */
+	private boolean checkInvokeInstruction(final IInvokeInstruction instruction, final MethodWrapper method) {
+		String invokedClass = instruction.getClassType().substring(0, instruction.getClassType().length() - 1);
+		String methodClass = method.getClassType().substring(0, method.getClassType().length() - 1);
+		return instruction.getMethodName().equals(APIConstants.INIT) && isSubclassOfFrameworkClasses(invokedClass)
+				&& !(method.getMethodName().equals(APIConstants.INIT)
+						&& areDirectSubclasses(invokedClass, methodClass));
+	}
+
+	/**
 	 * Checks that two classes are direct subclasses of each other or equal.
 	 *
 	 * @param classOne one class.
@@ -319,6 +328,9 @@ class BytecodeInstrumenter {
 				.findOrCreate(wrapper.getClassHierarchy().getScope().getApplicationLoader(), classOne));
 		IClass two = wrapper.getClassHierarchy().lookupClass(TypeReference
 				.findOrCreate(wrapper.getClassHierarchy().getScope().getApplicationLoader(), classTwo));
+		if (one == null || two == null) {
+			return false;
+		}
 		return one == two || wrapper.getClassHierarchy().isSubclassOf(one, two)
 				|| wrapper.getClassHierarchy().isSubclassOf(two, one)
 				|| wrapper.getClassHierarchy().implementsInterface(one, two)
