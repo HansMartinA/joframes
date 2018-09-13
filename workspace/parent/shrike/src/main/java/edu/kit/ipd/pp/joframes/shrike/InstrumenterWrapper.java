@@ -30,6 +30,10 @@ public class InstrumenterWrapper {
 	 * Stores all wrapped class instrumenter.
 	 */
 	private ArrayList<ClassInstrumenterWrapper> clInstrs;
+	/**
+	 * Stores the number of instructions that were counted the last time.
+	 */
+	private long instructionCount;
 
 	/**
 	 * Creates a new instance.
@@ -155,6 +159,22 @@ public class InstrumenterWrapper {
 			}
 		}
 		return null;
+	}
+
+	/**
+	 * Counts all instructions of all methods in all added classes.
+	 *
+	 * @return the number of instructions.
+	 */
+	public long countInstructions() {
+		if (clInstrs == null) {
+			createClassInstrumenterWrapper();
+		}
+		instructionCount = 0;
+		visitClasses(clInstr -> {
+			instructionCount += clInstr.countInstructions();
+		});
+		return instructionCount;
 	}
 
 	/**

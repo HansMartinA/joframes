@@ -27,6 +27,10 @@ public class ClassInstrumenterWrapper {
 	 * Stores all newly created methods.
 	 */
 	private ArrayList<MethodWrapper> additionalMethods;
+	/**
+	 * Stores the number of instructions counted at last.
+	 */
+	private long instructionCount;
 
 	/**
 	 * Creates a new instance.
@@ -97,6 +101,19 @@ public class ClassInstrumenterWrapper {
 		for (MethodWrapper m : additionalMethods) {
 			visitor.visitMethod(m);
 		}
+	}
+
+	/**
+	 * Counts the number of instructions of all methods in the wrapped class.
+	 *
+	 * @return the number of instructions.
+	 */
+	public long countInstructions() {
+		instructionCount = 0;
+		visitMethods(methodWrapper -> {
+			instructionCount += methodWrapper.getMethodData().getInstructions().length;
+		});
+		return instructionCount;
 	}
 
 	/**
