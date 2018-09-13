@@ -2,8 +2,12 @@ package edu.kit.ipd.pp.joframes.api;
 
 import com.ibm.wala.classLoader.IClass;
 import com.ibm.wala.ipa.cha.ClassHierarchy;
+import com.ibm.wala.types.ClassLoaderReference;
+import com.ibm.wala.types.TypeReference;
 import edu.kit.ipd.pp.joframes.ast.base.Framework;
+import java.util.ArrayDeque;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -103,5 +107,49 @@ class FrameworkWrapper {
 	 */
 	int getInstancesCount(final IClass frameworkClass) {
 		return frameworkClassesToInstancesCount.get(frameworkClass);
+	}
+
+	/**
+	 * Returns a class for a class name.
+	 *
+	 * @param clRef class loader for the class.
+	 * @param className name of the class.
+	 * @return the class or null if it cannot be found.
+	 */
+	IClass getIClass(final ClassLoaderReference clRef, final String className) {
+		return hierarchy.lookupClass(TypeReference.findOrCreate(clRef, className));
+	}
+
+	/**
+	 * Returns all subtypes for a supertype. The supertype is not included.
+	 *
+	 * @param supertype the supertype.
+	 * @return an iterable object with the subtypes.
+	 */
+	Iterable<IClass> getSubtypes(final IClass supertype) {
+		if (supertype.isInterface()) {
+			return hierarchy.getImplementors(supertype.getReference());
+		} else {
+			HashSet<IClass> resultingClasses = new HashSet<>();
+			ArrayDeque<IClass> currentSubtypes = new ArrayDeque<>();
+			currentSubtypes.addAll(hierarchy.getImmediateSubclasses(supertype));
+			while (!currentSubtypes.isEmpty()) {
+				IClass nextType = currentSubtypes.poll();
+				resultingClasses.add(nextType);
+				currentSubtypes.addAll(hierarchy.getImmediateSubclasses(nextType));
+			}
+			return resultingClasses;
+		}
+	}
+
+	/**
+	 * Checks if a class is a direct subclass of another class or if a class implements an interface.
+	 *
+	 * @param supertype the supertype: a superclass or an interface.
+	 * @param subtype the subtype.
+	 * @return true if the class given as subtype is a direct subtype of supertype. false otherwise.
+	 */
+	boolean isDirectSubtype(final IClass supertype, final IClass subtype) {
+		return hierarchy.isSubclassOf(subtype, supertype) || hierarchy.implementsInterface(subtype, supertype);
 	}
 }
