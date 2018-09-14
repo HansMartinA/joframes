@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<framework-specification
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="framework_specification_language_model.xsd"
+	xmlns="fwspec" name="JavaFX">
+	<phases>
+		<start>
+			<explicit-declaration>
+				<static-call>main([Ljava/lang/String;)V</static-call>
+				<explicit-declaration for_all="Ljavafx/application/Application">
+					<method-call>Constructor</method-call>
+					<method-call>init()V</method-call>
+					<method-call>start(Ljavafx/stage/Stage;)V</method-call>
+				</explicit-declaration>
+			</explicit-declaration>
+		</start>
+		<end>
+			<explicit-declaration for_all="Ljavafx/application/Application">
+				<method-call>stop()V</method-call>
+			</explicit-declaration>
+		</end>
+		<working-phases>
+			<working threads="single">
+				<rule-supertype>Ljavafx/event/EventHandler</rule-supertype>
+			</working>
+		</working-phases>
+	</phases>
+</framework-specification>

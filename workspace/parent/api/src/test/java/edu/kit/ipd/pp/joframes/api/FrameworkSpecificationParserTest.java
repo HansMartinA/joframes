@@ -52,7 +52,7 @@ public class FrameworkSpecificationParserTest {
 	 */
 	@Test
 	public void testServletSpecification() throws ParseException {
-		parseFramework("Servlets");
+		parseFramework("main", "Servlets");
 		assertEquals(1, framework.getStartPhase().getDeclarations().size());
 		ExplicitDeclaration startDeclaration = null;
 		for (ExplicitDeclaration dec : framework.getStartPhase().getDeclarations()) {
@@ -123,7 +123,7 @@ public class FrameworkSpecificationParserTest {
 	 */
 	@Test(expected = ParseException.class)
 	public void testEmptySpecification() throws ParseException {
-		parseFramework("EmptySpec");
+		parseFramework("test", "EmptySpec");
 	}
 
 	/**
@@ -133,7 +133,7 @@ public class FrameworkSpecificationParserTest {
 	 */
 	@Test(expected = ParseException.class)
 	public void testInvalidSpecification() throws ParseException {
-		parseFramework("InvalidSpec");
+		parseFramework("test", "InvalidSpec");
 	}
 
 	/**
@@ -143,7 +143,7 @@ public class FrameworkSpecificationParserTest {
 	 */
 	@Test
 	public void testCompleteSpecification() throws ParseException {
-		parseFramework("CompleteSpec");
+		parseFramework("test", "CompleteSpec");
 		assertNotNull(framework.getResourceLoader());
 		assertEquals("Test.class", framework.getResourceLoader().getClassName());
 		assertEquals(3, framework.getStartPhase().getDeclarations().size());
@@ -180,11 +180,13 @@ public class FrameworkSpecificationParserTest {
 	/**
 	 * Does the actual parsing of a specification and performs basic tests.
 	 *
+	 * @param dir directory in which the specification resides. This parameter is used to differentiate between
+	 *            specification only created for test purposes and specifications of real frameworks.
 	 * @param fileName name of the specification file.
 	 * @throws ParseException when parsing fails.
 	 */
-	private void parseFramework(final String fileName) throws ParseException {
-		framework = parser.parse("src/test/resources/" + fileName + ".xml");
+	private void parseFramework(final String dir, final String fileName) throws ParseException {
+		framework = parser.parse("src/" + dir + "/resources/" + fileName + ".xml");
 		assertNotNull(framework);
 		assertNotNull(framework.getStartPhase());
 		assertNotNull(framework.getStartPhase().getDeclarations());

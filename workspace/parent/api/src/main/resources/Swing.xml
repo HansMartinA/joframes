@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<framework-specification
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="framework_specification_language_model.xsd"
+	xmlns="fwspec" name="Swing">
+	<phases>
+		<start>
+			<explicit-declaration>
+				<static-call>main([Ljava/lang/String;)V</static-call>
+			</explicit-declaration>
+		</start>
+		<end>
+			<explicit-declaration>
+			</explicit-declaration>
+		</end>
+		<working-phases>
+			<working threads="single">
+				<rule-supertype>Ljava/util/EventListener</rule-supertype>
+			</working>
+		</working-phases>
+	</phases>
+</framework-specification>
