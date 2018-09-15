@@ -1,7 +1,7 @@
 #!/bin/bash
 cd ..
 if
-test -e workspace/joana;
+test -e workspace/joana/dist;
 then
 echo "Skip building of WALA and Joana.";
 else
