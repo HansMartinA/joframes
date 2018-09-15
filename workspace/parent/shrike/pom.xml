@@ -8,4 +8,6 @@
 		<version>0.2</version>
 	</parent>
 	<artifactId>shrike</artifactId>
+	<name>Shrike abstraction API</name>
+	<description>This module provides an abstraction API for the Shrike module of WALA.</description>
 </project>

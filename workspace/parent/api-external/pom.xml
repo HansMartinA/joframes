@@ -8,4 +8,6 @@
 		<version>0.2</version>
 	</parent>
 	<artifactId>api-external</artifactId>
+	<name>External API</name>
+	<description>This module contains API classes that will be instrumented during the processing of an framework-based application and exposed to the application.</description>
 </project>

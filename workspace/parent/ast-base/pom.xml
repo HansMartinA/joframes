@@ -8,4 +8,6 @@
 		<version>0.2</version>
 	</parent>
 	<artifactId>ast-base</artifactId>
+	<name>AST</name>
+	<description>This module contains the base classes for the abstract syntax tree that remain the same during the whole application processing.</description>
 </project>

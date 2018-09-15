@@ -8,4 +8,6 @@
 		<version>0.2</version>
 	</parent>
   <artifactId>language-syntax</artifactId>
+  <name>language syntax</name>
+  <description>This module contains the syntax for the language.</description>
 </project>

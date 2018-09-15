@@ -14,7 +14,6 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jar-plugin</artifactId>
-				<version>3.1.0</version>
 				<executions>
 					<execution>
 						<goals>
@@ -25,4 +24,6 @@
 			</plugin>
 		</plugins>
 	</build>
+	<name>API-Test-Data</name>
+	<description>This module contains an artificial framework and application for testing purposes.</description>
 </project>
