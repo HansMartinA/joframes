@@ -1,3 +1,6 @@
 [submodule "workspace/joana"]
 	path = workspace/joana
 	url = https://github.com/joana-team/joana
+[submodule "workspace/securibench-micro"]
+	path = workspace/securibench-micro
+	url = https://github.com/too4words/securibench-micro

@@ -14,8 +14,10 @@ cd contrib/wala
 mvn package -DskipTests=true -e
 cd ../..
 ant
-cd ../..
+cd ..
 echo "Built WALA and Joana."
+cp -r securibench-micro/src/securibench parent/test-tools/src/main/java
+cd ..
 fi
 cd scripts
 
