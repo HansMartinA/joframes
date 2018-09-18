@@ -147,6 +147,83 @@ public class ServletSpecTest {
 	}
 
 	/**
+	 * Tests the Collections3 class of Securibench Micro.
+	 *
+	 * @throws Exception if something goes wrong.
+	 */
+	@Test
+	public void testCollections3() throws Exception {
+		// Annotation of sources and sinks.
+		makeAndPrintResults("collections3.jar", "coll3.jar", JoanaProfiles.HIGH_PRECISION, 2);
+	}
+
+	/**
+	 * Tests the Collections6 class of Securibench Micro.
+	 *
+	 * @throws Exception if something goes wrong.
+	 */
+	@Test
+	public void testCollections6() throws Exception {
+		// Annotation of sources and sinks.
+		makeAndPrintResults("collections6.jar", "coll6.jar", JoanaProfiles.HIGH_PRECISION, 1);
+	}
+
+	/**
+	 * Tests the Collections7 class of Securibench Micro.
+	 *
+	 * @throws Exception if something goes wrong.
+	 */
+	@Test
+	public void testCollections7() throws Exception {
+		// Annotation of sources and sinks.
+		makeAndPrintResults("collections7.jar", "coll7.jar", JoanaProfiles.HIGH_PRECISION, 1);
+	}
+
+	/**
+	 * Tests the Collections8 class of Securibench Micro.
+	 *
+	 * @throws Exception if something goes wrong.
+	 */
+	@Test
+	public void testCollections8() throws Exception {
+		// Annotation of sources and sinks.
+		makeAndPrintResults("collections8.jar", "coll8.jar", JoanaProfiles.HIGH_PRECISION, 1);
+	}
+
+	/**
+	 * Tests the Collections11 class of Securibench Micro.
+	 *
+	 * @throws Exception if something goes wrong.
+	 */
+	@Test
+	public void testCollections11() throws Exception {
+		// Annotation of sources and sinks.
+		makeAndPrintResults("collections11.jar", "coll11.jar", JoanaProfiles.HIGH_PRECISION, 1);
+	}
+
+	/**
+	 * Tests the Collections13 class of Securibench Micro.
+	 *
+	 * @throws Exception if something goes wrong.
+	 */
+	@Test
+	public void testCollections13() throws Exception {
+		// Annotation of sources and sinks.
+		makeAndPrintResults("collections13.jar", "coll13.jar", JoanaProfiles.HIGH_PRECISION, 1);
+	}
+
+	/**
+	 * Tests the Collections14 class of Securibench Micro.
+	 *
+	 * @throws Exception if something goes wrong.
+	 */
+	@Test
+	public void testCollections14() throws Exception {
+		// Annotation of sources and sinks.
+		makeAndPrintResults("collections14.jar", "coll14.jar", JoanaProfiles.HIGH_PRECISION, 1);
+	}
+
+	/**
 	 * Runs the analysis and prints and tests the results.
 	 *
 	 * @param classifier classifier of the input jar file.
