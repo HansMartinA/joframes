@@ -53,6 +53,51 @@
 							</includes>
 						</configuration>
 					</execution>
+					<execution>
+						<id>Aliasing2</id>
+						<phase>package</phase>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+						<configuration>
+							<classifier>aliasing2</classifier>
+							<includes>
+								<include>**/*Aliasing2.class</include>
+								<include>**/*BasicTestCase.class</include>
+								<include>**/*MicroTestCase.class</include>
+							</includes>
+						</configuration>
+					</execution>
+					<execution>
+						<id>Aliasing5</id>
+						<phase>package</phase>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+						<configuration>
+							<classifier>aliasing5</classifier>
+							<includes>
+								<include>**/*Aliasing5.class</include>
+								<include>**/*BasicTestCase.class</include>
+								<include>**/*MicroTestCase.class</include>
+							</includes>
+						</configuration>
+					</execution>
+					<execution>
+						<id>Aliasing6</id>
+						<phase>package</phase>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+						<configuration>
+							<classifier>aliasing6</classifier>
+							<includes>
+								<include>**/*Aliasing6.class</include>
+								<include>**/*BasicTestCase.class</include>
+								<include>**/*MicroTestCase.class</include>
+							</includes>
+						</configuration>
+					</execution>
 				</executions>
 			</plugin>
 			<plugin>

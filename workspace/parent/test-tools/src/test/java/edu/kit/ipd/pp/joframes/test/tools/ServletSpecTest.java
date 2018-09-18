@@ -70,6 +70,39 @@ public class ServletSpecTest {
 	}
 
 	/**
+	 * Tests the Aliasing2 class of Securibench Micro.
+	 *
+	 * @throws Exception if something goes wrong.
+	 */
+	@Test
+	public void testAliasing2() throws Exception {
+		// Annotation of sources and sinks.
+		makeAndPrintResults("aliasing2.jar", "al2.jar", JoanaProfiles.HIGH_PRECISION, 0);
+	}
+
+	/**
+	 * Tests the Aliasing5 class of Securibench Micro.
+	 *
+	 * @throws Exception if something goes wrong.
+	 */
+	@Test
+	public void testAliasing5() throws Exception {
+		// Annotation of sources and sinks.
+		makeAndPrintResults("aliasing5.jar", "al5.jar", JoanaProfiles.HIGH_PRECISION, 1);
+	}
+
+	/**
+	 * Tests the Aliasing6 class of Securibench Micro.
+	 *
+	 * @throws Exception if something goes wrong.
+	 */
+	@Test
+	public void testAliasing6() throws Exception {
+		// Annotation of sources and sinks.
+		makeAndPrintResults("aliasing6.jar", "al6.jar", JoanaProfiles.HIGH_PRECISION, 7);
+	}
+
+	/**
 	 * Runs the analysis and prints and tests the results.
 	 *
 	 * @param classifier classifier of the input jar file.
