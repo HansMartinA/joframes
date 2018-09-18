@@ -411,6 +411,39 @@ public class ServletSpecTest {
 	}
 
 	/**
+	 * Tests the StrongUpdates3 class of Securibench Micro.
+	 *
+	 * @throws Exception if something goes wrong.
+	 */
+	@Test
+	public void testStrongUpdates3() throws Exception {
+		// Annotation of sources and sinks.
+		makeAndPrintResults("strong-updates3.jar", "su3.jar", JoanaProfiles.HIGH_PRECISION, 0);
+	}
+
+	/**
+	 * Tests the StrongUpdates4 class of Securibench Micro.
+	 *
+	 * @throws Exception if something goes wrong.
+	 */
+	@Test
+	public void testStrongUpdates4() throws Exception {
+		// Annotation of sources and sinks.
+		makeAndPrintResults("strong-updates4.jar", "su4.jar", JoanaProfiles.HIGH_PRECISION, 1);
+	}
+
+	/**
+	 * Tests the StrongUpdates5 class of Securibench Micro.
+	 *
+	 * @throws Exception if something goes wrong.
+	 */
+	@Test
+	public void testStrongUpdates5() throws Exception {
+		// Annotation of sources and sinks.
+		makeAndPrintResults("strong-updates5.jar", "su5.jar", JoanaProfiles.HIGH_PRECISION, 0);
+	}
+
+	/**
 	 * Runs the analysis and prints and tests the results.
 	 *
 	 * @param classifier classifier of the input jar file.

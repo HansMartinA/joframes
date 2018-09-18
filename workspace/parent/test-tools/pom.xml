@@ -519,6 +519,51 @@
 							</includes>
 						</configuration>
 					</execution>
+					<execution>
+						<id>StrongUpdates3</id>
+						<phase>package</phase>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+						<configuration>
+							<classifier>su3</classifier>
+							<includes>
+								<include>**/*StrongUpdates3*</include>
+								<include>**/*BasicTestCase.class</include>
+								<include>**/*MicroTestCase.class</include>
+							</includes>
+						</configuration>
+					</execution>
+					<execution>
+						<id>StrongUpdates4</id>
+						<phase>package</phase>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+						<configuration>
+							<classifier>su4</classifier>
+							<includes>
+								<include>**/*StrongUpdates4.class</include>
+								<include>**/*BasicTestCase.class</include>
+								<include>**/*MicroTestCase.class</include>
+							</includes>
+						</configuration>
+					</execution>
+					<execution>
+						<id>StrongUpdates5</id>
+						<phase>package</phase>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+						<configuration>
+							<classifier>su5</classifier>
+							<includes>
+								<include>**/*StrongUpdates5.class</include>
+								<include>**/*BasicTestCase.class</include>
+								<include>**/*MicroTestCase.class</include>
+							</includes>
+						</configuration>
+					</execution>
 				</executions>
 			</plugin>
 			<plugin>
