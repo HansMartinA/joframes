@@ -334,6 +334,50 @@ public class ServletSpecTest {
 	}
 
 	/**
+	 * Tests the Pred1 class of Securibench Micro.
+	 *
+	 * @throws Exception if something goes wrong.
+	 */
+	@Test
+	public void testPred1() throws Exception {
+		// Annotation of sources and sinks.
+		makeAndPrintResults("pred1.jar", "pred1.jar", JoanaProfiles.HIGH_PRECISION, 0);
+	}
+
+	/**
+	 * Tests the Pred3 class of Securibench Micro.
+	 *
+	 * @throws Exception if something goes wrong.
+	 */
+	@Test
+	public void testPred3() throws Exception {
+		// Annotation of sources and sinks.
+		makeAndPrintResults("pred3.jar", "pred3.jar", JoanaProfiles.HIGH_PRECISION, 0);
+	}
+
+	/**
+	 * Tests the Pred7 class of Securibench Micro.
+	 *
+	 * @throws Exception if something goes wrong.
+	 */
+	@Test
+	public void testPred7() throws Exception {
+		// Annotation of sources and sinks.
+		makeAndPrintResults("pred7.jar", "pred7.jar", JoanaProfiles.HIGH_PRECISION, 0);
+	}
+
+	/**
+	 * Tests the Pred9 class of Securibench Micro.
+	 *
+	 * @throws Exception if something goes wrong.
+	 */
+	@Test
+	public void testPred9() throws Exception {
+		// Annotation of sources and sinks.
+		makeAndPrintResults("pred9.jar", "pred9.jar", JoanaProfiles.HIGH_PRECISION, 1);
+	}
+
+	/**
 	 * Runs the analysis and prints and tests the results.
 	 *
 	 * @param classifier classifier of the input jar file.
