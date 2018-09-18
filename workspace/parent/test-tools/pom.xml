@@ -504,6 +504,21 @@
 							</includes>
 						</configuration>
 					</execution>
+					<execution>
+						<id>Session2</id>
+						<phase>package</phase>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+						<configuration>
+							<classifier>sess2</classifier>
+							<includes>
+								<include>**/*Session2.class</include>
+								<include>**/*BasicTestCase.class</include>
+								<include>**/*MicroTestCase.class</include>
+							</includes>
+						</configuration>
+					</execution>
 				</executions>
 			</plugin>
 			<plugin>

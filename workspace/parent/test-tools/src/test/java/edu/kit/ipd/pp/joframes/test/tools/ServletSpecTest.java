@@ -400,6 +400,17 @@ public class ServletSpecTest {
 	}
 
 	/**
+	 * Tests the Session2 class of Securibench Micro.
+	 *
+	 * @throws Exception if something goes wrong.
+	 */
+	@Test
+	public void testSession2() throws Exception {
+		// Annotation of sources and sinks.
+		makeAndPrintResults("session2.jar", "sess2.jar", JoanaProfiles.HIGH_PRECISION, 1);
+	}
+
+	/**
 	 * Runs the analysis and prints and tests the results.
 	 *
 	 * @param classifier classifier of the input jar file.
