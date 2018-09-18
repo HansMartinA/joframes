@@ -149,3 +149,4 @@ _minted*
 .svn
 CVS
 workspace/parent/test-tools/src/main/java/securibench/*
+*dependency-reduced-pom.xml

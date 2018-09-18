@@ -7,7 +7,11 @@ import com.ibm.wala.shrikeBT.Constants;
  *
  * @author Martin Armbruster
  */
-final class APIConstants {
+public final class APIConstants {
+	/**
+	 * Name of the system property that is only set for test cases to indicate a test and development environment.
+	 */
+	public static final String TEST_SYSTEM_PROPERTY = "edu.kit.ipd.pp.joframes.test.active";
 	/**
 	 * Signature of a main method.
 	 */
@@ -24,10 +28,6 @@ final class APIConstants {
 	 * Signature of the default constructor.
 	 */
 	static final String DEFAULT_CONSTRUCTOR_SIGNATURE = INIT + "()" + Constants.TYPE_void;
-	/**
-	 * Name of the system property that is only set for test cases to indicate a test and development environment.
-	 */
-	static final String TEST_SYSTEM_PROPERTY = "edu.kit.ipd.pp.joframes.test.active";
 
 	/**
 	 * Private constructor to avoid instantiation.

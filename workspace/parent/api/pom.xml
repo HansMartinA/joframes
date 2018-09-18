@@ -40,6 +40,11 @@
 			<artifactId>shrike</artifactId>
 			<version>0.2</version>
 		</dependency>
+		<dependency>
+			<groupId>framework</groupId>
+			<artifactId>api-external</artifactId>
+			<version>0.2</version>
+		</dependency>
 	</dependencies>
 	<build>
 		<plugins>

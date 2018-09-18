@@ -107,9 +107,10 @@ class AnalysisApplicator {
 	 * @param mainClass name of the main class of the application.
 	 * @param output name of the output jar file.
 	 * @param joProfile profile for Joana.
+	 * @returns the results of the analysis.
 	 * @throws Exception if something goes wrong.
 	 */
-	void applyAnalysis(final SupportedFrameworks framework, final String[] applicationJars, final String mainClass,
+	AAResults applyAnalysis(final SupportedFrameworks framework, final String[] applicationJars, final String mainClass,
 			final String output, final JoanaProfiles joProfile) throws Exception {
 		long analysisStart = System.currentTimeMillis();
 		AAResults result = new AAResults();
@@ -141,12 +142,12 @@ class AnalysisApplicator {
 		instr.addInputJar(p.getOutput());
 		result.insCountAfter = instr.countInstructions();
 		JavaMethodSignature entryMethod = JavaMethodSignature.mainMethodOfClass(
-				"edu.kit.ipd.pp.joframes.api.external.ArtificialMain");
+				"edu.kit.ipd.pp.joframes.api.external.ArtificialClass");
 		SDGConfig sdgConfig = new SDGConfig(p.getOutput(), entryMethod.toBCString(), Stubs.JRE_17);
 		sdgConfig.setComputeInterferences(true);
 		if (joProfile == JoanaProfiles.HIGH_PRECISION) {
 			sdgConfig.setMhpType(MHPType.PRECISE);
-			sdgConfig.setPointsToPrecision(PointsToPrecision.N3_CALL_STACK);
+			sdgConfig.setPointsToPrecision(PointsToPrecision.N1_OBJECT_SENSITIVE);
 			sdgConfig.setExceptionAnalysis(ExceptionAnalysis.INTERPROC);
 		} else if (joProfile == JoanaProfiles.MODERATE) {
 			sdgConfig.setMhpType(MHPType.SIMPLE);
@@ -167,6 +168,7 @@ class AnalysisApplicator {
 		TObjectIntMap<IViolation<SDGProgramPart>> sortedIFCResult = ifcAna.groupByPPPart(ifcResult);
 		result.violations = sortedIFCResult;
 		result.time = System.currentTimeMillis() - analysisStart;
+		return result;
 	}
 
 	/**

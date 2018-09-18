@@ -17,6 +17,7 @@ ant
 cd ..
 echo "Built WALA and Joana."
 cp -r securibench-micro/src/securibench parent/test-tools/src/main/java
+rm parent/test-tools/src/main/java/securibench/micro/basic/Basic40.java -f
 cd ..
 fi
 cd scripts
