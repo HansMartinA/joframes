@@ -257,6 +257,83 @@ public class ServletSpecTest {
 	}
 
 	/**
+	 * Tests the Inter2 class of Securibench Micro.
+	 *
+	 * @throws Exception if something goes wrong.
+	 */
+	@Test
+	public void testInter2() throws Exception {
+		// Annotation of sources and sinks.
+		makeAndPrintResults("inter2.jar", "inter2.jar", JoanaProfiles.HIGH_PRECISION, 2);
+	}
+
+	/**
+	 * Tests the Inter3 class of Securibench Micro.
+	 *
+	 * @throws Exception if something goes wrong.
+	 */
+	@Test
+	public void testInter3() throws Exception {
+		// Annotation of sources and sinks.
+		makeAndPrintResults("inter3.jar", "inter3.jar", JoanaProfiles.HIGH_PRECISION, 1);
+	}
+
+	/**
+	 * Tests the Inter4 class of Securibench Micro.
+	 *
+	 * @throws Exception if something goes wrong.
+	 */
+	@Test
+	public void testInter4() throws Exception {
+		// Annotation of sources and sinks.
+		makeAndPrintResults("inter4.jar", "inter4.jar", JoanaProfiles.HIGH_PRECISION, 1);
+	}
+
+	/**
+	 * Tests the Inter7 class of Securibench Micro.
+	 *
+	 * @throws Exception if something goes wrong.
+	 */
+	@Test
+	public void testInter7() throws Exception {
+		// Annotation of sources and sinks.
+		makeAndPrintResults("inter7.jar", "inter7.jar", JoanaProfiles.HIGH_PRECISION, 1);
+	}
+
+	/**
+	 * Tests the Inter8 class of Securibench Micro.
+	 *
+	 * @throws Exception if something goes wrong.
+	 */
+	@Test
+	public void testInter8() throws Exception {
+		// Annotation of sources and sinks.
+		makeAndPrintResults("inter8.jar", "inter8.jar", JoanaProfiles.HIGH_PRECISION, 1);
+	}
+
+	/**
+	 * Tests the Inter11 class of Securibench Micro.
+	 *
+	 * @throws Exception if something goes wrong.
+	 */
+	@Test
+	public void testInter11() throws Exception {
+		// Annotation of sources and sinks.
+		makeAndPrintResults("inter11.jar", "inter11.jar", JoanaProfiles.HIGH_PRECISION, 1);
+	}
+
+	/**
+	 * Tests the Inter13 class of Securibench Micro.
+	 *
+	 * @throws Exception if something goes wrong.
+	 */
+	@Test
+	public void testInter13() throws Exception {
+		// Annotation of sources and sinks.
+		makeAndPrintResults("inter13.jar", "inter13.jar", JoanaProfiles.HIGH_PRECISION, 1);
+	}
+
+	/**
 	 * Runs the analysis and prints and tests the results.
 	 *
 	 * @param classifier classifier of the input jar file.
