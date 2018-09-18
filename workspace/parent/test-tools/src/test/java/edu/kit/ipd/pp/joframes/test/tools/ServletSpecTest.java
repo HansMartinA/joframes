@@ -103,6 +103,50 @@ public class ServletSpecTest {
 	}
 
 	/**
+	 * Tests the Arrays2 class of Securibench Micro.
+	 *
+	 * @throws Exception if something goes wrong.
+	 */
+	@Test
+	public void testArrays2() throws Exception {
+		// Annotation of sources and sinks.
+		makeAndPrintResults("arrays2.jar", "ar2.jar", JoanaProfiles.HIGH_PRECISION, 1);
+	}
+
+	/**
+	 * Tests the Arrays4 class of Securibench Micro.
+	 *
+	 * @throws Exception if something goes wrong.
+	 */
+	@Test
+	public void testArrays4() throws Exception {
+		// Annotation of sources and sinks.
+		makeAndPrintResults("arrays4.jar", "ar4.jar", JoanaProfiles.HIGH_PRECISION, 1);
+	}
+
+	/**
+	 * Tests the Arrays5 class of Securibench Micro.
+	 *
+	 * @throws Exception if something goes wrong.
+	 */
+	@Test
+	public void testArrays5() throws Exception {
+		// Annotation of sources and sinks.
+		makeAndPrintResults("arrays5.jar", "ar5.jar", JoanaProfiles.HIGH_PRECISION, 0);
+	}
+
+	/**
+	 * Tests the Arrays10 class of Securibench Micro.
+	 *
+	 * @throws Exception if something goes wrong.
+	 */
+	@Test
+	public void testArrays10() throws Exception {
+		// Annotation of sources and sinks.
+		makeAndPrintResults("arrays10.jar", "ar10.jar", JoanaProfiles.HIGH_PRECISION, 1);
+	}
+
+	/**
 	 * Runs the analysis and prints and tests the results.
 	 *
 	 * @param classifier classifier of the input jar file.
@@ -119,6 +163,7 @@ public class ServletSpecTest {
 				+ result.getAdditionalInstructionsCount());
 		System.out.println("Overall time: " + result.getOverallTime() + ", time for [Framework Project]: "
 				+ result.getProcessingTime() + ", time for Joana: " + result.getTimeOfJoana());
+		System.out.println("Violations: " + result.getViolations().keySet().size());
 		for (IViolation<SDGProgramPart> part : result.getViolations().keySet()) {
 			System.out.println("Found a violation.");
 			part.accept(new IViolationVisitor<SDGProgramPart>() {

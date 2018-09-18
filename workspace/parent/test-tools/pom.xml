@@ -98,6 +98,66 @@
 							</includes>
 						</configuration>
 					</execution>
+					<execution>
+						<id>Arrays2</id>
+						<phase>package</phase>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+						<configuration>
+							<classifier>arrays2</classifier>
+							<includes>
+								<include>**/*Arrays2.class</include>
+								<include>**/*BasicTestCase.class</include>
+								<include>**/*MicroTestCase.class</include>
+							</includes>
+						</configuration>
+					</execution>
+					<execution>
+						<id>Arrays4</id>
+						<phase>package</phase>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+						<configuration>
+							<classifier>arrays4</classifier>
+							<includes>
+								<include>**/*Arrays4.class</include>
+								<include>**/*BasicTestCase.class</include>
+								<include>**/*MicroTestCase.class</include>
+							</includes>
+						</configuration>
+					</execution>
+					<execution>
+						<id>Arrays5</id>
+						<phase>package</phase>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+						<configuration>
+							<classifier>arrays5</classifier>
+							<includes>
+								<include>**/*Arrays5.class</include>
+								<include>**/*BasicTestCase.class</include>
+								<include>**/*MicroTestCase.class</include>
+							</includes>
+						</configuration>
+					</execution>
+					<execution>
+						<id>Arrays10</id>
+						<phase>package</phase>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+						<configuration>
+							<classifier>arrays10</classifier>
+							<includes>
+								<include>**/*Arrays10.class</include>
+								<include>**/*BasicTestCase.class</include>
+								<include>**/*MicroTestCase.class</include>
+							</includes>
+						</configuration>
+					</execution>
 				</executions>
 			</plugin>
 			<plugin>
