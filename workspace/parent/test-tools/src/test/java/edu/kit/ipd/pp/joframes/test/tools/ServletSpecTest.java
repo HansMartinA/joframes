@@ -378,6 +378,28 @@ public class ServletSpecTest {
 	}
 
 	/**
+	 * Tests the Sanitizers2 class of Securibench Micro.
+	 *
+	 * @throws Exception if something goes wrong.
+	 */
+	@Test
+	public void testSanitizers2() throws Exception {
+		// Annotation of sources and sinks.
+		makeAndPrintResults("sanitizers2.jar", "san2.jar", JoanaProfiles.HIGH_PRECISION, 1);
+	}
+
+	/**
+	 * Tests the Sanitizers4 class of Securibench Micro.
+	 *
+	 * @throws Exception if something goes wrong.
+	 */
+	@Test
+	public void testSanitizers4() throws Exception {
+		// Annotation of sources and sinks.
+		makeAndPrintResults("sanitizers4.jar", "san4.jar", JoanaProfiles.HIGH_PRECISION, 2);
+	}
+
+	/**
 	 * Runs the analysis and prints and tests the results.
 	 *
 	 * @param classifier classifier of the input jar file.
