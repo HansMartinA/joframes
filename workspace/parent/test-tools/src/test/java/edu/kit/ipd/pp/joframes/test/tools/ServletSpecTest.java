@@ -444,6 +444,94 @@ public class ServletSpecTest {
 	}
 
 	/**
+	 * Tests the Basic4 class of Securibench Micro.
+	 *
+	 * @throws Exception if something goes wrong.
+	 */
+	@Test
+	public void testBasic4() throws Exception {
+		// Annotation of sources and sinks.
+		makeAndPrintResults("basic4.jar", "basic4.jar", JoanaProfiles.HIGH_PRECISION, 1);
+	}
+
+	/**
+	 * Tests the Basic7 class of Securibench Micro.
+	 *
+	 * @throws Exception if something goes wrong.
+	 */
+	@Test
+	public void testBasic7() throws Exception {
+		// Annotation of sources and sinks.
+		makeAndPrintResults("basic7.jar", "basic7.jar", JoanaProfiles.HIGH_PRECISION, 1);
+	}
+
+	/**
+	 * Tests the Basic8 class of Securibench Micro.
+	 *
+	 * @throws Exception if something goes wrong.
+	 */
+	@Test
+	public void testBasic8() throws Exception {
+		// Annotation of sources and sinks.
+		makeAndPrintResults("basic8.jar", "basic8.jar", JoanaProfiles.HIGH_PRECISION, 1);
+	}
+
+	/**
+	 * Tests the Basic14 class of Securibench Micro.
+	 *
+	 * @throws Exception if something goes wrong.
+	 */
+	@Test
+	public void testBasic14() throws Exception {
+		// Annotation of sources and sinks.
+		makeAndPrintResults("basic14.jar", "basic14.jar", JoanaProfiles.HIGH_PRECISION, 1);
+	}
+
+	/**
+	 * Tests the Basic23 class of Securibench Micro.
+	 *
+	 * @throws Exception if something goes wrong.
+	 */
+	@Test
+	public void testBasic23() throws Exception {
+		// Annotation of sources and sinks.
+		makeAndPrintResults("basic23.jar", "basic23.jar", JoanaProfiles.HIGH_PRECISION, 3);
+	}
+
+	/**
+	 * Tests the Basic28 class of Securibench Micro.
+	 *
+	 * @throws Exception if something goes wrong.
+	 */
+	@Test
+	public void testBasic28() throws Exception {
+		// Annotation of sources and sinks.
+		makeAndPrintResults("basic28.jar", "basic28.jar", JoanaProfiles.HIGH_PRECISION, 2);
+	}
+
+	/**
+	 * Tests the Basic31 class of Securibench Micro.
+	 *
+	 * @throws Exception if something goes wrong.
+	 */
+	@Test
+	public void testBasic31() throws Exception {
+		// Annotation of sources and sinks.
+		makeAndPrintResults("basic31.jar", "basic31.jar", JoanaProfiles.HIGH_PRECISION, 3);
+	}
+
+	/**
+	 * Tests the Basic35 class of Securibench Micro.
+	 *
+	 * @throws Exception if something goes wrong.
+	 */
+	@Test
+	public void testBasic35() throws Exception {
+		// Annotation of sources and sinks.
+		makeAndPrintResults("basic35.jar", "basic35.jar", JoanaProfiles.HIGH_PRECISION, 6);
+	}
+
+	/**
 	 * Runs the analysis and prints and tests the results.
 	 *
 	 * @param classifier classifier of the input jar file.
