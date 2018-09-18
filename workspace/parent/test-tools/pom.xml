@@ -264,6 +264,51 @@
 							</includes>
 						</configuration>
 					</execution>
+					<execution>
+						<id>Datastructures2</id>
+						<phase>package</phase>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+						<configuration>
+							<classifier>datastructures2</classifier>
+							<includes>
+								<include>**/*Datastructures2*</include>
+								<include>**/*BasicTestCase.class</include>
+								<include>**/*MicroTestCase.class</include>
+							</includes>
+						</configuration>
+					</execution>
+					<execution>
+						<id>Datastructures4</id>
+						<phase>package</phase>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+						<configuration>
+							<classifier>datastructures4</classifier>
+							<includes>
+								<include>**/*Datastructures4*</include>
+								<include>**/*BasicTestCase.class</include>
+								<include>**/*MicroTestCase.class</include>
+							</includes>
+						</configuration>
+					</execution>
+					<execution>
+						<id>Datastructures6</id>
+						<phase>package</phase>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+						<configuration>
+							<classifier>datastructures6</classifier>
+							<includes>
+								<include>**/*Datastructures6*</include>
+								<include>**/*BasicTestCase.class</include>
+								<include>**/*MicroTestCase.class</include>
+							</includes>
+						</configuration>
+					</execution>
 				</executions>
 			</plugin>
 			<plugin>

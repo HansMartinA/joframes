@@ -224,6 +224,39 @@ public class ServletSpecTest {
 	}
 
 	/**
+	 * Tests the Datastructures2 class of Securibench Micro.
+	 *
+	 * @throws Exception if something goes wrong.
+	 */
+	@Test
+	public void testDatastructures2() throws Exception {
+		// Annotation of sources and sinks.
+		makeAndPrintResults("datastructures2.jar", "data2.jar", JoanaProfiles.HIGH_PRECISION, 1);
+	}
+
+	/**
+	 * Tests the Datastructures4 class of Securibench Micro.
+	 *
+	 * @throws Exception if something goes wrong.
+	 */
+	@Test
+	public void testDatastructures4() throws Exception {
+		// Annotation of sources and sinks.
+		makeAndPrintResults("datastructures4.jar", "data4.jar", JoanaProfiles.HIGH_PRECISION, 0);
+	}
+
+	/**
+	 * Tests the Datastructures6 class of Securibench Micro.
+	 *
+	 * @throws Exception if something goes wrong.
+	 */
+	@Test
+	public void testDatastructures6() throws Exception {
+		// Annotation of sources and sinks.
+		makeAndPrintResults("datastructures6.jar", "data6.jar", JoanaProfiles.HIGH_PRECISION, 1);
+	}
+
+	/**
 	 * Runs the analysis and prints and tests the results.
 	 *
 	 * @param classifier classifier of the input jar file.
