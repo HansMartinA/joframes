@@ -484,18 +484,23 @@ class BytecodeInstrumenter {
 					editor.addInstructionAtEnd(ConstantInstruction.make(type.getName().toString() + ";", null));
 				} else {
 					IClass con = wrapper.getClassHierarchy().lookupClass(type);
+					if (con.isArrayClass()) {
+						editor.addInstructionAtEnd(ConstantInstruction.make(0));
+						editor.addInstructionAtEnd(NewInstruction.make(con.getName().toString() + ";", 1));
+						continue;
+					}
 					if (!isConcreteClass(con)) {
+						IClass newCon = null;
 						for (IClass cl : wrapper.getSubtypes(con)) {
 							if (isConcreteClass(con)) {
-								con = cl;
+								newCon = cl;
 								break;
 							}
 						}
-					} else {
-						con = null;
-					}
-					if (con == null) {
-						throw new InstrumenterException("No concrete class found for " + type.getName().toString());
+						if (newCon == null) {
+							throw new InstrumenterException("No concrete class found for " + type.getName().toString());
+						}
+						con = newCon;
 					}
 					IMethod init = wrapper.findInit(con);
 					editor.addInstructionAtEnd(NewInstruction.make(con.getName().toString() + ";", 0));
