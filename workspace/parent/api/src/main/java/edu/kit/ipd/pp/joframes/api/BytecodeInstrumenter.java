@@ -295,7 +295,6 @@ class BytecodeInstrumenter {
 		}
 		for (IClass cl : wrapper.getFrameworkClasses()) {
 			if (wrapper.isDirectSubtype(cl, subclass)) {
-				wrapper.countOneInstance(subclass);
 				return true;
 			}
 		}
@@ -312,9 +311,14 @@ class BytecodeInstrumenter {
 	private boolean checkInvokeInstruction(final IInvokeInstruction instruction, final MethodWrapper method) {
 		String invokedClass = instruction.getClassType().substring(0, instruction.getClassType().length() - 1);
 		String methodClass = method.getClassType().substring(0, method.getClassType().length() - 1);
-		return instruction.getMethodName().equals(APIConstants.INIT) && isSubclassOfFrameworkClasses(invokedClass)
-				&& !(method.getMethodName().equals(APIConstants.INIT)
+		boolean result =  instruction.getMethodName().equals(APIConstants.INIT)
+				&& isSubclassOfFrameworkClasses(invokedClass) && !(method.getMethodName().equals(APIConstants.INIT)
 						&& areDirectSubclasses(invokedClass, methodClass));
+		if (result) {
+			wrapper.countOneInstance(wrapper.getIClass(wrapper.getClassHierarchy().getScope().getApplicationLoader(),
+				invokedClass));
+		}
+		return result;
 	}
 
 	/**
