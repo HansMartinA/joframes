@@ -1,8 +1,10 @@
 package edu.kit.ipd.pp.joframes.api;
 
 import com.ibm.wala.classLoader.IClass;
+import com.ibm.wala.classLoader.IMethod;
 import com.ibm.wala.ipa.cha.ClassHierarchy;
 import com.ibm.wala.types.ClassLoaderReference;
+import com.ibm.wala.types.Selector;
 import com.ibm.wala.types.TypeReference;
 import edu.kit.ipd.pp.joframes.ast.base.Framework;
 import java.util.ArrayDeque;
@@ -151,5 +153,24 @@ class FrameworkWrapper {
 	 */
 	boolean isDirectSubtype(final IClass supertype, final IClass subtype) {
 		return hierarchy.isSubclassOf(subtype, supertype) || hierarchy.implementsInterface(subtype, supertype);
+	}
+
+	/**
+	 * Searches a class for a constructor.
+	 *
+	 * @param cl the class.
+	 * @return the constructor or null if no can be found.
+	 */
+	IMethod findInit(final IClass cl) {
+		IMethod m = cl.getMethod(Selector.make(APIConstants.DEFAULT_CONSTRUCTOR_SIGNATURE));
+		if (m == null) {
+			for (IMethod possibleInitMethod : cl.getDeclaredMethods()) {
+				if (possibleInitMethod.isInit()) {
+					m = possibleInitMethod;
+					break;
+				}
+			}
+		}
+		return m;
 	}
 }

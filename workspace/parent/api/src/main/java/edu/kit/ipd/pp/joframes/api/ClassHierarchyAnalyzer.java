@@ -188,7 +188,7 @@ class ClassHierarchyAnalyzer {
 				if (method.getSignature().equals(APIConstants.CONSTRUCTOR)) {
 					for (IClass cl : wrapper.getSubtypes(actualBoundClass)) {
 						if (checkSubclassForExplicitDeclaration(cl)) {
-							declaration.addApplicationClass(cl, findInit(cl));
+							declaration.addApplicationClass(cl, wrapper.findInit(cl));
 						}
 					}
 				} else {
@@ -234,25 +234,6 @@ class ClassHierarchyAnalyzer {
 		assert cl != null;
 		return cl.getClassLoader().getReference() == applicationLoader
 				&& !(cl.isAbstract() || cl.isInterface() || cl.isPrivate());
-	}
-
-	/**
-	 * Searches a class for a constructor.
-	 *
-	 * @param cl the class.
-	 * @return the constructor of null if no can be found.
-	 */
-	private IMethod findInit(final IClass cl) {
-		IMethod m = cl.getMethod(Selector.make(APIConstants.DEFAULT_CONSTRUCTOR_SIGNATURE));
-		if (m == null) {
-			for (IMethod possibleInitMethod : cl.getDeclaredMethods()) {
-				if (possibleInitMethod.isInit()) {
-					m = possibleInitMethod;
-					break;
-				}
-			}
-		}
-		return m;
 	}
 
 	/**

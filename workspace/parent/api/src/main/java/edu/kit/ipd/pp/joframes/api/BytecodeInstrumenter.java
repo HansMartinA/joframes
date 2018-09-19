@@ -138,6 +138,10 @@ class BytecodeInstrumenter {
 	 */
 	private static final String DEFAULT_SIGNATURE = "()" + Constants.TYPE_void;
 	/**
+	 * Stores the maximum level for parameter instantiation.
+	 */
+	private static final int MAX_LEVEL = 3;
+	/**
 	 * Stores the framework jar files that will be included in the output jar.
 	 */
 	private String[] frameworkJars;
@@ -358,9 +362,10 @@ class BytecodeInstrumenter {
 	 * @param declaration the explicit declaration.
 	 * @param instanceIndex local variable index of an instance that is put in or -1 if no instance is put in.
 	 * @param instanceType type of the instance put in or null if no instance is put in.
+	 * @throws InstrumenterException if the instrumentation fails.
 	 */
 	private void instrumentExplicitDeclaration(final MethodWrapper editor, final ExplicitDeclaration declaration,
-			final int instanceIndex, final IClass instanceType) {
+			final int instanceIndex, final IClass instanceType) throws InstrumenterException {
 		boolean useForLoop = declaration.getClassName() != null;
 		IClass actualInstanceType = instanceType;
 		int iteratorIndex = 0;
@@ -409,9 +414,10 @@ class BytecodeInstrumenter {
 	 * @param declaration the explicit declaration.
 	 * @param instanceIndex index where the local variable to use is stored.
 	 * @param instanceType type of the local variable.
+	 * @throws InstrumenterException if the instrumentation fails.
 	 */
 	private void instrumentExplicitDeclarationContent(final MethodWrapper editor, final ExplicitDeclaration declaration,
-			final int instanceIndex, final IClass instanceType) {
+			final int instanceIndex, final IClass instanceType) throws InstrumenterException {
 		for (int i = 0; i < declaration.getNumberOfCallsAndDeclarations(); i++) {
 			AstBaseClass abc = declaration.getCallOrDeclaration(i);
 			if (abc.getClass() == Method.class) {
@@ -423,7 +429,7 @@ class BytecodeInstrumenter {
 					}
 					editor.addInstructionAtEnd(NewInstruction.make(instanceType.getName().toString() + ";", 0));
 					editor.addInstructionAtEnd(InstructionFactory.makeDup());
-					instantiateParameters(editor, init);
+					instantiateParameters(editor, init, 1);
 					editor.addInstructionAtEnd(InstructionFactory.makeInit(instanceType.getName().toString() + ";",
 							init.getDescriptor().toString()));
 					editor.addInstructionAtEnd(InstructionFactory.makeDup());
@@ -436,7 +442,7 @@ class BytecodeInstrumenter {
 				}
 				editor.addInstructionAtEnd(LoadInstruction.make(instanceType.getName().toString() + ";",
 						instanceIndex));
-				instantiateParameters(editor, m.getMethod());
+				instantiateParameters(editor, m.getMethod(), 1);
 				editor.addInstructionAtEnd(InvokeInstruction.make(m.getMethod().getDescriptor().toString(),
 						instanceType.getName().toString() + ";", m.getMethod().getName().toString(),
 								instanceType.isInterface() ? IInvokeInstruction.Dispatch.INTERFACE
@@ -446,7 +452,7 @@ class BytecodeInstrumenter {
 				}
 			} else if (abc.getClass() == StaticMethod.class) {
 				StaticMethod st = (StaticMethod) abc;
-				instantiateParameters(editor, st.getMethod());
+				instantiateParameters(editor, st.getMethod(), 1);
 				editor.addInstructionAtEnd(InvokeInstruction.make(st.getMethod().getDescriptor().toString(),
 						st.getClassString() + ";",
 						st.getMethod().getName().toString(), IInvokeInstruction.Dispatch.STATIC));
@@ -464,24 +470,61 @@ class BytecodeInstrumenter {
 	 *
 	 * @param editor the editor for bytecode instrumentation.
 	 * @param method the method for which the parameters are created.
+	 * @param level level of parameter instantiation.
+	 * @throws InstrumenterException if a parameter cannot be instantiated.
 	 */
-	private void instantiateParameters(final MethodWrapper editor, final IMethod method) {
+	private void instantiateParameters(final MethodWrapper editor, final IMethod method, final int level)
+		throws InstrumenterException {
 		for (int i = method.isStatic() ? 0 : 1; i < method.getNumberOfParameters(); i++) {
 			TypeReference type = method.getParameterType(i);
 			if (type.isPrimitiveType()) {
 				editor.addInstructionAtEnd(ConstantInstruction.make(type.getName().toString(), 0));
 			} else {
-				editor.addInstructionAtEnd(ConstantInstruction.make(type.getName().toString() + ";", null));
+				if (level == MAX_LEVEL) {
+					editor.addInstructionAtEnd(ConstantInstruction.make(type.getName().toString() + ";", null));
+				} else {
+					IClass con = wrapper.getClassHierarchy().lookupClass(type);
+					if (!isConcreteClass(con)) {
+						for (IClass cl : wrapper.getSubtypes(con)) {
+							if (isConcreteClass(con)) {
+								con = cl;
+								break;
+							}
+						}
+					} else {
+						con = null;
+					}
+					if (con == null) {
+						throw new InstrumenterException("No concrete class found for " + type.getName().toString());
+					}
+					IMethod init = wrapper.findInit(con);
+					editor.addInstructionAtEnd(NewInstruction.make(con.getName().toString() + ";", 0));
+					editor.addInstructionAtEnd(InstructionFactory.makeDup());
+					instantiateParameters(editor, init, level + 1);
+					editor.addInstructionAtEnd(InstructionFactory.makeInit(con.getName().toString() + ";",
+							init.getDescriptor().toString()));
+				}
 			}
 		}
+	}
+
+	/**
+	 * Checks if a class is a concrete class.
+	 *
+	 * @param c the class to check.
+	 * @return true if the class is concrete. false otherwise.
+	 */
+	private boolean isConcreteClass(final IClass c) {
+		return !(c.isAbstract() || c.isPrivate() || c.isInterface());
 	}
 
 	/**
 	 * Instruments the bytecode for the start phase.
 	 *
 	 * @param editor the editor for the start phase method.
+	 * @throws InstrumenterException if the instrumentation fails.
 	 */
-	private void instrumentStartPhase(final MethodWrapper editor) {
+	private void instrumentStartPhase(final MethodWrapper editor) throws InstrumenterException {
 		NonDeterministicIfInstrumenter ifInstr = new NonDeterministicIfInstrumenter();
 		Set<ExplicitDeclaration> declarations = wrapper.getFramework().getStartPhase().getDeclarations();
 		int maxUsesIndex = editor.allocateLocalVariable(Constants.TYPE_double);
@@ -500,8 +543,9 @@ class BytecodeInstrumenter {
 	 * Instruments the bytecode for the end phase.
 	 *
 	 * @param editor the editor for the end phase method.
+	 * @throws InstrumenterException if the instrumentation fails.
 	 */
-	private void instrumentEndPhase(final MethodWrapper editor) {
+	private void instrumentEndPhase(final MethodWrapper editor) throws InstrumenterException {
 		instrumentExplicitDeclaration(editor, wrapper.getFramework().getEndPhase().getEnd(), -1, null);
 		editor.instrumentMethod();
 	}
@@ -617,8 +661,10 @@ class BytecodeInstrumenter {
 	 *
 	 * @param editor the edtior for bytecode instrumentation.
 	 * @param working the working phase.
+	 * @throws InstrumenterException if the instrumentation fails.
 	 */
-	private void instrumentActualWorkingPhaseContent(final MethodWrapper editor, final WorkingPhase working) {
+	private void instrumentActualWorkingPhaseContent(final MethodWrapper editor, final WorkingPhase working) throws
+		InstrumenterException {
 		NonDeterministicLoopInstrumenter loop = new NonDeterministicLoopInstrumenter();
 		NonDeterministicIfInstrumenter ifInstr = new NonDeterministicIfInstrumenter();
 		loop.instrumentLoopBeginning(editor);
@@ -656,7 +702,7 @@ class BytecodeInstrumenter {
 									+ Constants.TYPE_Object, LIST_BYTECODE_NAME, "get",
 									IInvokeInstruction.Dispatch.INTERFACE), handlers);
 							editor.addInstructionAtEnd(CheckCastInstruction.make(cl.getName().toString() + ";"));
-							instantiateParameters(editor, m);
+							instantiateParameters(editor, m, 1);
 							editor.addInstructionAtEnd(InvokeInstruction.make(m.getDescriptor().toString(),
 									cl.getName().toString() + ";",
 									m.getName().toString(), cl.isInterface()
@@ -697,9 +743,10 @@ class BytecodeInstrumenter {
 	 * @param editor the editor for bytecode instrumentation.
 	 * @param ifInstr instrumenter for the non-deterministic if-else-if-clause in the working phase.
 	 * @param b the block rule.
+	 * @throws InstrumenterException if the instrumentation fails.
 	 */
 	private void instrumentBlock(final MethodWrapper editor, final NonDeterministicIfInstrumenter ifInstr,
-			final Block b) {
+			final Block b) throws InstrumenterException {
 		if (b.getInnerBlock() == null) {
 			for (int i = 0; i < wrapper.getInstancesCount(b.getIClass()); i++) {
 				ifInstr.instrumentCaseBeginning(editor);
