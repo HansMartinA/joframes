@@ -489,20 +489,20 @@ class BytecodeInstrumenter {
 						editor.addInstructionAtEnd(NewInstruction.make(con.getName().toString() + ";", 1));
 						continue;
 					}
-					if (!isConcreteClass(con)) {
-						IClass newCon = null;
+					IMethod init = wrapper.findInit(con);
+					if (init == null) {
 						for (IClass cl : wrapper.getSubtypes(con)) {
-							if (isConcreteClass(con)) {
-								newCon = cl;
+							init = wrapper.findInit(cl);
+							if (init != null) {
+								con = cl;
 								break;
 							}
 						}
-						if (newCon == null) {
-							throw new InstrumenterException("No concrete class found for " + type.getName().toString());
-						}
-						con = newCon;
 					}
-					IMethod init = wrapper.findInit(con);
+					if (init == null) {
+						editor.addInstructionAtEnd(ConstantInstruction.make(con.getName().toString() + ";", null));
+						continue;
+					}
 					editor.addInstructionAtEnd(NewInstruction.make(con.getName().toString() + ";", 0));
 					editor.addInstructionAtEnd(InstructionFactory.makeDup());
 					instantiateParameters(editor, init, level + 1);
@@ -511,16 +511,6 @@ class BytecodeInstrumenter {
 				}
 			}
 		}
-	}
-
-	/**
-	 * Checks if a class is a concrete class.
-	 *
-	 * @param c the class to check.
-	 * @return true if the class is concrete. false otherwise.
-	 */
-	private boolean isConcreteClass(final IClass c) {
-		return !(c.isAbstract() || c.isPrivate() || c.isInterface());
 	}
 
 	/**
