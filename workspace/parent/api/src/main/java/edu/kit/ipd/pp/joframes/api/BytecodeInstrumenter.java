@@ -40,6 +40,7 @@ import edu.kit.ipd.pp.joframes.shrike.MethodWrapper;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -494,11 +495,14 @@ class BytecodeInstrumenter {
 						continue;
 					}
 					IMethod init = wrapper.findInit(con);
-					if (init == null) {
-						for (IClass cl : wrapper.getSubtypes(con)) {
-							init = wrapper.findInit(cl);
-							if (init != null) {
+					Iterator<IClass> subtypes = wrapper.getSubtypes(con).iterator();
+					if (init == null || subtypes.hasNext()) {
+						while (subtypes.hasNext()) {
+							IClass cl = subtypes.next();
+							IMethod nextInit = wrapper.findInit(cl);
+							if (nextInit != null && !wrapper.getSubtypes(cl).iterator().hasNext()) {
 								con = cl;
+								init = nextInit;
 								break;
 							}
 						}
