@@ -119,9 +119,19 @@ class AnalysisApplicator {
 		String specPath = new File("").getAbsoluteFile().getParentFile().getAbsolutePath() + File.separator + "api"
 				+ File.separator + "src" + File.separator + "main" + File.separator + "resources" + File.separator;
 		if (framework == SupportedFrameworks.SERVLET) {
-			String servletAPI = "target" + File.separator + "javax.servlet-api-4.0.1.jar";
-			instr.addInputJar(servletAPI);
-			frameworkJars = new String[] {servletAPI};
+			frameworkJars = new String[] {
+					"target" + File.separator + "tomcat-servlet-api-9.0.12.jar",
+					"target" + File.separator + "tomcat-annotations-api-9.0.12.jar",
+					"target" + File.separator + "tomcat-api-9.0.12.jar",
+					"target" + File.separator + "tomcat-catalina-9.0.12.jar",
+					"target" + File.separator + "tomcat-coyote-9.0.12.jar",
+					"target" + File.separator + "tomcat-jni-9.0.12.jar",
+					"target" + File.separator + "tomcat-juli-9.0.12.jar",
+					"target" + File.separator + "tomcat-util-9.0.12.jar",
+					"target" + File.separator + "tomcat-util-scan-9.0.12.jar"};
+			for (String j : frameworkJars) {
+				instr.addInputJar(j);
+			}
 			specPath += "Servlets.xml";
 		} else if (framework == SupportedFrameworks.SWING) {
 			specPath += "Swing.xml";
