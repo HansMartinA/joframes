@@ -14,6 +14,9 @@ cd dist
 mvn install:install-file -Dfile=./joana.ui.ifc.wala.console.jar -DgroupId=edu.kit.ipd -DartifactId=joana-ui-ifc -Dversion=-1 -Dpackaging=jar
 cd ../..
 cd parent
-mvn clean package site
+mvn clean install -DskipTests=true
+mkdir target
+mvn surefire:test > target/test-results-console-out.txt
+mvn site -DskipTests=true
 ant -buildfile ./build-maven-site.xml
 

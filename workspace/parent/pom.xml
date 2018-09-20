@@ -156,12 +156,6 @@
 							<goal>report</goal>
 						</goals>
 					</execution>
-					<execution>
-						<id>default-check</id>
-						<goals>
-							<goal>check</goal>
-						</goals>
-					</execution>
 				</executions>
 			</plugin>
 			<plugin>
@@ -199,6 +193,7 @@
 				</reportSets>
 				<configuration>
 					<show>package</show>
+					<failOnError>false</failOnError>
 				</configuration>
 			</plugin>
 			<plugin>
