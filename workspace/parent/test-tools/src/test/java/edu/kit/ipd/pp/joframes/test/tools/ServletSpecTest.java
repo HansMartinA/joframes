@@ -507,6 +507,19 @@ public class ServletSpecTest {
 	}
 
 	/**
+	 * Tests the Servlet test case which violates confidentiality.
+	 *
+	 * @throws Exception if something goes wrong.
+	 */
+	@Test
+	public void testConf1() throws Exception {
+		anaApp.addSource("edu.kit.ipd.pp.joframes.test.servlet.conf.ConfContextListener.secret",
+				BuiltinLattices.STD_SECLEVEL_HIGH);
+		anaApp.addSink("java.io.PrintWriter.println(Ljava/lang/Object;)V->p1", BuiltinLattices.STD_SECLEVEL_LOW);
+		makeAndPrintResults("conf1.jar", "conf1.jar", JoanaProfiles.HIGH_PRECISION, 1, false, false);
+	}
+
+	/**
 	 * Runs the analysis and prints and tests the results.
 	 *
 	 * @param classifier classifier of the input jar file.

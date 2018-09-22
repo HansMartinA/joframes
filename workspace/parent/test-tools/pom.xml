@@ -684,6 +684,20 @@
 							</includes>
 						</configuration>
 					</execution>
+					<execution>
+						<id>Conf1</id>
+						<phase>package</phase>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+						<configuration>
+							<classifier>conf1</classifier>
+							<includes>
+								<include>**/*ConfContextListener.class</include>
+								<include>**/*ConfServlet.class</include>
+							</includes>
+						</configuration>
+					</execution>
 				</executions>
 			</plugin>
 			<plugin>
