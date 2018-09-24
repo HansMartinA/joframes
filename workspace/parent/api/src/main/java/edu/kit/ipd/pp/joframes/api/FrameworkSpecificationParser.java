@@ -386,7 +386,7 @@ class FrameworkSpecificationParser {
 				case XMLStreamConstants.CHARACTERS:
 					String[] splittedText = xmlStream.getText().trim().split(" ");
 					if (splittedText.length == 1 && splittedText[0].equals(APIConstants.MAIN_SIGNATURE)) {
-						return new StaticMethod(null, splittedText[1]);
+						return new StaticMethod(null, splittedText[0]);
 					}
 					return new StaticMethod(splittedText[0], splittedText[1]);
 				default: break;
