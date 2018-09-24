@@ -539,14 +539,23 @@ public class ServletSpecTest {
 	 */
 	@Test
 	public void testInt1() throws Exception {
-		anaApp.addSource(
-				"org.apache.catalina.connector.Request.getParameter(Ljava/lang/String;)Ljava/lang/String;->exit",
-				BuiltinLattices.STD_SECLEVEL_HIGH);
 		anaApp.addSource("edu.kit.ipd.pp.joframes.test.servlet.integrity.SecretOutputServlet.input",
 				BuiltinLattices.STD_SECLEVEL_LOW);
-		anaApp.addSink("java.io.PrintWriter.println(Ljava/lang/String;)V->p1",
+		makeAndPrintResults("int1.jar", "int1.jar", JoanaProfiles.HIGH_PRECISION, 1, true, true);
+	}
+
+	/**
+	 * Tests the second Servlet test case which violates integrity.
+	 *
+	 * @throws Exception if something goes wrong.
+	 */
+	@Test
+	public void testInt2() throws Exception {
+		anaApp.addSource("edu.kit.ipd.pp.joframes.test.servlet.integrity2.FirstContextListener.secret",
 				BuiltinLattices.STD_SECLEVEL_LOW);
-		makeAndPrintResults("int1.jar", "int1.jar", JoanaProfiles.HIGH_PRECISION, 1, false, false);
+		anaApp.addSink("java.io.PrintStream.println(Ljava/lang/Object;)V->p1",
+				BuiltinLattices.STD_SECLEVEL_LOW);
+		makeAndPrintResults("int2.jar", "int2.jar", JoanaProfiles.HIGH_PRECISION, 1, true, false);
 	}
 
 	/**
