@@ -483,7 +483,11 @@ class BytecodeInstrumenter {
 		for (int i = method.isStatic() ? 0 : 1; i < method.getNumberOfParameters(); i++) {
 			TypeReference type = method.getParameterType(i);
 			if (type.isPrimitiveType()) {
-				editor.addInstructionAtEnd(ConstantInstruction.make(type.getName().toString(), 0));
+				if (type.getName().toString().equals(Constants.TYPE_char)) {
+					editor.addInstructionAtEnd(ConstantInstruction.make('0'));
+				} else {
+					editor.addInstructionAtEnd(ConstantInstruction.make(type.getName().toString(), 0));
+				}
 			} else {
 				if (level == MAX_LEVEL) {
 					editor.addInstructionAtEnd(ConstantInstruction.make(type.getName().toString() + ";", null));
