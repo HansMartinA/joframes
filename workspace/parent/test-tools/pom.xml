@@ -755,6 +755,19 @@
 							</includes>
 						</configuration>
 					</execution>
+					<execution>
+						<id>SWConf2</id>
+						<phase>package</phase>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+						<configuration>
+							<classifier>sw-conf2</classifier>
+							<includes>
+								<include>**/swing/password/**</include>
+							</includes>
+						</configuration>
+					</execution>
 				</executions>
 			</plugin>
 			<plugin>

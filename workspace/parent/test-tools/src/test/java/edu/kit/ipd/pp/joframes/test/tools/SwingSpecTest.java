@@ -30,6 +30,24 @@ public class SwingSpecTest extends BasicTest {
 		makeAndPrintResults("sw-conf1.jar", "sw-conf1.jar", JoanaProfiles.HIGH_PRECISION, 1, false, false);
 	}
 
+	/**
+	 * Tests the Swing test case with password input which violates confidentiality.
+	 *
+	 * @throws Exception if something goes wrong.
+	 */
+	@Test
+	public void testPassword() throws Exception {
+		mainClass = "Ledu/kit/ipd/pp/joframes/test/swing/password/MainPW";
+		anaApp.addSource("javax.swing.JPasswordField.getText()Ljava/lang/String;->exit",
+				BuiltinLattices.STD_SECLEVEL_HIGH);
+		anaApp.addSource(
+				"edu.kit.ipd.pp.joframes.test.swing.password.PasswordInput.keyReleased(Ljava/awt/event/KeyEvent;)V->p1",
+				BuiltinLattices.STD_SECLEVEL_HIGH);
+		anaApp.addSink("javax.swing.JPasswordField.setText(Ljava/lang/String;)V->p1", BuiltinLattices.STD_SECLEVEL_LOW);
+		anaApp.addSink("java.io.PrintStream.println(Ljava/lang/String;)V->p1", BuiltinLattices.STD_SECLEVEL_LOW);
+		makeAndPrintResults("sw-conf2.jar", "sw-conf2.jar", JoanaProfiles.HIGH_PRECISION, 2, false, false);
+	}
+
 	@Override
 	SupportedFrameworks getFramework() {
 		return SupportedFrameworks.SWING;
