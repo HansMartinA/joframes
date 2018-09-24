@@ -61,6 +61,10 @@ class AnalysisApplicator {
 		 * Settings that offer a trade-off between performance for larger applications and precision for the analysis.
 		 */
 		MODERATE,
+		/**
+		 * Settings that offer a fast analysis.
+		 */
+		FAST,
 	}
 	/**
 	 * Stores the sources with their security level for annotation.
@@ -170,6 +174,10 @@ class AnalysisApplicator {
 			sdgConfig.setMhpType(MHPType.SIMPLE);
 			sdgConfig.setPointsToPrecision(PointsToPrecision.INSTANCE_BASED);
 			sdgConfig.setExceptionAnalysis(ExceptionAnalysis.INTRAPROC);
+		} else if (joProfile == JoanaProfiles.FAST) {
+			sdgConfig.setMhpType(MHPType.SIMPLE);
+			sdgConfig.setPointsToPrecision(PointsToPrecision.TYPE_BASED);
+			sdgConfig.setExceptionAnalysis(ExceptionAnalysis.ALL_NO_ANALYSIS);
 		}
 		SDGProgram sdg = SDGProgram.createSDGProgram(sdgConfig, System.out, new NullProgressMonitor());
 		IFCAnalysis ifcAna = new IFCAnalysis(sdg);
