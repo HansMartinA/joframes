@@ -459,7 +459,7 @@ class BytecodeInstrumenter {
 				StaticMethod st = (StaticMethod) abc;
 				instantiateParameters(editor, st.getMethod(), 1);
 				editor.addInstructionAtEnd(InvokeInstruction.make(st.getMethod().getDescriptor().toString(),
-						st.getClassString() + ";",
+						st.getIClass().getName().toString() + ";",
 						st.getMethod().getName().toString(), IInvokeInstruction.Dispatch.STATIC));
 				if (st.getMethod().getReturnType() != TypeReference.Void) {
 					editor.addInstructionAtEnd(InstructionFactory.makePop());
