@@ -50,6 +50,20 @@ public class SwingSpecTest extends BasicTest {
 		makeAndPrintResults("sw-conf2.jar", "sw-conf2.jar", JoanaProfiles.FAST, 2, false, false);
 	}
 
+	/**
+	 * Tests the Swing test case which has no information flow.
+	 *
+	 * @throws Exception if something goes wrong.
+	 */
+	@Test
+	public void testNoIF() throws Exception {
+		mainClass = "Ledu/kit/ipd/pp/joframes/test/swing/no_ifc/MainNo";
+		anaApp.addSource("javax.swing.text.JTextComponent.getText()Ljava/lang/String;->exit",
+				BuiltinLattices.STD_SECLEVEL_HIGH);
+		anaApp.addSink("java.io.PrintStream.println(Ljava/lang/String;)V->p1", BuiltinLattices.STD_SECLEVEL_LOW);
+		makeAndPrintResults("sw-noif.jar", "sw-noif.jar", JoanaProfiles.MODERATE, 0, false, false);
+	}
+
 	@Override
 	SupportedFrameworks getFramework() {
 		return SupportedFrameworks.SWING;

@@ -767,6 +767,18 @@
 								<include>**/swing/password/**</include>
 							</includes>
 						</configuration>
+					</execution><execution>
+						<id>SWNoIF</id>
+						<phase>package</phase>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+						<configuration>
+							<classifier>sw-noif</classifier>
+							<includes>
+								<include>**/swing/no_ifc/**</include>
+							</includes>
+						</configuration>
 					</execution>
 				</executions>
 			</plugin>
