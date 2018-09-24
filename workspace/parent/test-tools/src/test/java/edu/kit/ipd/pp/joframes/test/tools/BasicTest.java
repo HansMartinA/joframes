@@ -64,6 +64,15 @@ public abstract class BasicTest {
 	abstract SupportedFrameworks getFramework();
 
 	/**
+	 * Returns the class containing the main method.
+	 *
+	 * @return the main class.
+	 */
+	String getMainClass() {
+		return null;
+	}
+
+	/**
 	 * Annotates the default source.
 	 */
 	abstract void annotateDefaultSource();
@@ -95,7 +104,7 @@ public abstract class BasicTest {
 			annotateDefaultSink();
 		}
 		AnalysisApplicator.AAResults result = anaApp.applyAnalysis(getFramework(), new String[] {
-				"target" + File.separator + JAR_PREFIX + classifier}, null, output, profile);
+				"target" + File.separator + JAR_PREFIX + classifier}, getMainClass(), output, profile);
 		System.out.println("Instructions: " + result.getFrameworkAndApplicationInstructionCount() + " + "
 				+ result.getAdditionalInstructionsCount());
 		System.out.println("Overall time: " + result.getOverallTime() + ", time for [Framework Project]: "

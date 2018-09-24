@@ -742,6 +742,19 @@
 							</includes>
 						</configuration>
 					</execution>
+					<execution>
+						<id>SWConf1</id>
+						<phase>package</phase>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+						<configuration>
+							<classifier>sw-conf1</classifier>
+							<includes>
+								<include>**/swing/conf/**</include>
+							</includes>
+						</configuration>
+					</execution>
 				</executions>
 			</plugin>
 			<plugin>
