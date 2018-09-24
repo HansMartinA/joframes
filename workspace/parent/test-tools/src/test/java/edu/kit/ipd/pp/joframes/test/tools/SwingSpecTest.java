@@ -26,8 +26,9 @@ public class SwingSpecTest extends BasicTest {
 		mainClass = "Ledu/kit/ipd/pp/joframes/test/swing/conf/Main";
 		anaApp.addSource("edu.kit.ipd.pp.joframes.test.swing.conf.ConfActionListener.secret",
 				BuiltinLattices.STD_SECLEVEL_HIGH);
-		anaApp.addSink("javax.swing.JTextField.setText(Ljava/lang/String;)V->p1", BuiltinLattices.STD_SECLEVEL_LOW);
-		makeAndPrintResults("sw-conf1.jar", "sw-conf1.jar", JoanaProfiles.HIGH_PRECISION, 1, false, false);
+		anaApp.addSink("javax.swing.text.JTextComponent.setText(Ljava/lang/String;)V->p1",
+				BuiltinLattices.STD_SECLEVEL_LOW);
+		makeAndPrintResults("sw-conf1.jar", "sw-conf1.jar", JoanaProfiles.MODERATE, 1, false, false);
 	}
 
 	/**
@@ -43,9 +44,10 @@ public class SwingSpecTest extends BasicTest {
 		anaApp.addSource(
 				"edu.kit.ipd.pp.joframes.test.swing.password.PasswordInput.keyReleased(Ljava/awt/event/KeyEvent;)V->p1",
 				BuiltinLattices.STD_SECLEVEL_HIGH);
-		anaApp.addSink("javax.swing.JPasswordField.setText(Ljava/lang/String;)V->p1", BuiltinLattices.STD_SECLEVEL_LOW);
+		anaApp.addSink("javax.swing.text.JTextComponent.setText(Ljava/lang/String;)V->p1",
+				BuiltinLattices.STD_SECLEVEL_LOW);
 		anaApp.addSink("java.io.PrintStream.println(Ljava/lang/String;)V->p1", BuiltinLattices.STD_SECLEVEL_LOW);
-		makeAndPrintResults("sw-conf2.jar", "sw-conf2.jar", JoanaProfiles.HIGH_PRECISION, 2, false, false);
+		makeAndPrintResults("sw-conf2.jar", "sw-conf2.jar", JoanaProfiles.FAST, 2, false, false);
 	}
 
 	@Override
