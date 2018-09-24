@@ -533,6 +533,23 @@ public class ServletSpecTest {
 	}
 
 	/**
+	 * Tests the Servlet test case which violates integrity.
+	 *
+	 * @throws Exception if something goes wrong.
+	 */
+	@Test
+	public void testInt1() throws Exception {
+		anaApp.addSource(
+				"org.apache.catalina.connector.Request.getParameter(Ljava/lang/String;)Ljava/lang/String;->exit",
+				BuiltinLattices.STD_SECLEVEL_HIGH);
+		anaApp.addSource("edu.kit.ipd.pp.joframes.test.servlet.integrity.SecretOutputServlet.input",
+				BuiltinLattices.STD_SECLEVEL_LOW);
+		anaApp.addSink("java.io.PrintWriter.println(Ljava/lang/String;)V->p1",
+				BuiltinLattices.STD_SECLEVEL_LOW);
+		makeAndPrintResults("int1.jar", "int1.jar", JoanaProfiles.HIGH_PRECISION, 1, false, false);
+	}
+
+	/**
 	 * Runs the analysis and prints and tests the results.
 	 *
 	 * @param classifier classifier of the input jar file.

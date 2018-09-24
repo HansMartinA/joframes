@@ -713,6 +713,20 @@
 							</includes>
 						</configuration>
 					</execution>
+					<execution>
+						<id>Int1</id>
+						<phase>package</phase>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+						<configuration>
+							<classifier>int1</classifier>
+							<includes>
+								<include>**/*PublicInputServlet.class</include>
+								<include>**/*SecretOutputServlet.class</include>
+							</includes>
+						</configuration>
+					</execution>
 				</executions>
 			</plugin>
 			<plugin>
