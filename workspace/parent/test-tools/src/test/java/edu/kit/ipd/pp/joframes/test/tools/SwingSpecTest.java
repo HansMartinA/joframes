@@ -64,6 +64,21 @@ public class SwingSpecTest extends BasicTest {
 		makeAndPrintResults("sw-noif.jar", "sw-noif.jar", JoanaProfiles.MODERATE, 0, false, false);
 	}
 
+	/**
+	 * Tests the Swing test case which includes a SwingWorker.
+	 *
+	 * @throws Exception if something goes wrong.
+	 */
+	@Test
+	public void testSwingWorker() throws Exception {
+		mainClass = "Ledu/kit/ipd/pp/joframes/test/swing/swing_worker/MainWorker";
+		anaApp.addSource("edu.kit.ipd.pp.joframes.test.swing.swing_worker.LongRunningSwingWorker.secret",
+				BuiltinLattices.STD_SECLEVEL_HIGH);
+		anaApp.addSink("javax.swing.text.JTextComponent.setText(Ljava/lang/String;)V->p1",
+				BuiltinLattices.STD_SECLEVEL_LOW);
+		makeAndPrintResults("sw-sw.jar", "sw-sw.jar", JoanaProfiles.MODERATE, 1, false, false);
+	}
+
 	@Override
 	SupportedFrameworks getFramework() {
 		return SupportedFrameworks.SWING;
