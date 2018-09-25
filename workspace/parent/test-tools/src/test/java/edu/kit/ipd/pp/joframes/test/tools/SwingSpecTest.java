@@ -79,6 +79,24 @@ public class SwingSpecTest extends BasicTest {
 		makeAndPrintResults("sw-sw.jar", "sw-sw.jar", JoanaProfiles.MODERATE, 1, false, false);
 	}
 
+	/**
+	 * Tests the Swing test case with extended password and no information flow.
+	 *
+	 * @throws Exception if something goes wrong.
+	 */
+	@Test
+	public void testExtendedPassword() throws Exception {
+		mainClass = "Ledu/kit/ipd/pp/joframes/test/swing/extended_password/MainExtPW";
+		anaApp.addSource("javax.swing.JPasswordField.getText()Ljava/lang/String;->exit",
+				BuiltinLattices.STD_SECLEVEL_HIGH);
+		anaApp.addSource("javax.swing.text.JTextComponent.getText()Ljava/lang/String;->exit",
+				BuiltinLattices.STD_SECLEVEL_LOW);
+		anaApp.addSink("edu.kit.ipd.pp.joframes.test.swing.extended_password.CheckUserNameActionListener"
+				+ ".actionPerformed(Ljava/awt/event/ActionEvent;)V:37",
+				BuiltinLattices.STD_SECLEVEL_LOW);
+		makeAndPrintResults("sw-ext-pw.jar", "sw-ext-pw.jar", JoanaProfiles.MODERATE, 0, false, false);
+	}
+
 	@Override
 	SupportedFrameworks getFramework() {
 		return SupportedFrameworks.SWING;
