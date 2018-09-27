@@ -119,6 +119,11 @@ class AnalysisApplicator {
 		long analysisStart = System.currentTimeMillis();
 		AAResults result = new AAResults();
 		InstrumenterWrapper instr = new InstrumenterWrapper();
+		for (String appJar : applicationJars) {
+			instr.addInputJar(appJar);
+		}
+		result.insCountBefore = instr.countInstructions();
+		instr = new InstrumenterWrapper();
 		String[] frameworkJars = null;
 		String specPath = new File("").getAbsoluteFile().getParentFile().getAbsolutePath() + File.separator + "api"
 				+ File.separator + "src" + File.separator + "main" + File.separator + "resources" + File.separator;
@@ -142,10 +147,7 @@ class AnalysisApplicator {
 		} else if (framework == SupportedFrameworks.JAVAFX) {
 			specPath += "JavaFX.xml";
 		}
-		for (String appJar : applicationJars) {
-			instr.addInputJar(appJar);
-		}
-		result.insCountBefore = instr.countInstructions();
+		result.insFramework = instr.countInstructions();
 		Pipeline p = new Pipeline(specPath, frameworkJars, applicationJars);
 		p.setOutput("target" + File.separator + output);
 		p.setMainClass(mainClass);
@@ -203,7 +205,11 @@ class AnalysisApplicator {
 	 */
 	class AAResults {
 		/**
-		 * Stores the instruction count before the analysis and instrumentation of the application.
+		 * Stores the instruction count of the framework.
+		 */
+		private long insFramework;
+		/**
+		 * Stores the instruction count of the application before the analysis and instrumentation of the application.
 		 */
 		private long insCountBefore;
 		/**
@@ -228,11 +234,20 @@ class AnalysisApplicator {
 		private TObjectIntMap<IViolation<SDGProgramPart>> violations;
 
 		/**
-		 * Returns the instruction count of the framework and application without the instrumented code.
+		 * Returns the instruction count of the framework.
 		 *
 		 * @return the instruction count.
 		 */
-		long getFrameworkAndApplicationInstructionCount() {
+		long getFrameworkInstructionCount() {
+			return insFramework;
+		}
+
+		/**
+		 * Returns the instruction count of the application without the instrumented code.
+		 *
+		 * @return the instruction count.
+		 */
+		long getApplicationInstructionCount() {
 			return insCountBefore;
 		}
 
@@ -242,7 +257,7 @@ class AnalysisApplicator {
 		 * @return the instruction count.
 		 */
 		long getAdditionalInstructionsCount() {
-			return insCountAfter - insCountBefore;
+			return insCountAfter - insCountBefore - insFramework;
 		}
 
 		/**
