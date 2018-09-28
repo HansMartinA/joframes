@@ -30,6 +30,20 @@ public class JavaFXSpecTest extends BasicTest {
 		super.makeAndPrintResults("jfx-conf1.jar", "jfx-conf1.jar", JoanaProfiles.MODERATE, 1, false, false);
 	}
 
+	/**
+	 * Tests the JavaFX test case with a password input and its output.
+	 *
+	 * @throws Exception if something goes wrong.
+	 */
+	@Test
+	public void testPassword() throws Exception {
+		mainClass = "Ledu/kit/ipd/pp/joframes/jfx/password/PasswordApplication";
+		anaApp.addSource("javafx.scene.control.PasswordField.getText()Ljava/lang/String;->exit",
+				BuiltinLattices.STD_SECLEVEL_HIGH);
+		anaApp.addSink("java.io.PrintStream.println(Ljava/lang/String;)V->p1", BuiltinLattices.STD_SECLEVEL_LOW);
+		super.makeAndPrintResults("jfx-password.jar", "jfx-password.jar", JoanaProfiles.MODERATE, 1, false, false);
+	}
+
 	@Override
 	String getMainClass() {
 		return mainClass;

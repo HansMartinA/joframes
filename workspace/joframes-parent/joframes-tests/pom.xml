@@ -814,6 +814,19 @@
 							</includes>
 						</configuration>
 					</execution>
+					<execution>
+						<id>JFXPassword</id>
+						<phase>package</phase>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+						<configuration>
+							<classifier>jfx-password</classifier>
+							<includes>
+								<include>**/jfx/password/**</include>
+							</includes>
+						</configuration>
+					</execution>
 				</executions>
 			</plugin>
 			<plugin>
