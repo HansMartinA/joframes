@@ -771,7 +771,7 @@
 						<configuration>
 							<classifier>sw-noif</classifier>
 							<includes>
-								<include>**/swing/no_ifc/**</include>
+								<include>**/swing/no_if/**</include>
 							</includes>
 						</configuration>
 					</execution>

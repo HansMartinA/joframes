@@ -9,7 +9,7 @@ import javax.swing.JTextField;
  *
  * @author Martin Armbruster
  */
-public class ConfActionListener implements ActionListener {
+public final class ConfActionListener implements ActionListener {
 	/**
 	 * Stores a secret.
 	 */

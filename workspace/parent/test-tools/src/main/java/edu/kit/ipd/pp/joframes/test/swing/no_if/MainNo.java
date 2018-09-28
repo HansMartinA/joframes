@@ -1,7 +1,7 @@
-package edu.kit.ipd.pp.joframes.test.swing.no_ifc;
+package edu.kit.ipd.pp.joframes.test.swing.no_if;
 
 /**
- * Main class for the test case with no information flow.
+ * Main class which creates the main frame.
  *
  * @author Martin Armbruster
  */

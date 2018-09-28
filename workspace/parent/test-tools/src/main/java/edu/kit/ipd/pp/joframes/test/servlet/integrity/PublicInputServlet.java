@@ -5,7 +5,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 /**
- * A Servlet that is open for public input.
+ * A Servlet that is open for public inputs.
  *
  * @author Martin Armbruster
  */

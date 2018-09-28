@@ -1,7 +1,7 @@
 package edu.kit.ipd.pp.joframes.test.swing.password;
 
 /**
- * Main class that makes the input of the password possible.
+ * Main class that creates the main frame.
  *
  * @author Martin Armbruster
  */

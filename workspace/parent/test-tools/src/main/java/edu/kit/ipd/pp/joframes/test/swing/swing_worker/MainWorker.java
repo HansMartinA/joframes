@@ -1,7 +1,7 @@
 package edu.kit.ipd.pp.joframes.test.swing.swing_worker;
 
 /**
- * Main class for the Swing test case including a SwingWorker.
+ * Main class which creates the main frame.
  *
  * @author Martin Armbruster
  */

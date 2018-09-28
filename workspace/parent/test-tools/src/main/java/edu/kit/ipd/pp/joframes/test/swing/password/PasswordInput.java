@@ -7,11 +7,11 @@ import javax.swing.JFrame;
 import javax.swing.JPasswordField;
 
 /**
- * This class provides an password input for the user.
+ * This class provides a password input for the user.
  *
  * @author Martin Armbruster
  */
-public class PasswordInput implements KeyListener {
+public final class PasswordInput implements KeyListener {
 	/**
 	 * Stores the displayed window.
 	 */

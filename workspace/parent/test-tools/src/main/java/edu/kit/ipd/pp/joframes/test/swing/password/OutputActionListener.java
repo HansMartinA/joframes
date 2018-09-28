@@ -9,7 +9,7 @@ import javax.swing.text.JTextComponent;
  *
  * @author Martin Armbruster
  */
-public class OutputActionListener implements ActionListener {
+public final class OutputActionListener implements ActionListener {
 	/**
 	 * Stores the TextComponent.
 	 */

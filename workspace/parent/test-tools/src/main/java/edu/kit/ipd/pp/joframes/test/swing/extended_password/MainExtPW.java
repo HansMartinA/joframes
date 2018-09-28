@@ -1,7 +1,7 @@
 package edu.kit.ipd.pp.joframes.test.swing.extended_password;
 
 /**
- * Main class for the Swing test case with extended password input.
+ * Main class which creates the main frame.
  *
  * @author Martin Armbruster
  */

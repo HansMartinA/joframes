@@ -17,7 +17,7 @@ public class SwingSpecTest extends BasicTest {
 	private String mainClass;
 
 	/**
-	 * Tests the simple Swing test case which violates confidentiality.
+	 * Tests the simple Swing test case which violates confidentiality by showing a secret in a text field.
 	 *
 	 * @throws Exception if something goes wrong.
 	 */
@@ -32,7 +32,7 @@ public class SwingSpecTest extends BasicTest {
 	}
 
 	/**
-	 * Tests the Swing test case with password input which violates confidentiality.
+	 * Tests the Swing test case with password input which violates confidentiality by putting the password out.
 	 *
 	 * @throws Exception if something goes wrong.
 	 */
@@ -57,7 +57,7 @@ public class SwingSpecTest extends BasicTest {
 	 */
 	@Test
 	public void testNoIF() throws Exception {
-		mainClass = "Ledu/kit/ipd/pp/joframes/test/swing/no_ifc/MainNo";
+		mainClass = "Ledu/kit/ipd/pp/joframes/test/swing/no_if/MainNo";
 		anaApp.addSource("javax.swing.text.JTextComponent.getText()Ljava/lang/String;->exit",
 				BuiltinLattices.STD_SECLEVEL_HIGH);
 		anaApp.addSink("java.io.PrintStream.println(Ljava/lang/String;)V->p1", BuiltinLattices.STD_SECLEVEL_LOW);
@@ -80,7 +80,7 @@ public class SwingSpecTest extends BasicTest {
 	}
 
 	/**
-	 * Tests the Swing test case with extended password and no information flow.
+	 * Tests the Swing test case with a user name and password input and no information flow.
 	 *
 	 * @throws Exception if something goes wrong.
 	 */

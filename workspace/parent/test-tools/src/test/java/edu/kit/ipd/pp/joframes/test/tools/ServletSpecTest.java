@@ -462,7 +462,7 @@ public class ServletSpecTest extends BasicTest {
 	}
 
 	/**
-	 * Tests the Servlet test case which violates confidentiality.
+	 * Tests the Servlet test case which violates confidentiality by putting out a secret attribute.
 	 *
 	 * @throws Exception if something goes wrong.
 	 */
@@ -475,7 +475,8 @@ public class ServletSpecTest extends BasicTest {
 	}
 
 	/**
-	 * Tests the Servlet test case which does not violate confidentiality.
+	 * Tests the Servlet test case which does not violate confidentiality by extending the test case out of testConf1
+	 * and overriding the secret attribute.
 	 *
 	 * @throws Exception if something goes wrong.
 	 */
@@ -488,7 +489,8 @@ public class ServletSpecTest extends BasicTest {
 	}
 
 	/**
-	 * Tests the Servlet test case which violates integrity.
+	 * Tests the Servlet test case which violates integrity by putting out a secret value which can be written
+	 * publicly.
 	 *
 	 * @throws Exception if something goes wrong.
 	 */
@@ -500,7 +502,8 @@ public class ServletSpecTest extends BasicTest {
 	}
 
 	/**
-	 * Tests the second Servlet test case which violates integrity.
+	 * Tests the second Servlet test case which violates integrity where a Servlet can influence a flow of a hidden
+	 * attribute.
 	 *
 	 * @throws Exception if something goes wrong.
 	 */

@@ -3,4 +3,4 @@
  *
  * @author Martin Armbruster
  */
-package edu.kit.ipd.pp.joframes.test.swing.no_ifc;
+package edu.kit.ipd.pp.joframes.test.swing.no_if;

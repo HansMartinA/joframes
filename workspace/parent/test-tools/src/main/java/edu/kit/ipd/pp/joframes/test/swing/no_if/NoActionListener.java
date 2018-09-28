@@ -1,4 +1,4 @@
-package edu.kit.ipd.pp.joframes.test.swing.no_ifc;
+package edu.kit.ipd.pp.joframes.test.swing.no_if;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -9,7 +9,7 @@ import javax.swing.JTextField;
  *
  * @author Martin Armbruster
  */
-public class NoActionListener implements ActionListener {
+public final class NoActionListener implements ActionListener {
 	/**
 	 * Stores the JTextField used for an output.
 	 */

@@ -9,7 +9,7 @@ import javax.swing.text.JTextComponent;
  *
  * @author Martin Armbruster
  */
-public class LongRunningSwingWorker extends SwingWorker<String, Void> {
+public final class LongRunningSwingWorker extends SwingWorker<String, Void> {
 	/**
 	 * Stores a secret.
 	 */
