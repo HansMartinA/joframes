@@ -13,7 +13,7 @@ cd ../../../..
 cd dist
 mvn install:install-file -Dfile=./joana.ui.ifc.wala.console.jar -DgroupId=edu.kit.ipd -DartifactId=joana-ui-ifc -Dversion=-1 -Dpackaging=jar
 cd ../..
-cd parent
+cd joframes-parent
 mvn clean install -DskipTests=true
 cd ../..
 cd scripts

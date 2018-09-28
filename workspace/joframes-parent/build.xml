@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="JoFrames" default="project-build" basedir=".">
+	<property name="project.name" value="joframes" />
+	<property name="project.version" value="0.2" />
+	<property name="project.ui.package" value="edu.kit.ipd.pp.joframes.ui." />
+	<property name="module.api" location="./joframes-api" />
+	<property name="module.api.external" location="./joframes-api-external" />
+	<property name="module.ast.base" location="./joframes-ast-base" />
+	<property name="module.ast.ap" location="./joframes-ast-ap" />
+	<property name="module.ast.acha" location="./joframes-ast-acha" />
+	<property name="module.language" location="./joframes-language-syntax" />
+	<property name="module.shrike" location="./joframes-shrike" />
+	<property name="module.ui.cli" location="./joframes-ui-cli" />
+	<property name="module.ui.gui" location="./joframes-ui-gui" />
+	<property name="module.tests" location="./joframes-tests" />
+	<property name="src" value="src/main/java" />
+	<property name="src.test" value="src/test/java" />
+	<property name="src.res" value="src/main/resources" />
+	<property name="src.test.res" value="src/test/resources" />
+	<property name="dest" location="./target" />
+	<property name="dest.src" location="${dest}/src" />
+	<property name="dest.src.compiled" location="${dest}/classes" />
+	<property name="dest.jar.api" location="${dest}/${project.name}-api-${project.version}.jar" />
+	<property name="dest.jar.ui.cli" location="${dest}/${project.name}-cli-${project.version}.jar" />
+	<property name="dest.jar.ui.gui" location="${dest}/${project.name}-gui-${project.version}.jar" />
+	<property name="wala" location="../joana/contrib/wala" />
+	<property name="wala.core" location="${wala}/com.ibm.wala.core/target/com.ibm.wala.core-1.4.4-SNAPSHOT.jar" />
+	<property name="wala.util" location="${wala}/com.ibm.wala.util/target/com.ibm.wala.util-1.4.4-SNAPSHOT.jar" />
+	<property name="wala.shrike" location="${wala}/com.ibm.wala.shrike/target/com.ibm.wala.shrike-1.4.4-SNAPSHOT.jar" />
+	<property name="joana" location="../joana/dist" />
+	<property name="joana.api" location="${joana}/joana.api.jar" />
+	<property name="joana.ui.ifc.console" location="${joana}/joana.ui.ifc.wala.console.jar" />
+	<property name="build.compiler" value="javac1.8" />
+
+	<target name="api-copy-sources">
+		<mkdir dir="${dest.src}" />
+		<mkdir dir="${dest.src.compiled}" />
+		<copy todir="${dest.src}">
+			<fileset dir="${module.ast.base}/${src}" />
+			<fileset dir="${module.ast.ap}/${src}" />
+			<fileset dir="${module.ast.acha}/${src}" />
+			<fileset dir="${module.shrike}/${src}" />
+			<fileset dir="${module.api}/${src}" />
+			<fileset dir="${module.api.external}/${src}" />
+		</copy>
+		<copy todir="${dest.src.compiled}">
+			<fileset dir="${module.api}/${src.res}" />
+			<fileset dir="${module.language}/${src.res}" />
+		</copy>
+	</target>
+
+	<target name="api-compile" depends="api-copy-sources">
+		<javac srcdir="${dest.src}" destdir="${dest.src.compiled}" fork="true">
+			<classpath>
+				<fileset file="${wala.core}" />
+				<fileset file="${wala.util}" />
+				<fileset file="${wala.shrike}" />
+			</classpath>
+		</javac>
+	</target>
+
+	<target name="api-package" depends="api-compile">
+		<jar destfile="${dest.jar.api}">
+			<fileset dir="${dest.src.compiled}" />
+			<zipfileset src="${wala.core}" />
+			<zipfileset src="${wala.util}" />
+			<zipfileset src="${wala.shrike}" />
+			<manifest />
+		</jar>
+	</target>
+
+	<target name="api-clean" depends="api-package">
+		<delete includeemptydirs="true">
+			<fileset dir="${dest.src}" includes="**/*" />
+			<fileset dir="${dest.src.compiled}" includes="**/*" />
+		</delete>
+	</target>
+
+	<target name="ui-cli-copy-sources">
+		<copy todir="${dest.src}">
+			<fileset dir="${module.ui.cli}/${src}" />
+		</copy>
+	</target>
+
+	<target name="ui-cli-compile" depends="ui-cli-copy-sources">
+		<javac srcdir="${dest.src}" destdir="${dest.src.compiled}" fork="true" classpath="${dest.jar.api}" />
+	</target>
+
+	<target name="ui-cli-package" depends="ui-cli-compile">
+		<jar destfile="${dest.jar.ui.cli}">
+			<fileset dir="${dest.src.compiled}" />
+			<zipfileset src="${dest.jar.api}" />
+			<manifest>
+				<attribute name="Main-Class" value="${project.ui.package}cli.CLIMain" />
+			</manifest>
+		</jar>
+	</target>
+
+	<target name="ui-cli-clean" depends="ui-cli-package">
+		<delete includeemptydirs="true">
+			<fileset dir="${dest.src}" includes="**/*" />
+			<fileset dir="${dest.src.compiled}" includes="**/*" />
+		</delete>
+	</target>
+
+	<target name="ui-gui-copy-sources">
+		<copy todir="${dest.src}">
+			<fileset dir="${module.ui.gui}/${src}" />
+		</copy>
+	</target>
+
+	<target name="ui-gui-compile" depends="ui-gui-copy-sources">
+		<javac srcdir="${dest.src}" destdir="${dest.src.compiled}" fork="true">
+			<classpath>
+				<fileset file="${dest.jar.api}" />
+				<fileset file="${joana.ui.ifc.console}" />
+			</classpath>
+		</javac>
+	</target>
+
+	<target name="ui-gui-package" depends="ui-gui-compile">
+		<jar destfile="${dest.jar.ui.gui}">
+			<fileset dir="${dest.src.compiled}" />
+			<zipfileset src="${dest.jar.api}" />
+			<zipfileset src="${joana.ui.ifc.console}" />
+			<manifest>
+				<attribute name="Main-Class" value="${project.ui.package}gui.Main" />
+			</manifest>
+		</jar>
+	</target>
+
+	<target name="ui-gui-clean" depends="ui-gui-package">
+		<delete includeemptydirs="true">
+			<fileset dir="${dest.src}" />
+			<fileset dir="${dest.src.compiled}" />
+		</delete>
+	</target>
+
+	<target name="api" depends="api-clean" />
+
+	<target name="ui-cli" depends="ui-cli-clean" />
+
+	<target name="ui-gui" depends="ui-gui-clean" />
+
+	<target name="project-build" depends="api,ui-cli,ui-gui" />
+</project>

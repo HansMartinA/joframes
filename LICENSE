@@ -1,6 +1,6 @@
-######################################################
-#####    [Framework Project] - The MIT-License    ####
-######################################################
+##################################################################
+#####    Joana and Frameworks (JoFrames) - The MIT-License    ####
+##################################################################
 
 Copyright (C) 2018, Martin Armbruster
 
@@ -14,7 +14,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 #####    Java Object-sensitive ANAlysis (Joana)    ####
 #######################################################
 
-The [Framework Project] uses parts of Joana. For all files of Joana, the following note applies. 
+JoFrames uses parts of Joana. For all files of Joana, the following note applies. 
 
 /**
  * This file is part of the Joana IFC project. It is developed at the

@@ -1,0 +1,20 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>joframes</groupId>
+		<artifactId>joframes-parent</artifactId>
+		<version>0.2</version>
+	</parent>
+	<artifactId>joframes-ast-ap</artifactId>
+	<dependencies>
+		<dependency>
+			<groupId>joframes</groupId>
+			<artifactId>joframes-ast-base</artifactId>
+			<version>0.2</version>
+		</dependency>
+	</dependencies>
+	<name>AST, ap</name>
+	<description>This module contains parts of the abstract syntax tree that are added by the parser and removed during the class hierarchy analysis.</description>
+</project>

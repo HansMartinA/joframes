@@ -148,5 +148,5 @@ _minted*
 .DS_Store
 .svn
 CVS
-workspace/parent/test-tools/src/main/java/securibench/*
+workspace/joframes-parent/joframes-tests/src/main/java/securibench/*
 *dependency-reduced-pom.xml

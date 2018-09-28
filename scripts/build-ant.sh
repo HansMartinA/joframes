@@ -1,6 +1,6 @@
 #!/bin/bash
 ./init.sh
 cd ..
-cd workspace/parent
+cd workspace/joframes-parent
 ant
 

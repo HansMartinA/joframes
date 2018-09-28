@@ -1,29 +1,29 @@
 #!/bin/bash
 cd ..
-cd workspace/parent
+cd workspace/joframes-parent
 mvn site -DskipTests=true
-cp -r ./api/target/site ./target/site/site
-mv ./target/site/site ./target/site/api
-cp -r ./api-external/target/site ./target/site/site
-mv ./target/site/site ./target/site/api-external
-cp -r ./api-test-data/target/site ./target/site/site
-mv ./target/site/site ./target/site/api-test-data
-cp -r ./ast-acha/target/site ./target/site/site
-mv ./target/site/site ./target/site/ast-acha
-cp -r ./ast-ap/target/site ./target/site/site
-mv ./target/site/site ./target/site/ast-ap
-cp -r ./ast-base/target/site ./target/site/site
-mv ./target/site/site ./target/site/ast-base
-cp -r ./language-syntax/target/site ./target/site/site
-mv ./target/site/site ./target/site/language-syntax
-cp -r ./shrike/target/site ./target/site/site
-mv ./target/site/site ./target/site/shrike
-cp -r ./test-tools/target/site ./target/site/site
-mv ./target/site/site ./target/site/test-tools
-cp -r ./ui-cli/target/site ./target/site/site
-mv ./target/site/site ./target/site/ui-cli
-cp -r ./ui-gui/target/site ./target/site/site
-mv ./target/site/site ./target/site/ui-gui
+cp -r ./joframes-api/target/site ./target/site/site
+mv ./target/site/site ./target/site/joframes-api
+cp -r ./joframes-api-external/target/site ./target/site/site
+mv ./target/site/site ./target/site/joframes-api-external
+cp -r ./joframes-api-test-data/target/site ./target/site/site
+mv ./target/site/site ./target/site/joframes-api-test-data
+cp -r ./joframes-ast-acha/target/site ./target/site/site
+mv ./target/site/site ./target/site/joframes-ast-acha
+cp -r ./joframes-ast-ap/target/site ./target/site/site
+mv ./target/site/site ./target/site/joframes-ast-ap
+cp -r ./joframes-ast-base/target/site ./target/site/site
+mv ./target/site/site ./target/site/joframes-ast-base
+cp -r ./joframes-language-syntax/target/site ./target/site/site
+mv ./target/site/site ./target/site/joframes-language-syntax
+cp -r ./joframes-shrike/target/site ./target/site/site
+mv ./target/site/site ./target/site/joframes-shrike
+cp -r ./joframes-tests/target/site ./target/site/site
+mv ./target/site/site ./target/site/joframes-tests
+cp -r ./joframes-ui-cli/target/site ./target/site/site
+mv ./target/site/site ./target/site/joframes-ui-cli
+cp -r ./joframes-ui-gui/target/site ./target/site/site
+mv ./target/site/site ./target/site/joframes-ui-gui
 cd ../..
 cd scripts
 
