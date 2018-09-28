@@ -23,7 +23,7 @@ public class JavaFXSpecTest extends BasicTest {
 	 */
 	@Test
 	public void testConf1() throws Exception {
-		mainClass = "Ledu/kit/ipd/pp/joframes/jfx/conf/ConfApplication";
+		mainClass = "Ledu/kit/ipd/pp/joframes/test/jfx/conf/ConfApplication";
 		anaApp.addSource("edu.kit.ipd.pp.joframes.jfx.conf.ConfEventHandler.secret", BuiltinLattices.STD_SECLEVEL_HIGH);
 		anaApp.addSink("javafx.scene.control.TextInputControl.setText(Ljava/lang/String;)V->p1",
 				BuiltinLattices.STD_SECLEVEL_LOW);
@@ -37,7 +37,7 @@ public class JavaFXSpecTest extends BasicTest {
 	 */
 	@Test
 	public void testPassword() throws Exception {
-		mainClass = "Ledu/kit/ipd/pp/joframes/jfx/password/PasswordApplication";
+		mainClass = "Ledu/kit/ipd/pp/joframes/test/jfx/password/PasswordApplication";
 		anaApp.addSource("javafx.scene.control.PasswordField.getText()Ljava/lang/String;->exit",
 				BuiltinLattices.STD_SECLEVEL_HIGH);
 		anaApp.addSink("java.io.PrintStream.println(Ljava/lang/String;)V->p1", BuiltinLattices.STD_SECLEVEL_LOW);
@@ -51,7 +51,7 @@ public class JavaFXSpecTest extends BasicTest {
 	 */
 	@Test
 	public void testExtendedPassword() throws Exception {
-		mainClass = "Ledu/kit/ipd/pp/joframes/jfx/extended_password/ExtendedPasswordApplication";
+		mainClass = "Ledu/kit/ipd/pp/joframes/test/jfx/extended_password/ExtendedPasswordApplication";
 		anaApp.addSource("javafx.scene.control.TextInputControl.getText()Ljava/lang/String;->exit",
 				BuiltinLattices.STD_SECLEVEL_LOW);
 		anaApp.addSource("javafx.scene.control.PasswordField.getText()Ljava/lang/String;->exit",

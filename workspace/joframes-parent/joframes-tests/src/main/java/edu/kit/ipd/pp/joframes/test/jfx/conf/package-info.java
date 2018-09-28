@@ -3,4 +3,4 @@
  *
  * @author Martin Armbruster
  */
-package edu.kit.ipd.pp.joframes.jfx.conf;
+package edu.kit.ipd.pp.joframes.test.jfx.conf;

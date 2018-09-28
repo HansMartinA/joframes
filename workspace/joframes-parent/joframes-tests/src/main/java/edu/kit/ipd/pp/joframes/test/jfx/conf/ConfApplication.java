@@ -1,4 +1,4 @@
-package edu.kit.ipd.pp.joframes.jfx.conf;
+package edu.kit.ipd.pp.joframes.test.jfx.conf;
 
 import javafx.application.Application;
 import javafx.scene.Scene;

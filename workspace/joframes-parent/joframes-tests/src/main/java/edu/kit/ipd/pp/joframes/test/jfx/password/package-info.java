@@ -3,4 +3,4 @@
  *
  * @author Martin Armbruster
  */
-package edu.kit.ipd.pp.joframes.jfx.password;
+package edu.kit.ipd.pp.joframes.test.jfx.password;

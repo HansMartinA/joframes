@@ -1,4 +1,4 @@
-package edu.kit.ipd.pp.joframes.jfx.extended_password;
+package edu.kit.ipd.pp.joframes.test.jfx.extended_password;
 
 import javafx.application.Application;
 import javafx.event.ActionEvent;

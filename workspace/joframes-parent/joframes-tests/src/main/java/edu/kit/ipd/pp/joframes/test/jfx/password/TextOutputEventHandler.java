@@ -1,4 +1,4 @@
-package edu.kit.ipd.pp.joframes.jfx.password;
+package edu.kit.ipd.pp.joframes.test.jfx.password;
 
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
