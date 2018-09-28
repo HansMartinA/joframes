@@ -693,8 +693,7 @@
 						<configuration>
 							<classifier>conf1</classifier>
 							<includes>
-								<include>**/*ConfContextListener.class</include>
-								<include>**/*ConfServlet.class</include>
+								<include>**/servlet/conf/**</include>
 							</includes>
 						</configuration>
 					</execution>
@@ -707,9 +706,7 @@
 						<configuration>
 							<classifier>conf2</classifier>
 							<includes>
-								<include>**/*ConfContextListener.class</include>
-								<include>**/*ConfServlet.class</include>
-								<include>**/*ConfRequestListener.class</include>
+								<include>**/servlet/no_conf/**</include>
 							</includes>
 						</configuration>
 					</execution>
@@ -722,8 +719,7 @@
 						<configuration>
 							<classifier>int1</classifier>
 							<includes>
-								<include>**/*PublicInputServlet.class</include>
-								<include>**/*SecretOutputServlet.class</include>
+								<include>**/servlet/integrity/**</include>
 							</includes>
 						</configuration>
 					</execution>
@@ -736,9 +732,7 @@
 						<configuration>
 							<classifier>int2</classifier>
 							<includes>
-								<include>**/*FirstContextListener.class</include>
-								<include>**/*SecondContextListener.class</include>
-								<include>**/*Int2Servlet.class</include>
+								<include>**/servlet/integrity2/**</include>
 							</includes>
 						</configuration>
 					</execution>

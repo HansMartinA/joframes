@@ -51,7 +51,7 @@ public class ServletSpecTest extends BasicTest {
 		anaApp.addSource("org.apache.catalina.connector.Request.getParameterValues(Ljava/lang/String;)"
 				+ "[Ljava/lang/String;->exit", BuiltinLattices.STD_SECLEVEL_HIGH);
 		anaApp.addSink("java.io.PrintWriter.println(Ljava/lang/Object;)V->p1", BuiltinLattices.STD_SECLEVEL_LOW);
-		makeAndPrintResults("aliasing6.jar", "al6.jar", JoanaProfiles.HIGH_PRECISION, 7, false, false);
+		makeAndPrintResults("aliasing6.jar", "al6.jar", JoanaProfiles.HIGH_PRECISION, 1, false, false);
 	}
 
 	/**
@@ -101,7 +101,7 @@ public class ServletSpecTest extends BasicTest {
 	 */
 	@Test
 	public void testCollections3() throws Exception {
-		makeAndPrintResults("collections3.jar", "coll3.jar", JoanaProfiles.HIGH_PRECISION, 2, true, true);
+		makeAndPrintResults("collections3.jar", "coll3.jar", JoanaProfiles.HIGH_PRECISION, 0, true, true);
 	}
 
 	/**
@@ -121,7 +121,7 @@ public class ServletSpecTest extends BasicTest {
 	 */
 	@Test
 	public void testCollections7() throws Exception {
-		makeAndPrintResults("collections7.jar", "coll7.jar", JoanaProfiles.HIGH_PRECISION, 1, true, true);
+		makeAndPrintResults("collections7.jar", "coll7.jar", JoanaProfiles.FAST, 1, true, true);
 	}
 
 	/**
@@ -131,7 +131,7 @@ public class ServletSpecTest extends BasicTest {
 	 */
 	@Test
 	public void testCollections8() throws Exception {
-		makeAndPrintResults("collections8.jar", "coll8.jar", JoanaProfiles.HIGH_PRECISION, 1, true, true);
+		makeAndPrintResults("collections8.jar", "coll8.jar", JoanaProfiles.HIGH_PRECISION, 0, true, true);
 	}
 
 	/**
@@ -151,7 +151,8 @@ public class ServletSpecTest extends BasicTest {
 	 */
 	@Test
 	public void testCollections13() throws Exception {
-		makeAndPrintResults("collections13.jar", "coll13.jar", JoanaProfiles.HIGH_PRECISION, 1, true, true);
+		anaApp.addSink("java.io.PrintWriter.println(Ljava/lang/Object;)V->p1", BuiltinLattices.STD_SECLEVEL_LOW);
+		makeAndPrintResults("collections13.jar", "coll13.jar", JoanaProfiles.HIGH_PRECISION, 1, true, false);
 	}
 
 	/**
@@ -161,7 +162,8 @@ public class ServletSpecTest extends BasicTest {
 	 */
 	@Test
 	public void testCollections14() throws Exception {
-		makeAndPrintResults("collections14.jar", "coll14.jar", JoanaProfiles.HIGH_PRECISION, 1, true, true);
+		anaApp.addSink("java.io.PrintWriter.println(Ljava/lang/Object;)V->p1", BuiltinLattices.STD_SECLEVEL_LOW);
+		makeAndPrintResults("collections14.jar", "coll14.jar", JoanaProfiles.HIGH_PRECISION, 1, true, false);
 	}
 
 	/**
@@ -201,7 +203,7 @@ public class ServletSpecTest extends BasicTest {
 	 */
 	@Test
 	public void testInter2() throws Exception {
-		makeAndPrintResults("inter2.jar", "inter2.jar", JoanaProfiles.HIGH_PRECISION, 2, true, true);
+		makeAndPrintResults("inter2.jar", "inter2.jar", JoanaProfiles.HIGH_PRECISION, 1, true, true);
 	}
 
 	/**
@@ -271,7 +273,9 @@ public class ServletSpecTest extends BasicTest {
 	 */
 	@Test
 	public void testPred1() throws Exception {
-		makeAndPrintResults("pred1.jar", "pred1.jar", JoanaProfiles.HIGH_PRECISION, 0, true, true);
+		anaApp.addSink("javax.servlet.http.HttpServlet.service(Ljavax/servlet/ServletRequest;"
+				+ "Ljavax/servlet/ServletResponse;)V->p2", BuiltinLattices.STD_SECLEVEL_LOW);
+		makeAndPrintResults("pred1.jar", "pred1.jar", JoanaProfiles.HIGH_PRECISION, 0, true, false);
 	}
 
 	/**
@@ -321,7 +325,7 @@ public class ServletSpecTest extends BasicTest {
 	 */
 	@Test
 	public void testSanitizers4() throws Exception {
-		makeAndPrintResults("san4.jar", "san4.jar", JoanaProfiles.HIGH_PRECISION, 2, true, true);
+		makeAndPrintResults("san4.jar", "san4.jar", JoanaProfiles.HIGH_PRECISION, 1, true, true);
 	}
 
 	/**
@@ -396,7 +400,7 @@ public class ServletSpecTest extends BasicTest {
 	 */
 	@Test
 	public void testBasic8() throws Exception {
-		makeAndPrintResults("basic8.jar", "basic8.jar", JoanaProfiles.HIGH_PRECISION, 1, true, true);
+		makeAndPrintResults("basic8.jar", "basic8.jar", JoanaProfiles.HIGH_PRECISION, 0, true, true);
 	}
 
 	/**
@@ -420,7 +424,7 @@ public class ServletSpecTest extends BasicTest {
 	public void testBasic23() throws Exception {
 		anaApp.addSink("java.io.FileWriter.<init>(Ljava/lang/String;)V", BuiltinLattices.STD_SECLEVEL_LOW);
 		anaApp.addSink("java.io.FileInputStream.<init>(Ljava/lang/String;)V", BuiltinLattices.STD_SECLEVEL_LOW);
-		makeAndPrintResults("basic23.jar", "basic23.jar", JoanaProfiles.HIGH_PRECISION, 3, true, false);
+		makeAndPrintResults("basic23.jar", "basic23.jar", JoanaProfiles.HIGH_PRECISION, 2, true, false);
 	}
 
 	/**
@@ -430,7 +434,7 @@ public class ServletSpecTest extends BasicTest {
 	 */
 	@Test
 	public void testBasic28() throws Exception {
-		makeAndPrintResults("basic28.jar", "basic28.jar", JoanaProfiles.HIGH_PRECISION, 2, true, true);
+		makeAndPrintResults("basic28.jar", "basic28.jar", JoanaProfiles.HIGH_PRECISION, 1, true, true);
 	}
 
 	/**
@@ -442,7 +446,7 @@ public class ServletSpecTest extends BasicTest {
 	public void testBasic31() throws Exception {
 		anaApp.addSource("org.apache.catalina.connector.Request.getCookies()[Ljavax/servlet/http/Cookie;",
 				BuiltinLattices.STD_SECLEVEL_HIGH);
-		makeAndPrintResults("basic31.jar", "basic31.jar", JoanaProfiles.HIGH_PRECISION, 3, false, true);
+		makeAndPrintResults("basic31.jar", "basic31.jar", JoanaProfiles.HIGH_PRECISION, 1, false, true);
 	}
 
 	/**
@@ -452,10 +456,9 @@ public class ServletSpecTest extends BasicTest {
 	 */
 	@Test
 	public void testBasic35() throws Exception {
-		anaApp.addSource(
-				"javax.servlet.http.HttpServlet.service(Ljavax/servlet/ServletRequest;Ljavax/servlet/Response;)V->p1",
-				BuiltinLattices.STD_SECLEVEL_HIGH);
-		makeAndPrintResults("basic35.jar", "basic35.jar", JoanaProfiles.HIGH_PRECISION, 6, false, true);
+		anaApp.addSource("javax.servlet.http.HttpServlet.service(Ljavax/servlet/ServletRequest;"
+				+ "Ljavax/servlet/ServletResponse;)V->p1", BuiltinLattices.STD_SECLEVEL_HIGH);
+		makeAndPrintResults("basic35.jar", "basic35.jar", JoanaProfiles.HIGH_PRECISION, 1, false, true);
 	}
 
 	/**
