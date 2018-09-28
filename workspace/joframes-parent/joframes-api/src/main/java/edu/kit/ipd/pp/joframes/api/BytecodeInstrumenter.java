@@ -201,6 +201,7 @@ class BytecodeInstrumenter {
 		this.wrapper = frameworkWrapper;
 		try {
 			InstrumenterWrapper instrumenter = new InstrumenterWrapper();
+			instrumenter.setExclusionRegex(APIConstants.DEFAULT_EXCLUSION_REGEX);
 			try {
 				for (String appJar : applicationJars) {
 					instrumenter.addInputJar(appJar);

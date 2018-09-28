@@ -1,6 +1,7 @@
 package edu.kit.ipd.pp.joframes.test.tools;
 
 import com.ibm.wala.util.NullProgressMonitor;
+import edu.kit.ipd.pp.joframes.api.APIConstants;
 import edu.kit.ipd.pp.joframes.api.Pipeline;
 import edu.kit.ipd.pp.joframes.shrike.InstrumenterWrapper;
 import edu.kit.joana.api.IFCAnalysis;
@@ -166,13 +167,7 @@ class AnalysisApplicator {
 				"edu.kit.ipd.pp.joframes.api.external.ArtificialClass");
 		SDGConfig sdgConfig = new SDGConfig(p.getOutput(), entryMethod.toBCString(), Stubs.JRE_17);
 		sdgConfig.setComputeInterferences(true);
-		sdgConfig.setExclusions("java\\/nio\\/.*\n"
-				+ "java\\/net\\/.*\n"
-				+ "com\\/sun\\/.*\n"
-				+ "sun\\/.*\n"
-				+ "apple\\/awt\\/.*\n"
-				+ "com\\/apple\\/.*\n"
-				+ "org\\/omg\\/.*\n");
+		sdgConfig.setExclusions(APIConstants.DEFAULT_EXCLUSION_REGEX);
 		if (joProfile == JoanaProfiles.HIGH_PRECISION) {
 			sdgConfig.setMhpType(MHPType.PRECISE);
 			sdgConfig.setPointsToPrecision(PointsToPrecision.N1_OBJECT_SENSITIVE);

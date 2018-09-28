@@ -13,6 +13,16 @@ public final class APIConstants {
 	 */
 	public static final String TEST_SYSTEM_PROPERTY = "edu.kit.ipd.pp.joframes.test.active";
 	/**
+	 * Default regular expression for selecting classes to exclude in the instrumentation.
+	 */
+	public static final String DEFAULT_EXCLUSION_REGEX = "(java\\/nio\\/.*)|"
+			+ "(java\\/net\\/.*)|"
+			+ "(com\\/sun\\/.*)|"
+			+ "(sun\\/.*)|"
+			+ "(apple\\/awt\\/.*)|"
+			+ "(com\\/apple\\/.*)|"
+			+ "(org\\/omg\\/.*)";
+	/**
 	 * Signature of a main method.
 	 */
 	static final String MAIN_SIGNATURE = "main([" + Constants.TYPE_String + ")" + Constants.TYPE_void;
