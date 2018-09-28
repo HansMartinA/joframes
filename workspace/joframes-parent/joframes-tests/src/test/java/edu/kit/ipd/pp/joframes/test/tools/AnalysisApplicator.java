@@ -146,6 +146,10 @@ class AnalysisApplicator {
 		} else if (framework == SupportedFrameworks.SWING) {
 			specPath += "Swing.xml";
 		} else if (framework == SupportedFrameworks.JAVAFX) {
+			frameworkJars = new String[] {
+					System.getProperty("java.home") + File.separator + "lib" + File.separator + "ext" + File.separator
+					+ "jfxrt.jar"};
+			System.out.println();
 			specPath += "JavaFX.xml";
 		}
 		result.insFramework = instr.countInstructions();
