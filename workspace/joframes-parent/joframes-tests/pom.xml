@@ -801,6 +801,19 @@
 							</includes>
 						</configuration>
 					</execution>
+					<execution>
+						<id>JFXConf1</id>
+						<phase>package</phase>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+						<configuration>
+							<classifier>jfx-conf1</classifier>
+							<includes>
+								<include>**/jfx/conf/**</include>
+							</includes>
+						</configuration>
+					</execution>
 				</executions>
 			</plugin>
 			<plugin>
