@@ -23,6 +23,10 @@ public class InstrumenterWrapper {
 	 */
 	private OfflineInstrumenter offInstr;
 	/**
+	 * Stores a regular expression for selecting classes to exclude when adding a jar file.
+	 */
+	private String exclusionRegex = "";
+	/**
 	 * Stores the output jar file.
 	 */
 	private String output;
@@ -82,7 +86,7 @@ public class InstrumenterWrapper {
 		Enumeration<JarEntry> entries = jo.entries();
 		while (entries.hasMoreElements()) {
 			JarEntry entry = entries.nextElement();
-			if (entry.getName().endsWith(".class")) {
+			if (entry.getName().endsWith(".class") && !entry.getName().matches(exclusionRegex)) {
 				offInstr.addInputJarEntry(jar, entry.getName());
 			}
 		}
@@ -105,6 +109,15 @@ public class InstrumenterWrapper {
 			throw new IllegalArgumentException("The given jar entry (" + jarEntry + ") is not valid.");
 		}
 		offInstr.addInputElement(new File(""), jarEntry);
+	}
+
+	/**
+	 * Sets a regular expression for choosing classes to exclude when adding a jar file.
+	 *
+	 * @param regex the regular expression.
+	 */
+	public void setExclusionRegex(final String regex) {
+		exclusionRegex = regex;
 	}
 
 	/**
