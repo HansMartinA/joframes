@@ -113,7 +113,7 @@ class ClassHierarchyAnalyzer {
 		ClassHierarchyCreationException {
 		try {
 			AnalysisScope scope = AnalysisScopeReader.makePrimordialScope(new File("cha-exclusions.txt"));
-			if (!wrapper.getFramework().getName().equals(SWING) && !wrapper.getFramework().getName().equals(JAVAFX)) {
+			if (!wrapper.getFramework().getName().equals(SWING)) {
 				if (frameworkJars.length == 0) {
 					throw new ClassHierarchyCreationException("There are no framework jar files.");
 				}

@@ -66,6 +66,10 @@ class AnalysisApplicator {
 		 * Settings that offer a fast analysis.
 		 */
 		FAST,
+		/**
+		 * Settings that offer a faster analysis than the fast settings.
+		 */
+		FASTEST,
 	}
 	/**
 	 * Stores the sources with their security level for annotation.
@@ -120,11 +124,13 @@ class AnalysisApplicator {
 		long analysisStart = System.currentTimeMillis();
 		AAResults result = new AAResults();
 		InstrumenterWrapper instr = new InstrumenterWrapper();
+		instr.setExclusionRegex(APIConstants.DEFAULT_EXCLUSION_REGEX);
 		for (String appJar : applicationJars) {
 			instr.addInputJar(appJar);
 		}
 		result.insCountBefore = instr.countInstructions();
 		instr = new InstrumenterWrapper();
+		instr.setExclusionRegex(APIConstants.DEFAULT_EXCLUSION_REGEX);
 		String[] frameworkJars = null;
 		String specPath = new File("").getAbsoluteFile().getParentFile().getAbsolutePath() + File.separator
 				+ "joframes-api" + File.separator + "src" + File.separator + "main" + File.separator + "resources"
@@ -150,7 +156,7 @@ class AnalysisApplicator {
 			frameworkJars = new String[] {
 					System.getProperty("java.home") + File.separator + "lib" + File.separator + "ext" + File.separator
 					+ "jfxrt.jar"};
-			System.out.println();
+			instr.addInputJar(frameworkJars[0]);
 			specPath += "JavaFX.xml";
 		}
 		result.insFramework = instr.countInstructions();
@@ -180,6 +186,11 @@ class AnalysisApplicator {
 			sdgConfig.setMhpType(MHPType.SIMPLE);
 			sdgConfig.setPointsToPrecision(PointsToPrecision.TYPE_BASED);
 			sdgConfig.setExceptionAnalysis(ExceptionAnalysis.ALL_NO_ANALYSIS);
+		} else if (joProfile == JoanaProfiles.FASTEST) {
+			sdgConfig.setComputeInterferences(false);
+			sdgConfig.setComputeSummaryEdges(false);
+			sdgConfig.setPointsToPrecision(PointsToPrecision.TYPE_BASED);
+			sdgConfig.setExceptionAnalysis(ExceptionAnalysis.IGNORE_ALL);
 		}
 		SDGProgram sdg = SDGProgram.createSDGProgram(sdgConfig, System.out, new NullProgressMonitor());
 		IFCAnalysis ifcAna = new IFCAnalysis(sdg);
