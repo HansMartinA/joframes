@@ -61,6 +61,21 @@ public class JavaFXSpecTest extends BasicTest {
 				false, false);
 	}
 
+	/**
+	 * Tests the JavaFX test case including a Worker.
+	 *
+	 * @throws Exception if something goes wrong.
+	 */
+	@Test
+	public void testWorker() throws Exception {
+		mainClass = "Ledu/kit/ipd/pp/joframes/test/jfx/worker/WorkerApplication";
+		anaApp.addSource("edu.kit.ipd.pp.joframes.test.jfx.worker.WorkerWorker.secret",
+				BuiltinLattices.STD_SECLEVEL_HIGH);
+		anaApp.addSink("javafx.scene.control.TextInputControl.setText(Ljava/lang/String;)V->p1",
+				BuiltinLattices.STD_SECLEVEL_LOW);
+		super.makeAndPrintResults("jfx-worker.jar", "jfx-worker.jar", JoanaProfiles.MODERATE, 1, false, false);
+	}
+
 	@Override
 	String getMainClass() {
 		return mainClass;

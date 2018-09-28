@@ -840,6 +840,19 @@
 							</includes>
 						</configuration>
 					</execution>
+					<execution>
+						<id>JFXWorker</id>
+						<phase>package</phase>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+						<configuration>
+							<classifier>jfx-worker</classifier>
+							<includes>
+								<include>**/jfx/worker/**</include>
+							</includes>
+						</configuration>
+					</execution>
 				</executions>
 			</plugin>
 			<plugin>
