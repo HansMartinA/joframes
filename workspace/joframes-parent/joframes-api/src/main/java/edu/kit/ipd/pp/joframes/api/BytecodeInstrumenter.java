@@ -485,6 +485,8 @@ class BytecodeInstrumenter {
 			if (type.isPrimitiveType()) {
 				if (type.getName().toString().equals(Constants.TYPE_char)) {
 					editor.addInstructionAtEnd(ConstantInstruction.make('0'));
+				} else if (type.getName().toString().equals(Constants.TYPE_boolean)) {
+					editor.addInstructionAtEnd(ConstantInstruction.make(0));
 				} else {
 					editor.addInstructionAtEnd(ConstantInstruction.make(type.getName().toString(), 0));
 				}
