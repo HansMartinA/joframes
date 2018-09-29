@@ -1,5 +1,6 @@
 #!/bin/bash
-./build-maven.sh
+./init.sh
+./maven-build.sh
 cd ..
 cd workspace/joframes-parent
 mkdir target
