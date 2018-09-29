@@ -24,10 +24,11 @@ public class JavaFXSpecTest extends BasicTest {
 	@Test
 	public void testConf1() throws Exception {
 		mainClass = "Ledu/kit/ipd/pp/joframes/test/jfx/conf/ConfApplication";
-		anaApp.addSource("edu.kit.ipd.pp.joframes.jfx.conf.ConfEventHandler.secret", BuiltinLattices.STD_SECLEVEL_HIGH);
+		anaApp.addSource("edu.kit.ipd.pp.joframes.test.jfx.conf.ConfEventHandler.secret",
+				BuiltinLattices.STD_SECLEVEL_HIGH);
 		anaApp.addSink("javafx.scene.control.TextInputControl.setText(Ljava/lang/String;)V->p1",
 				BuiltinLattices.STD_SECLEVEL_LOW);
-		super.makeAndPrintResults("jfx-conf1.jar", "jfx-conf1.jar", JoanaProfiles.MODERATE, 1, false, false);
+		makeAndPrintResults("jfx-conf1.jar", "jfx-conf1.jar", JoanaProfiles.FASTEST, 1, false, false);
 	}
 
 	/**
@@ -38,10 +39,10 @@ public class JavaFXSpecTest extends BasicTest {
 	@Test
 	public void testPassword() throws Exception {
 		mainClass = "Ledu/kit/ipd/pp/joframes/test/jfx/password/PasswordApplication";
-		anaApp.addSource("javafx.scene.control.PasswordField.getText()Ljava/lang/String;->exit",
+		anaApp.addSource("javafx.scene.control.TextInputControl.getText()Ljava/lang/String;->exit",
 				BuiltinLattices.STD_SECLEVEL_HIGH);
 		anaApp.addSink("java.io.PrintStream.println(Ljava/lang/String;)V->p1", BuiltinLattices.STD_SECLEVEL_LOW);
-		super.makeAndPrintResults("jfx-password.jar", "jfx-password.jar", JoanaProfiles.MODERATE, 1, false, false);
+		makeAndPrintResults("jfx-password.jar", "jfx-password.jar", JoanaProfiles.FASTEST, 1, false, false);
 	}
 
 	/**
@@ -52,12 +53,13 @@ public class JavaFXSpecTest extends BasicTest {
 	@Test
 	public void testExtendedPassword() throws Exception {
 		mainClass = "Ledu/kit/ipd/pp/joframes/test/jfx/extended_password/ExtendedPasswordApplication";
-		anaApp.addSource("javafx.scene.control.TextInputControl.getText()Ljava/lang/String;->exit",
+		anaApp.addSource("edu.kit.ipd.pp.joframes.test.jfx.extended_password.ExtendedPasswordApplication.userName",
 				BuiltinLattices.STD_SECLEVEL_LOW);
-		anaApp.addSource("javafx.scene.control.PasswordField.getText()Ljava/lang/String;->exit",
+		anaApp.addSource("edu.kit.ipd.pp.joframes.test.jfx.extended_password.ExtendedPasswordApplication.password",
 				BuiltinLattices.STD_SECLEVEL_HIGH);
-		anaApp.addSink("java.io.FileWriter.append(Ljava/lang/String;)V->p1", BuiltinLattices.STD_SECLEVEL_LOW);
-		super.makeAndPrintResults("jfx-extended-password.jar", "jfx-extended-password.jar", JoanaProfiles.MODERATE, 0,
+		anaApp.addSink("java.io.Writer.append(Ljava/lang/CharSequence;)Ljava/io/Writer;->p1",
+				BuiltinLattices.STD_SECLEVEL_LOW);
+		makeAndPrintResults("jfx-extended-password.jar", "jfx-extended-password.jar", JoanaProfiles.FASTEST, 0,
 				false, false);
 	}
 
@@ -73,7 +75,7 @@ public class JavaFXSpecTest extends BasicTest {
 				BuiltinLattices.STD_SECLEVEL_HIGH);
 		anaApp.addSink("javafx.scene.control.TextInputControl.setText(Ljava/lang/String;)V->p1",
 				BuiltinLattices.STD_SECLEVEL_LOW);
-		super.makeAndPrintResults("jfx-worker.jar", "jfx-worker.jar", JoanaProfiles.MODERATE, 1, false, false);
+		makeAndPrintResults("jfx-worker.jar", "jfx-worker.jar", JoanaProfiles.FASTEST, 1, false, false);
 	}
 
 	@Override
