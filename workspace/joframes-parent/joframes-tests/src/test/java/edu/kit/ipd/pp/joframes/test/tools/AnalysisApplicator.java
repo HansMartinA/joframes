@@ -10,6 +10,7 @@ import edu.kit.joana.api.sdg.SDGProgram;
 import edu.kit.joana.api.sdg.SDGProgramPart;
 import edu.kit.joana.ifc.sdg.core.SecurityNode;
 import edu.kit.joana.ifc.sdg.core.violations.IViolation;
+import edu.kit.joana.ifc.sdg.graph.SDGSerializer;
 import edu.kit.joana.ifc.sdg.mhpoptimization.MHPType;
 import edu.kit.joana.ifc.sdg.util.JavaMethodSignature;
 import edu.kit.joana.util.Stubs;
@@ -17,6 +18,7 @@ import edu.kit.joana.wala.core.SDGBuilder.ExceptionAnalysis;
 import edu.kit.joana.wala.core.SDGBuilder.PointsToPrecision;
 import gnu.trove.map.TObjectIntMap;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map.Entry;
@@ -193,6 +195,7 @@ class AnalysisApplicator {
 			sdgConfig.setExceptionAnalysis(ExceptionAnalysis.IGNORE_ALL);
 		}
 		SDGProgram sdg = SDGProgram.createSDGProgram(sdgConfig, System.out, new NullProgressMonitor());
+		// SDGSerializer.toPDGFormat(sdg.getSDG(), new FileOutputStream("SDG.pdg"));
 		IFCAnalysis ifcAna = new IFCAnalysis(sdg);
 		for (Entry<String, String> entry : sources.entrySet()) {
 			ifcAna.addSourceAnnotation(sdg.getPart(entry.getKey()), entry.getValue());
