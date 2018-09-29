@@ -5,29 +5,29 @@
 	<parent>
 		<groupId>joframes</groupId>
 		<artifactId>joframes-parent</artifactId>
-		<version>0.2</version>
+		<version>0.3</version>
 	</parent>
 	<artifactId>joframes-api</artifactId>
 	<dependencies>
 		<dependency>
 			<groupId>joframes</groupId>
 			<artifactId>joframes-ast-base</artifactId>
-			<version>0.2</version>
+			<version>0.3</version>
 		</dependency>
 		<dependency>
 			<groupId>joframes</groupId>
 			<artifactId>joframes-ast-ap</artifactId>
-			<version>0.2</version>
+			<version>0.3</version>
 		</dependency>
 		<dependency>
 			<groupId>joframes</groupId>
 			<artifactId>joframes-ast-acha</artifactId>
-			<version>0.2</version>
+			<version>0.3</version>
 		</dependency>
 		<dependency>
 			<groupId>joframes</groupId>
 			<artifactId>joframes-language-syntax</artifactId>
-			<version>0.2</version>
+			<version>0.3</version>
 		</dependency>
 		<dependency>
 			<groupId>joframes</groupId>
@@ -38,12 +38,12 @@
 		<dependency>
 			<groupId>joframes</groupId>
 			<artifactId>joframes-shrike</artifactId>
-			<version>0.2</version>
+			<version>0.3</version>
 		</dependency>
 		<dependency>
 			<groupId>joframes</groupId>
 			<artifactId>joframes-api-external</artifactId>
-			<version>0.2</version>
+			<version>0.3</version>
 		</dependency>
 	</dependencies>
 	<build>

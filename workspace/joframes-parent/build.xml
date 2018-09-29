@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="JoFrames" default="project-build" basedir=".">
 	<property name="project.name" value="joframes" />
-	<property name="project.version" value="0.2" />
+	<property name="project.version" value="0.3" />
 	<property name="project.ui.package" value="edu.kit.ipd.pp.joframes.ui." />
 	<property name="module.api" location="./joframes-api" />
 	<property name="module.api.external" location="./joframes-api-external" />

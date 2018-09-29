@@ -5,14 +5,14 @@
 	<parent>
 		<groupId>joframes</groupId>
 		<artifactId>joframes-parent</artifactId>
-		<version>0.2</version>
+		<version>0.3</version>
 	</parent>
 	<artifactId>joframes-ui-gui</artifactId>
 	<dependencies>
 		<dependency>
 			<groupId>joframes</groupId>
 			<artifactId>joframes-api</artifactId>
-			<version>0.2</version>
+			<version>0.3</version>
 		</dependency>
 		<dependency>
 			<groupId>edu.kit.ipd</groupId>
