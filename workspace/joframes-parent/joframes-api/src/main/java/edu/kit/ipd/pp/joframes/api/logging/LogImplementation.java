@@ -18,4 +18,10 @@ interface LogImplementation {
 	 * @param message the message.
 	 */
 	void logExtended(String message);
+	/**
+	 * Logs the last message.
+	 *
+	 * @param message the last message.
+	 */
+	void endLog(String message);
 }

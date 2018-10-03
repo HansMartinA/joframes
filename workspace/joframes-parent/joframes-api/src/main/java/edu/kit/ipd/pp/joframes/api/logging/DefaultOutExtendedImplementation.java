@@ -8,6 +8,6 @@ package edu.kit.ipd.pp.joframes.api.logging;
 class DefaultOutExtendedImplementation extends DefaultOutImplementation {
 	@Override
 	public void logExtended(final String message) {
-		System.out.print(message);
+		log(message);
 	}
 }

@@ -90,4 +90,13 @@ public final class Log {
 	static void logExtended(final String message) {
 		impl.logExtended(message);
 	}
+
+	/**
+	 * Logs the last message.
+	 *
+	 * @param message the last message.
+	 */
+	static void endLog(final String message) {
+		impl.endLog(message);
+	}
 }

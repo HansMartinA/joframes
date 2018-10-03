@@ -36,4 +36,13 @@ class FileImplementation implements LogImplementation {
 	@Override
 	public void logExtended(final String message) {
 	}
+
+	@Override
+	public void endLog(final String message) {
+		log(message);
+		try {
+			writer.close();
+		} catch (IOException | NullPointerException e) {
+		}
+	}
 }
