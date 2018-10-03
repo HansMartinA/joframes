@@ -37,7 +37,7 @@ public final class Log {
 	/**
 	 * Stores the actual logging implementation.
 	 */
-	private static LogImplementation impl;
+	private static LogImplementation impl = new NoOpImplementation();
 
 	/**
 	 * Private constructor to avoid instantiation.
@@ -52,12 +52,24 @@ public final class Log {
 	 */
 	public static void setLogOption(final LogOptions option) {
 		switch (option) {
-			case NO_OP: break;
-			case DEFAULT_OUT: break;
-			case DEFAULT_OUT_EXTENDED: break;
-			case FILE: break;
-			case FILE_EXTENDED: break;
-			default: break;
+			case NO_OP:
+				impl = new NoOpImplementation();
+				break;
+			case DEFAULT_OUT:
+				impl = new DefaultOutImplementation();
+				break;
+			case DEFAULT_OUT_EXTENDED:
+				impl = new DefaultOutExtendedImplementation();
+				break;
+			case FILE:
+				impl = new FileImplementation();
+				break;
+			case FILE_EXTENDED:
+				impl = new FileExtendedImplementation();
+				break;
+			default:
+				impl = new NoOpImplementation();
+				break;
 		}
 	}
 
