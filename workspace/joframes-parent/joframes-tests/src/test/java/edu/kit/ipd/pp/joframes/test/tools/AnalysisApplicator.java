@@ -171,6 +171,9 @@ class AnalysisApplicator {
 		instr = new InstrumenterWrapper();
 		instr.addInputJar(p.getOutput());
 		result.insCountAfter = instr.countInstructions();
+		System.out.println("Instructions: " + result.getFrameworkInstructionCount() + " (F), "
+				+ result.getApplicationInstructionCount() + " (A), " + result.getAdditionalInstructionsCount());
+		System.out.println("Time for JoFrames: " + result.getProcessingTime() + "ms");
 		JavaMethodSignature entryMethod = JavaMethodSignature.mainMethodOfClass(
 				"edu.kit.ipd.pp.joframes.api.external.ArtificialClass");
 		SDGConfig sdgConfig = new SDGConfig(p.getOutput(), entryMethod.toBCString(), Stubs.JRE_17);
@@ -209,6 +212,8 @@ class AnalysisApplicator {
 		TObjectIntMap<IViolation<SDGProgramPart>> sortedIFCResult = ifcAna.groupByPPPart(ifcResult);
 		result.violations = sortedIFCResult;
 		result.time = System.currentTimeMillis() - analysisStart;
+		System.out.println("Time for Joana: " + result.getTimeOfJoana() + "ms");
+		System.out.println("Overall time: " + result.getOverallTime() + "ms");
 		return result;
 	}
 

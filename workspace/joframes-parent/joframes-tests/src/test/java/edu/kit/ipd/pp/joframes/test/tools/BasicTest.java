@@ -108,10 +108,6 @@ public abstract class BasicTest {
 		}
 		AnalysisApplicator.AAResults result = anaApp.applyAnalysis(getFramework(), new String[] {
 				"target" + File.separator + JAR_PREFIX + classifier}, getMainClass(), output, profile);
-		System.out.println("Instructions: " + result.getFrameworkInstructionCount() + " + "
-				+ result.getApplicationInstructionCount() + " + " + result.getAdditionalInstructionsCount());
-		System.out.println("Overall time: " + result.getOverallTime() + " ms, time for JoFramess: "
-				+ result.getProcessingTime() + " ms, time for Joana: " + result.getTimeOfJoana() + " ms");
 		System.out.println("Violations: " + result.getViolations().keySet().size() + ", minimal expected: "
 				+ minViolations);
 		for (IViolation<SDGProgramPart> part : result.getViolations().keySet()) {
@@ -147,6 +143,7 @@ public abstract class BasicTest {
 				}
 			});
 		}
+		System.out.println();
 		assertTrue(result.getViolations().keySet().size() >= minViolations);
 	}
 }
