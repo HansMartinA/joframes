@@ -49,8 +49,9 @@ public final class Log {
 	 * Sets the logging option to use.
 	 *
 	 * @param option the option.
+	 * @param options additional options for the logging option.
 	 */
-	public static void setLogOption(final LogOptions option) {
+	public static void setLogOption(final LogOptions option, final String... options) {
 		switch (option) {
 			case NO_OP:
 				impl = new NoOpImplementation();
@@ -62,10 +63,17 @@ public final class Log {
 				impl = new DefaultOutExtendedImplementation();
 				break;
 			case FILE:
-				impl = new FileImplementation();
+				if (options.length == 0) {
+					throw new IllegalArgumentException("A file has to be specified for the FILE logging option.");
+				}
+				impl = new FileImplementation(options[0]);
 				break;
 			case FILE_EXTENDED:
-				impl = new FileExtendedImplementation();
+				if (options.length == 0) {
+					throw new IllegalArgumentException(
+							"A file has to be specified for the FILE_EXTENDED logging option.");
+				}
+				impl = new FileExtendedImplementation(options[0]);
 				break;
 			default:
 				impl = new NoOpImplementation();

@@ -17,10 +17,12 @@ class FileImplementation implements LogImplementation {
 
 	/**
 	 * Creates a new instance.
+	 *
+	 * @param file the file in which the messages are written.
 	 */
-	FileImplementation() {
+	FileImplementation(final String file) {
 		try {
-			writer = new BufferedWriter(new FileWriter("", true));
+			writer = new BufferedWriter(new FileWriter(file, true));
 		} catch (IOException e) {
 		}
 	}
