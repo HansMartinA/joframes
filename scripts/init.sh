@@ -18,7 +18,9 @@ cd ..
 echo "Built WALA and Joana."
 cp -r securibench-micro/src/securibench joframes-parent/joframes-tests/src/main/java
 rm joframes-parent/joframes-tests/src/main/java/securibench/micro/basic/Basic40.java -f
-cd ..
+cd OSIP/src
+mvn package -DskipTests=true
+cd ../../..
 fi
 cd scripts
 

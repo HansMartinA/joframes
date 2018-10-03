@@ -11,6 +11,36 @@ import org.junit.Test;
  */
 public final class PerformanceTest extends BasicTest {
 	/**
+	 * Tests the performance of the OSIP monitoring view.
+	 *
+	 * @throws Exception if something goes wrong.
+	 */
+	@Test
+	public void testOSIPMonitoringView() throws Exception {
+		System.out.println("Testing of OSIP monitoring view (JavaFX)");
+		anaApp.applyAnalysis(SupportedFrameworks.JAVAFX, new String[] {
+				"target/osip-monitoring-controller-1.1-with-dependencies.jar"},
+				"Ledu/kit/pse/osip/monitoring/controller/MainClass", "osip-monitor-instrumented.jar",
+				JoanaProfiles.MODERATE);
+		System.out.println();
+	}
+
+	/**
+	 * Tests the performance of the OSIP simulation view.
+	 *
+	 * @throws Exception if something goes wrong.
+	 */
+	@Test
+	public void testOSIPSimulationView() throws Exception {
+		System.out.println("Testing of OSIP simulation view (JavaFX)");
+		anaApp.applyAnalysis(SupportedFrameworks.JAVAFX, new String[] {
+				"target/osip-simulation-controller-1.1-with-dependencies.jar"},
+				"Ledu/kit/pse/osip/simulation/controller/MainClass", "osip-simulation-instrumented.jar",
+				JoanaProfiles.MODERATE);
+		System.out.println();
+	}
+
+	/**
 	 * Tests the performance of JGit.
 	 *
 	 * @throws Exception if something goes wrong.

@@ -14,6 +14,9 @@ mvn install:install-file -Dfile=./joana.ui.ifc.wala.console.jar -DgroupId=edu.ki
 cd ../..
 cd joframes-parent
 mvn clean install -DskipTests=true
-cd ../..
+cd ..
+cp OSIP/src/osip-monitoring-controller/target/osip-monitoring-controller-1.1-with-dependencies.jar joframes-parent/joframes-tests/target/osip-monitoring-controller-1.1-with-dependencies.jar
+cp OSIP/src/osip-simulation-controller/target/osip-simulation-controller-1.1-with-dependencies.jar joframes-parent/joframes-tests/target/osip-simulation-controller-1.1-with-dependencies.jar
+cd ..
 cd scripts
 

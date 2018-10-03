@@ -4,3 +4,6 @@
 [submodule "workspace/securibench-micro"]
 	path = workspace/securibench-micro
 	url = https://github.com/too4words/securibench-micro
+[submodule "workspace/OSIP"]
+	path = workspace/OSIP
+	url = https://github.com/ByteHamster/PSE
