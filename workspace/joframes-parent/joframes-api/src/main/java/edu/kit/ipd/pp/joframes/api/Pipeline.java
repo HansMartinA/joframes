@@ -4,6 +4,7 @@ import edu.kit.ipd.pp.joframes.api.exceptions.ClassHierarchyAnalysisException;
 import edu.kit.ipd.pp.joframes.api.exceptions.ClassHierarchyCreationException;
 import edu.kit.ipd.pp.joframes.api.exceptions.InstrumenterException;
 import edu.kit.ipd.pp.joframes.api.exceptions.ParseException;
+import edu.kit.ipd.pp.joframes.api.logging.Log;
 import edu.kit.ipd.pp.joframes.ast.base.Framework;
 
 /**
@@ -84,6 +85,7 @@ public class Pipeline {
 	 */
 	public void process() throws ParseException, ClassHierarchyCreationException, ClassHierarchyAnalysisException,
 			InstrumenterException {
+		Log.log("Starting the processing.");
 		FrameworkSpecificationParser parser = new FrameworkSpecificationParser();
 		Framework framework = parser.parse(frameworkSpecification);
 		ClassHierarchyAnalyzer analyzer = new ClassHierarchyAnalyzer();
@@ -101,5 +103,6 @@ public class Pipeline {
 			instrumenter.instrumentBytecode(wrapper, applicationJars, output);
 		}
 		this.output = instrumenter.getOutput();
+		Log.endLog("Finished the processing. The result is available at " + this.output + ".");
 	}
 }

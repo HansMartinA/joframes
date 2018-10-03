@@ -11,6 +11,7 @@ import com.ibm.wala.types.Selector;
 import com.ibm.wala.util.config.AnalysisScopeReader;
 import edu.kit.ipd.pp.joframes.api.exceptions.ClassHierarchyAnalysisException;
 import edu.kit.ipd.pp.joframes.api.exceptions.ClassHierarchyCreationException;
+import edu.kit.ipd.pp.joframes.api.logging.Log;
 import edu.kit.ipd.pp.joframes.ast.acha.MethodCollector;
 import edu.kit.ipd.pp.joframes.ast.ap.Block;
 import edu.kit.ipd.pp.joframes.ast.ap.Regex;
@@ -94,10 +95,13 @@ class ClassHierarchyAnalyzer {
 		this.mainClassName = mainClass;
 		wrapper = new FrameworkWrapper(framework);
 		ClassHierarchy hierarchy = makeClassHierarchy(frameworkJars, applicationJars);
+		Log.logExtended("Created the class hierarchy.");
 		wrapper.setClassHierarchy(hierarchy);
 		extensionLoader = hierarchy.getScope().getExtensionLoader();
 		applicationLoader = hierarchy.getScope().getApplicationLoader();
+		Log.log("Analyzing the class hierarchy.");
 		analyzeFramework();
+		Log.logExtended("Analyzed the class hierarchy.");
 		return wrapper;
 	}
 
@@ -112,34 +116,43 @@ class ClassHierarchyAnalyzer {
 	private ClassHierarchy makeClassHierarchy(final String[] frameworkJars, final String[] applicationJars) throws
 		ClassHierarchyCreationException {
 		try {
+			Log.logExtended("Creating the class hierarchy.");
 			AnalysisScope scope = AnalysisScopeReader.makePrimordialScope(new File("cha-exclusions.txt"));
 			if (!wrapper.getFramework().getName().equals(SWING)) {
 				if (frameworkJars.length == 0) {
+					Log.endLog("No framework files given.");
 					throw new ClassHierarchyCreationException("There are no framework jar files.");
 				}
 				for (String fwJar : frameworkJars) {
 					if (!new File(fwJar).exists()) {
+						Log.endLog("The framework file " + fwJar + " does not exist.");
 						throw new ClassHierarchyCreationException("The given framework jar file (" + fwJar
 								+ ") does not exist.");
 					}
 					scope.addToScope(scope.getExtensionLoader(), new JarFile(fwJar));
+					Log.logExtended("Framework jar " + fwJar + " added.");
 				}
 			}
 			if (applicationJars.length == 0) {
+				Log.endLog("No application files given.");
 				throw new ClassHierarchyCreationException("There are no application jar files.");
 			}
 			for (String appJar : applicationJars) {
 				if (!new File(appJar).exists()) {
+					Log.endLog("The application file " + appJar + " does not exist.");
 					throw new ClassHierarchyCreationException("The given application jar file (" + appJar
 							+ ") does not exist.");
 				}
 				scope.addToScope(scope.getApplicationLoader(), new JarFile(appJar));
+				Log.logExtended("Application jar " + appJar + " added.");
 			}
 			return ClassHierarchyFactory.make(scope);
 		} catch (IOException e) {
+			Log.endLog("The class hierarchy could not be created.");
 			throw new ClassHierarchyCreationException("An IO exception occurred while creating the class hierarchy.",
 					e);
 		} catch (ClassHierarchyException e) {
+			Log.endLog("The class hierarchy could not be created.");
 			throw new ClassHierarchyCreationException("The class hierarchy could not be created.", e);
 		}
 	}
@@ -172,8 +185,9 @@ class ClassHierarchyAnalyzer {
 		if (declaration.getClassName() != null) {
 			actualBoundClass = wrapper.getIClass(extensionLoader, declaration.getClassName());
 			if (actualBoundClass == null) {
+				Log.endLog("The class " + declaration.getClassName() + " could not be found.");
 				throw new ClassHierarchyAnalysisException("The class " + declaration.getClassName()
-					+ "cannot be found.");
+					+ " cannot be found.");
 			}
 			declaration.setIClass(actualBoundClass);
 			wrapper.addFrameworkClass(actualBoundClass);
@@ -194,6 +208,7 @@ class ClassHierarchyAnalyzer {
 				} else {
 					m = actualBoundClass.getMethod(Selector.make(method.getSignature()));
 					if (m == null) {
+						Log.endLog("The method " + method.getSignature() + " could be not created.");
 						throw new ClassHierarchyAnalysisException("The method " + method.getSignature()
 							+ ") cannot be found.");
 					}
@@ -212,11 +227,15 @@ class ClassHierarchyAnalyzer {
 					stMethod.setIClass(wrapper.getIClass(extensionLoader, stMethod.getClassString()));
 				}
 				if (stMethod.getIClass() == null) {
+					Log.endLog("The class " + stMethod.getClassString() + " for " + stMethod.getSignature()
+						+ " could not be found.");
 					throw new ClassHierarchyAnalysisException("The class " + stMethod.getClassString()
 						+ " for the static method " + stMethod.getSignature() + " cannot be found.");
 				}
 				stMethod.setMethod(stMethod.getIClass().getMethod(Selector.make(stMethod.getSignature())));
 				if (stMethod.getMethod() == null) {
+					Log.endLog("The method " + stMethod.getClassString() + "." + stMethod.getSignature() + " could not "
+							+ "be found.");
 					throw new ClassHierarchyAnalysisException("The static method " + stMethod.getClassString()
 							+ stMethod.getSignature() + " cannot be found.");
 				}
@@ -292,8 +311,9 @@ class ClassHierarchyAnalyzer {
 				Supertype st = (Supertype) r;
 				IClass type = wrapper.getIClass(extensionLoader, st.getSuperType());
 				if (type == null) {
+					Log.endLog("The super type " + st.getSuperType() + " could not be found.");
 					throw new ClassHierarchyAnalysisException("The super type " + st.getSuperType()
-						+ "cannot be found.");
+						+ " cannot be found.");
 				}
 				analyzeForSupertypeRule(type, methods);
 				working.removeRule(r);
@@ -314,6 +334,7 @@ class ClassHierarchyAnalyzer {
 			throws ClassHierarchyAnalysisException {
 		IClass blockClass = wrapper.getIClass(extensionLoader, block.getClassName());
 		if (blockClass == null) {
+			Log.endLog("The block class " + block.getClassName() + " could not be found.");
 			throw new ClassHierarchyAnalysisException("The block class " + block.getClassName() + "cannot be found.");
 		}
 		block.setIClass(blockClass);

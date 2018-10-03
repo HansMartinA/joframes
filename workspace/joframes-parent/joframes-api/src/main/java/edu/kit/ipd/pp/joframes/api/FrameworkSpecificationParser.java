@@ -1,6 +1,7 @@
 package edu.kit.ipd.pp.joframes.api;
 
 import edu.kit.ipd.pp.joframes.api.exceptions.ParseException;
+import edu.kit.ipd.pp.joframes.api.logging.Log;
 import edu.kit.ipd.pp.joframes.ast.ap.Block;
 import edu.kit.ipd.pp.joframes.ast.ap.BlockQuantor;
 import edu.kit.ipd.pp.joframes.ast.ap.Regex;
@@ -112,6 +113,7 @@ class FrameworkSpecificationParser {
 	 *                        during parsing.
 	 */
 	Framework parse(final String file) throws ParseException {
+		Log.logExtended("Validating the framework specification " + file + ".");
 		Source xmlFile = new StreamSource(new File(file));
 		SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
 		try {
@@ -120,10 +122,14 @@ class FrameworkSpecificationParser {
 			Validator validator = schema.newValidator();
 			validator.validate(xmlFile);
 		} catch (SAXException e) {
+			Log.endLog("The framework specification is not valid.");
 			throw new ParseException("The provided xml file is not valid.", e);
 		} catch (IOException e) {
+			Log.endLog("The framework specification cannot be validated.");
 			throw new ParseException("The provided xml file cannot be validated.", e);
 		}
+		Log.logExtended("The framework specification is valid.");
+		Log.log("Parsing the framework specification " + file + ".");
 		Framework framework = null;
 		try (InputStream in = new FileInputStream(file)) {
 			XMLInputFactory factory = XMLInputFactory.newInstance();
@@ -143,10 +149,13 @@ class FrameworkSpecificationParser {
 				xmlStream.next();
 			}
 		} catch (XMLStreamException e) {
+			Log.endLog("The framework specification could not be parsed.");
 			throw new ParseException("An exception occurred while parsing.", e);
 		} catch (IOException e) {
+			Log.endLog("The framework specification could not be parsed.");
 			throw new ParseException("Thr provided xml file cannot be parsed.", e);
 		}
+		Log.logExtended("Successfully parsed the framework specification.");
 		return framework;
 	}
 

@@ -86,7 +86,7 @@ public final class Log {
 	 *
 	 * @param message the message.
 	 */
-	static void log(final String message) {
+	public static void log(final String message) {
 		impl.log(message);
 	}
 
@@ -95,7 +95,7 @@ public final class Log {
 	 *
 	 * @param message the message.
 	 */
-	static void logExtended(final String message) {
+	public static void logExtended(final String message) {
 		impl.logExtended(message);
 	}
 
@@ -104,7 +104,7 @@ public final class Log {
 	 *
 	 * @param message the last message.
 	 */
-	static void endLog(final String message) {
+	public static void endLog(final String message) {
 		impl.endLog(message);
 	}
 }

@@ -24,6 +24,7 @@ import com.ibm.wala.shrikeBT.Util;
 import com.ibm.wala.shrikeCT.InvalidClassFileException;
 import com.ibm.wala.types.TypeReference;
 import edu.kit.ipd.pp.joframes.api.exceptions.InstrumenterException;
+import edu.kit.ipd.pp.joframes.api.logging.Log;
 import edu.kit.ipd.pp.joframes.ast.acha.MethodCollector;
 import edu.kit.ipd.pp.joframes.ast.ap.Block;
 import edu.kit.ipd.pp.joframes.ast.base.AstBaseClass;
@@ -197,9 +198,11 @@ class BytecodeInstrumenter {
 	void instrumentBytecode(final FrameworkWrapper frameworkWrapper, final String[] applicationJars,
 			final String output)
 			throws InstrumenterException {
+		Log.log("Instrumenting the bytecode.");
 		this.actualOutput = output;
 		this.wrapper = frameworkWrapper;
 		try {
+			Log.logExtended("Loading the jar files.");
 			InstrumenterWrapper instrumenter = new InstrumenterWrapper();
 			instrumenter.setExclusionRegex(APIConstants.DEFAULT_EXCLUSION_REGEX);
 			try {
@@ -212,6 +215,7 @@ class BytecodeInstrumenter {
 					}
 				}
 			} catch (IllegalArgumentException e) {
+				Log.endLog("A jar file is not valid.");
 				throw new InstrumenterException("A jar file is not valid.", e);
 			}
 			// For test purposes, the loading of the external api classes is done by assuming that
@@ -227,6 +231,7 @@ class BytecodeInstrumenter {
 				instrumenter.addInputJarEntry(OWN_JAR_FILE + AC_NAME);
 				instrumenter.addInputJarEntry(OWN_JAR_FILE + AC_WW_NAME);
 			}
+			Log.logExtended("Instrumenting the InstanceCollector.");
 			ClassInstrumenterWrapper clInstr = instrumenter.getClassInstrumenter(PACKAGE + IC_NAME);
 			MethodWrapper editor = clInstr.getMethod(CLINIT, DEFAULT_SIGNATURE);
 			for (IClass cl : wrapper.getFrameworkClasses()) {
@@ -239,6 +244,7 @@ class BytecodeInstrumenter {
 						+ Constants.TYPE_void, IC_BYTECODE_NAME, "addClass",
 						IInvokeInstruction.Dispatch.STATIC));
 			}
+			Log.logExtended("Instrumenting the application to collect instances.");
 			editor.instrumentMethod();
 			instrumenter.visitClasses(classWrapper -> {
 				classWrapper.visitMethods(methodWrapper -> {
@@ -260,6 +266,7 @@ class BytecodeInstrumenter {
 					});
 				});
 			});
+			Log.logExtended("Instrumenting the ArtificialClass.");
 			clInstr = instrumenter.getClassInstrumenter(PACKAGE + AC_NAME);
 			editor = clInstr.getMethod(START, DEFAULT_SIGNATURE);
 			instrumentStartPhase(editor);
@@ -277,9 +284,12 @@ class BytecodeInstrumenter {
 			instrumentRunnableClassForWorkingPhase(editor);
 			instrumenter.setOutput(actualOutput);
 			instrumenter.outputClasses();
+			Log.logExtended("Finished instrumenting.");
 		} catch (IOException e) {
+			Log.endLog("Instrumentation failed.");
 			throw new InstrumenterException("An IO exception occurred while instrumenting the bytecode.", e);
 		} catch (InvalidClassFileException e) {
+			Log.endLog("Instrumentation failed.");
 			throw new InstrumenterException("Bytcode instrumentation resulted in an invalid class.", e);
 		}
 	}
