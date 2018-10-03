@@ -1,5 +1,8 @@
 package edu.kit.ipd.pp.joframes.api.logging;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+
 /**
  * This class provides a log for the processing of a framework and application.
  *
@@ -87,7 +90,7 @@ public final class Log {
 	 * @param message the message.
 	 */
 	public static void log(final String message) {
-		impl.log(message);
+		impl.log(getCurrentDate() + message + "\n");
 	}
 
 	/**
@@ -96,7 +99,7 @@ public final class Log {
 	 * @param message the message.
 	 */
 	public static void logExtended(final String message) {
-		impl.logExtended(message);
+		impl.logExtended(getCurrentDate() + message + "\n");
 	}
 
 	/**
@@ -105,6 +108,15 @@ public final class Log {
 	 * @param message the last message.
 	 */
 	public static void endLog(final String message) {
-		impl.endLog(message);
+		impl.endLog(getCurrentDate() + message + "\n");
+	}
+
+	/**
+	 * Returns the current date.
+	 *
+	 * @return the current date.
+	 */
+	private static String getCurrentDate() {
+		return "[" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("uuuu.MM.dd-HH:mm:ss_SSS")) + "]";
 	}
 }
