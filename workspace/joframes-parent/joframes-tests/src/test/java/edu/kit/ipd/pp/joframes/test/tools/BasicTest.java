@@ -1,6 +1,8 @@
 package edu.kit.ipd.pp.joframes.test.tools;
 
 import edu.kit.ipd.pp.joframes.api.APIConstants;
+import edu.kit.ipd.pp.joframes.api.logging.Log;
+import edu.kit.ipd.pp.joframes.api.logging.Log.LogOptions;
 import edu.kit.ipd.pp.joframes.test.tools.AnalysisApplicator.JoanaProfiles;
 import edu.kit.ipd.pp.joframes.test.tools.AnalysisApplicator.SupportedFrameworks;
 import edu.kit.joana.api.sdg.SDGProgramPart;
@@ -38,6 +40,7 @@ public abstract class BasicTest {
 	@BeforeClass
 	public static void setUpSystem() {
 		System.setProperty(APIConstants.TEST_SYSTEM_PROPERTY, "true");
+		Log.setLogOption(LogOptions.DEFAULT_OUT_EXTENDED);
 	}
 
 	/**
