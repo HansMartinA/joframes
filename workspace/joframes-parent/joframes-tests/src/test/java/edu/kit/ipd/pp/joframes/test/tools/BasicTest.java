@@ -28,7 +28,7 @@ public abstract class BasicTest {
 	/**
 	 * Stores the prefix for the jar files containing the classes for a test case.
 	 */
-	private static final String JAR_PREFIX = "joframes-tests-0.3-";
+	private static final String JAR_PREFIX = "joframes-tests-0.4-";
 	/**
 	 * Stores the applicator for the analysis.
 	 */

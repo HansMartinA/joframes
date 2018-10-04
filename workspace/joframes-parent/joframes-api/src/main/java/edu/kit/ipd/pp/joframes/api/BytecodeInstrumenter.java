@@ -62,7 +62,7 @@ class BytecodeInstrumenter {
 	/**
 	 * Format for the jar file containing the external api classes.
 	 */
-	private static final String OWN_JAR_FILE = "joframes-api-0.3.jar#" + PACKAGE;
+	private static final String OWN_JAR_FILE = "joframes-api-0.4.jar#" + PACKAGE;
 	/**
 	 * Simple name of the InstanceCollector class.
 	 */
