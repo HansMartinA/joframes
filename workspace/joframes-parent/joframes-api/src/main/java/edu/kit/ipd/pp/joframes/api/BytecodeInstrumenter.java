@@ -248,6 +248,12 @@ class BytecodeInstrumenter {
 			Log.logExtended("Instrumenting the application to collect instances.");
 			editor.instrumentMethod();
 			instrumenter.visitClasses(classWrapper -> {
+				// Check that the class is out of the application classes.
+				if (wrapper.getIClass(wrapper.getClassHierarchy().getScope().getApplicationLoader(),
+						"L" + classWrapper.getClassInputName().substring(0,
+								classWrapper.getClassInputName().length() - ".class".length() - 1)) == null) {
+					return;
+				}
 				classWrapper.visitMethods(methodWrapper -> {
 					methodWrapper.visitInstructions(new MethodEditor.Visitor() {
 						@Override
