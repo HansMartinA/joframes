@@ -7,3 +7,6 @@
 [submodule "workspace/OSIP"]
 	path = workspace/OSIP
 	url = https://github.com/ByteHamster/PSE
+[submodule "workspace/JPass"]
+	path = workspace/JPass
+	url = https://github.com/gaborbata/jpass

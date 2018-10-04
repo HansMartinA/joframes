@@ -17,6 +17,7 @@ mvn clean install -DskipTests=true
 cd ..
 cp OSIP/src/osip-monitoring-controller/target/osip-monitoring-controller-1.1-with-dependencies.jar joframes-parent/joframes-tests/target/osip-monitoring-controller-1.1-with-dependencies.jar
 cp OSIP/src/osip-simulation-controller/target/osip-simulation-controller-1.1-with-dependencies.jar joframes-parent/joframes-tests/target/osip-simulation-controller-1.1-with-dependencies.jar
+cp JPass/target/jpass-0.1.17-SNAPSHOT.jar joframes-parent/joframes-tests/target/jpass-0.1.17-SNAPSHOT.jar
 cd ..
 cd scripts
 

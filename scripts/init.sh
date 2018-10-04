@@ -20,7 +20,10 @@ cp -r securibench-micro/src/securibench joframes-parent/joframes-tests/src/main/
 rm joframes-parent/joframes-tests/src/main/java/securibench/micro/basic/Basic40.java -f
 cd OSIP/src
 mvn package -DskipTests=true
-cd ../../..
+cd ../..
+cd JPass
+mvn clean package
+cd ../..
 fi
 cd scripts
 

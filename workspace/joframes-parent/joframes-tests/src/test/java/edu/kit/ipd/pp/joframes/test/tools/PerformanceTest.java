@@ -59,6 +59,19 @@ public final class PerformanceTest extends BasicTest {
 		System.out.println();
 	}
 
+	/**
+	 * Tests the performance of JPass.
+	 *
+	 * @throws Exception if something goes wrong.
+	 */
+	@Test
+	public void testJPass() throws Exception {
+		System.out.println("Testing of JPass (Swing)");
+		anaApp.applyAnalysis(SupportedFrameworks.SWING, new String[] {"target/jpass-0.1.17-SNAPSHOT.jar"},
+				"Ljpass/JPass", "jpass-instrumented.jar", JoanaProfiles.MODERATE);
+		System.out.println();
+	}
+
 	@Override
 	SupportedFrameworks getFramework() {
 		return null;
