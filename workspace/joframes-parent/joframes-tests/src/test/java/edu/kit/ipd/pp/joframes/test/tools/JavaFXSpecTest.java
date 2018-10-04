@@ -10,7 +10,7 @@ import org.junit.Test;
  *
  * @author Martin Armbruster
  */
-public class JavaFXSpecTest extends BasicTest {
+public final class JavaFXSpecTest extends BasicTest {
 	/**
 	 * Stores the current main class.
 	 */
@@ -28,7 +28,7 @@ public class JavaFXSpecTest extends BasicTest {
 				BuiltinLattices.STD_SECLEVEL_HIGH);
 		anaApp.addSink("javafx.scene.control.TextInputControl.setText(Ljava/lang/String;)V->p1",
 				BuiltinLattices.STD_SECLEVEL_LOW);
-		makeAndPrintResults("jfx-conf1.jar", "jfx-conf1.jar", JoanaProfiles.FASTEST, 1, false, false);
+		makeAndPrintResults("jfx-conf1.jar", "jfx-conf1.jar", JoanaProfiles.MODERATE, 1, false, false);
 	}
 
 	/**
@@ -42,7 +42,7 @@ public class JavaFXSpecTest extends BasicTest {
 		anaApp.addSource("javafx.scene.control.TextInputControl.getText()Ljava/lang/String;->exit",
 				BuiltinLattices.STD_SECLEVEL_HIGH);
 		anaApp.addSink("java.io.PrintStream.println(Ljava/lang/String;)V->p1", BuiltinLattices.STD_SECLEVEL_LOW);
-		makeAndPrintResults("jfx-password.jar", "jfx-password.jar", JoanaProfiles.FASTEST, 1, false, false);
+		makeAndPrintResults("jfx-password.jar", "jfx-password.jar", JoanaProfiles.MODERATE, 1, false, false);
 	}
 
 	/**
@@ -59,7 +59,7 @@ public class JavaFXSpecTest extends BasicTest {
 				BuiltinLattices.STD_SECLEVEL_HIGH);
 		anaApp.addSink("java.io.Writer.append(Ljava/lang/CharSequence;)Ljava/io/Writer;->p1",
 				BuiltinLattices.STD_SECLEVEL_LOW);
-		makeAndPrintResults("jfx-extended-password.jar", "jfx-extended-password.jar", JoanaProfiles.FASTEST, 0,
+		makeAndPrintResults("jfx-extended-password.jar", "jfx-extended-password.jar", JoanaProfiles.MODERATE, 0,
 				false, false);
 	}
 
@@ -75,7 +75,7 @@ public class JavaFXSpecTest extends BasicTest {
 				BuiltinLattices.STD_SECLEVEL_HIGH);
 		anaApp.addSink("javafx.scene.control.TextInputControl.setText(Ljava/lang/String;)V->p1",
 				BuiltinLattices.STD_SECLEVEL_LOW);
-		makeAndPrintResults("jfx-worker.jar", "jfx-worker.jar", JoanaProfiles.FASTEST, 1, false, false);
+		makeAndPrintResults("jfx-worker.jar", "jfx-worker.jar", JoanaProfiles.MODERATE, 1, false, false);
 	}
 
 	@Override

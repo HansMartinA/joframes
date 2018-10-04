@@ -10,7 +10,7 @@ import org.junit.Test;
  *
  * @author Martin Armbruster
  */
-public class ServletSpecTest extends BasicTest {
+public final class ServletSpecTest extends BasicTest {
 	/**
 	 * Tests the Aliasing1 class of Securibench Micro.
 	 *
@@ -121,7 +121,7 @@ public class ServletSpecTest extends BasicTest {
 	 */
 	@Test
 	public void testCollections7() throws Exception {
-		makeAndPrintResults("collections7.jar", "coll7.jar", JoanaProfiles.FAST, 1, true, true);
+		makeAndPrintResults("collections7.jar", "coll7.jar", JoanaProfiles.MODERATE, 1, true, true);
 	}
 
 	/**

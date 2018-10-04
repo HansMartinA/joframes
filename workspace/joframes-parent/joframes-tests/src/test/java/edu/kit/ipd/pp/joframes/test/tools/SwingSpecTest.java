@@ -10,7 +10,7 @@ import org.junit.Test;
  *
  * @author Martin Armbruster
  */
-public class SwingSpecTest extends BasicTest {
+public final class SwingSpecTest extends BasicTest {
 	/**
 	 * Stores the current class containing the main class.
 	 */
@@ -47,7 +47,7 @@ public class SwingSpecTest extends BasicTest {
 		anaApp.addSink("javax.swing.text.JTextComponent.setText(Ljava/lang/String;)V->p1",
 				BuiltinLattices.STD_SECLEVEL_LOW);
 		anaApp.addSink("java.io.PrintStream.println(Ljava/lang/String;)V->p1", BuiltinLattices.STD_SECLEVEL_LOW);
-		makeAndPrintResults("sw-conf2.jar", "sw-conf2.jar", JoanaProfiles.FAST, 2, false, false);
+		makeAndPrintResults("sw-conf2.jar", "sw-conf2.jar", JoanaProfiles.MODERATE, 2, false, false);
 	}
 
 	/**
