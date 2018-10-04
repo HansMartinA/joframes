@@ -235,6 +235,7 @@ class BytecodeInstrumenter {
 			ClassInstrumenterWrapper clInstr = instrumenter.getClassInstrumenter(PACKAGE + IC_NAME);
 			MethodWrapper editor = clInstr.getMethod(CLINIT, DEFAULT_SIGNATURE);
 			for (IClass cl : wrapper.getFrameworkClasses()) {
+				Log.logExtended("Framework class " + cl.getName() + " added to the InstanceCollector.");
 				editor.addInstructionAtEnd(ConstantInstruction.makeString(Util.makeClass(cl.getName().toString()
 						+ ";")));
 				editor.addInstructionAtEnd(InvokeInstruction.make("(" + Constants.TYPE_String + ")"
@@ -252,6 +253,8 @@ class BytecodeInstrumenter {
 						@Override
 						public void visitInvoke(final IInvokeInstruction instruction) {
 							if (checkInvokeInstruction(instruction, methodWrapper)) {
+								Log.logExtended("Adding instance in " + methodWrapper.getClassType()
+									+ methodWrapper.getMethodName() + methodWrapper.getMethodSignature());
 								this.insertAfter(new MethodEditor.Patch() {
 									@Override
 									public void emitTo(final MethodEditor.Output w) {
@@ -528,6 +531,8 @@ class BytecodeInstrumenter {
 						editor.addInstructionAtEnd(ConstantInstruction.make(con.getName().toString() + ";", null));
 						continue;
 					}
+					Log.logExtended(level + ": Instantiating " + con.getName() + "." + init.getSignature() + " for "
+							+ method.getSignature() + "->p" + i + ".");
 					editor.addInstructionAtEnd(NewInstruction.make(con.getName().toString() + ";", 0));
 					editor.addInstructionAtEnd(InstructionFactory.makeDup());
 					instantiateParameters(editor, init, level + 1);

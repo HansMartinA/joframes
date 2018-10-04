@@ -200,9 +200,12 @@ class ClassHierarchyAnalyzer {
 				Method method = (Method) abc;
 				IMethod m = null;
 				if (method.getSignature().equals(APIConstants.CONSTRUCTOR)) {
+					Log.logExtended("Explicit declaration: Searching for application sub classes of "
+							+ declaration.getClassName() + ".");
 					for (IClass cl : wrapper.getSubtypes(actualBoundClass)) {
 						if (checkSubclassForExplicitDeclaration(cl)) {
 							declaration.addApplicationClass(cl, wrapper.findInit(cl));
+							Log.logExtended("Found sub class " + cl.getName() + ".");
 						}
 					}
 				} else {
@@ -223,6 +226,7 @@ class ClassHierarchyAnalyzer {
 					} else {
 						stMethod.setIClass(wrapper.getIClass(applicationLoader, mainClassName));
 					}
+					Log.logExtended("Using " + stMethod.getIClass().getName() + " as main class.");
 				} else {
 					stMethod.setIClass(wrapper.getIClass(extensionLoader, stMethod.getClassString()));
 				}
@@ -360,6 +364,8 @@ class ClassHierarchyAnalyzer {
 			if (isClassInFramework(type)) {
 				for (IMethod method : type.getDeclaredMethods()) {
 					if (method.getName().toString().matches(regex) && checkMethodForObjectMethod(method)) {
+						Log.logExtended("Regex: Found " + method.getDeclaringClass().getName() + "."
+								+ method.getName() + ".");
 						collector.addMethod(method);
 						wrapper.addFrameworkClass(method.getDeclaringClass());
 					}
@@ -379,6 +385,7 @@ class ClassHierarchyAnalyzer {
 		wrapper.addFrameworkClass(supertype);
 		for (IClass cl : wrapper.getSubtypes(supertype)) {
 			if (isClassInFramework(cl)) {
+				Log.logExtended("Super type: adding methods of " + cl.getName() + ".");
 				for (IMethod m : cl.getDeclaredMethods()) {
 					if (checkMethodForObjectMethod(m)) {
 						collector.addMethod(m);
