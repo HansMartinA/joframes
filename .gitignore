@@ -12,6 +12,8 @@ target
 .project
 .checkstyle
 .recommenders
+.classpath
+bin
 
 ###########################################
 #              Intellij files             #
