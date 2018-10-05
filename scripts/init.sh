@@ -1,10 +1,5 @@
 #!/bin/bash
 cd ..
-if
-test -e workspace/joana/dist;
-then
-echo "Skip building of WALA and Joana.";
-else
 git submodule init
 git submodule update
 cd workspace/joana
@@ -24,6 +19,5 @@ cd ../..
 cd JPass
 mvn clean package
 cd ../..
-fi
 cd scripts
 
