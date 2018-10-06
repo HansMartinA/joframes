@@ -4,7 +4,7 @@
 cd ..
 cd workspace/joframes-parent
 mkdir target
-mvn surefire:test > target/test-results-console-out.txt
+mvn surefire:test@default-test > target/test-results-console-out.txt
 cd ../..
 cd scripts
 ./maven-site.sh

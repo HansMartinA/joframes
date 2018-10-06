@@ -130,11 +130,27 @@
 				<artifactId>maven-surefire-plugin</artifactId>
 				<executions>
 					<execution>
+						<id>default-test</id>
 						<goals>
 							<goal>test</goal>
 						</goals>
 						<configuration>
 							<testFailureIgnore>true</testFailureIgnore>
+							<excludes>
+								<exclude>**/PerformanceTest.java</exclude>
+							</excludes>
+						</configuration>
+					</execution>
+					<execution>
+						<id>performance-test</id>
+						<configuration>
+							<failIfNoSpecifiedTests>false</failIfNoSpecifiedTests>
+							<testFailureIgnore>true</testFailureIgnore>
+							<excludes>
+								<exclude>**/ServletSpecTest.java</exclude>
+								<exclude>**/SwingSpecTest.java</exclude>
+								<exclude>**/JavaFXSpecTest.java</exclude>
+							</excludes>
 						</configuration>
 					</execution>
 				</executions>
@@ -167,6 +183,9 @@
 						<goals>
 							<goal>check</goal>
 						</goals>
+						<configuration>
+							<failOnError>false</failOnError>
+						</configuration>
 					</execution>
 				</executions>
 			</plugin>
