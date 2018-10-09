@@ -82,6 +82,10 @@ class AnalysisApplicator {
 	 * Stores the sinks witht their security level for annotation.
 	 */
 	private HashMap<String, String> sinks;
+	/**
+	 * Stores a boolean value indicating whether the resulting instrumented code should be analyzed with Joana or not.
+	 */
+	private boolean analyzeWithJoana;
 
 	/**
 	 * Creates a new instance.
@@ -89,6 +93,7 @@ class AnalysisApplicator {
 	AnalysisApplicator() {
 		sources = new HashMap<>();
 		sinks = new HashMap<>();
+		analyzeWithJoana = true;
 	}
 
 	/**
@@ -109,6 +114,15 @@ class AnalysisApplicator {
 	 */
 	void addSink(final String sink, final String level) {
 		sinks.put(sink, level);
+	}
+
+	/**
+	 * Sets a boolean value indicating whether the instrumented code should be analyzed with Joana or not.
+	 *
+	 * @param ana true if the code should be analyzed with Joana. false otherwise.
+	 */
+	void setAnalyzeWithJoana(final boolean ana) {
+		analyzeWithJoana = ana;
 	}
 
 	/**
@@ -177,6 +191,11 @@ class AnalysisApplicator {
 		System.out.println("Time for JoFrames: " + result.getProcessingTime() + "ms");
 		JavaMethodSignature entryMethod = JavaMethodSignature.mainMethodOfClass(
 				"edu.kit.ipd.pp.joframes.api.external.ArtificialClass");
+		if (!analyzeWithJoana) {
+			result.time = System.currentTimeMillis() - analysisStart;
+			System.out.println("Overall time: " + result.getOverallTime() + "ms");
+			return result;
+		}
 		SDGConfig sdgConfig = new SDGConfig(p.getOutput(), entryMethod.toBCString(), Stubs.JRE_17);
 		sdgConfig.setComputeInterferences(true);
 		sdgConfig.setExclusions(APIConstants.DEFAULT_EXCLUSION_REGEX);
