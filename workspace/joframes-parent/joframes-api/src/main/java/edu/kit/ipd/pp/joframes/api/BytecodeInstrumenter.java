@@ -249,9 +249,11 @@ class BytecodeInstrumenter {
 			editor.instrumentMethod();
 			instrumenter.visitClasses(classWrapper -> {
 				// Check that the class is out of the application classes.
-				if (wrapper.getIClass(wrapper.getApplicationLoader(),
+				IClass c = wrapper.getIClass(wrapper.getApplicationLoader(),
 						"L" + classWrapper.getClassInputName().substring(0,
-								classWrapper.getClassInputName().length() - ".class".length() - 1)) == null) {
+								classWrapper.getClassInputName().length() - ".class".length()));
+				if (c == null || c.getClassLoader() != wrapper.getClassHierarchy().getLoader(
+						wrapper.getApplicationLoader())) {
 					return;
 				}
 				classWrapper.visitMethods(methodWrapper -> {
@@ -259,7 +261,6 @@ class BytecodeInstrumenter {
 						@Override
 						public void visitInvoke(final IInvokeInstruction instruction) {
 							if (checkInvokeInstruction(instruction, methodWrapper)) {
-								System.out.println(classWrapper.getClassInputName());
 								Log.logExtended("Adding instance in " + methodWrapper.getClassType()
 									+ methodWrapper.getMethodName() + methodWrapper.getMethodSignature());
 								this.insertAfter(new MethodEditor.Patch() {
