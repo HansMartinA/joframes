@@ -95,4 +95,9 @@ public final class JavaFXSpecTest extends BasicTest {
 	@Override
 	void annotateDefaultSink() {
 	}
+
+	@Override
+	boolean analyzeWithJoana() {
+		return true;
+	}
 }

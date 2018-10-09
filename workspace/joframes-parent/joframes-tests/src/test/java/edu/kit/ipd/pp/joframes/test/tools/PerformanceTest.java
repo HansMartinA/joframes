@@ -84,4 +84,9 @@ public final class PerformanceTest extends BasicTest {
 	@Override
 	void annotateDefaultSink() {
 	}
+
+	@Override
+	boolean analyzeWithJoana() {
+		return false;
+	}
 }

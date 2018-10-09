@@ -114,4 +114,9 @@ public final class SwingSpecTest extends BasicTest {
 	@Override
 	void annotateDefaultSink() {
 	}
+
+	@Override
+	boolean analyzeWithJoana() {
+		return true;
+	}
 }

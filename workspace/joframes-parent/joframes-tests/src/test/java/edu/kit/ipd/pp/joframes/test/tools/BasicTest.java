@@ -57,6 +57,7 @@ public abstract class BasicTest {
 	@Before
 	public void setUp() {
 		anaApp = new AnalysisApplicator();
+		anaApp.setAnalyzeWithJoana(analyzeWithJoana());
 	}
 
 	/**
@@ -84,6 +85,13 @@ public abstract class BasicTest {
 	 * Annotates the default sink.
 	 */
 	abstract void annotateDefaultSink();
+
+	/**
+	 * Indicates if the instrumented code should be analyzed with Joana or not.
+	 *
+	 * @return true if the code should be analyzed with Joana. false otherwise.
+	 */
+	abstract boolean analyzeWithJoana();
 
 	/**
 	 * Runs the analysis and prints and tests the results.

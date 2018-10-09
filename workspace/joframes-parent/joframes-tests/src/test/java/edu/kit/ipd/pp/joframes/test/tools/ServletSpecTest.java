@@ -532,4 +532,9 @@ public final class ServletSpecTest extends BasicTest {
 	void annotateDefaultSink() {
 		anaApp.addSink("java.io.PrintWriter.println(Ljava/lang/String;)V->p1", BuiltinLattices.STD_SECLEVEL_LOW);
 	}
+
+	@Override
+	boolean analyzeWithJoana() {
+		return true;
+	}
 }
