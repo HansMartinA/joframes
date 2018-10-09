@@ -718,6 +718,7 @@
 							<classifier>conf2</classifier>
 							<includes>
 								<include>**/servlet/no_conf/**</include>
+								<include>**/servlet/conf/**</include>
 							</includes>
 						</configuration>
 					</execution>
