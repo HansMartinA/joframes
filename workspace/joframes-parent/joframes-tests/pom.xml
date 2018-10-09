@@ -749,6 +749,19 @@
 						</configuration>
 					</execution>
 					<execution>
+						<id>IPServlet</id>
+						<phase>package</phase>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+						<configuration>
+							<classifier>ip</classifier>
+							<includes>
+								<include>**/servlet/ip/**</include>
+							</includes>
+						</configuration>
+					</execution>
+					<execution>
 						<id>SWConf1</id>
 						<phase>package</phase>
 						<goals>

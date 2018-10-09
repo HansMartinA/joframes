@@ -517,6 +517,18 @@ public final class ServletSpecTest extends BasicTest {
 		makeAndPrintResults("int2.jar", "int2.jar", JoanaProfiles.HIGH_PRECISION, 1, true, false);
 	}
 
+	/**
+	 * Tests the Servlet test case which leaks all collected IP adresses.
+	 *
+	 * @throws Exception if something goes wrong.
+	 */
+	@Test
+	public void testIPServlet() throws Exception {
+		anaApp.addSource("org.apache.catalina.connector.Request.getRemoteAddr()Ljava/lang/String;->exit",
+				BuiltinLattices.STD_SECLEVEL_HIGH);
+		makeAndPrintResults("ip.jar", "ip.jar", JoanaProfiles.HIGH_PRECISION, 1, false, true);
+	}
+
 	@Override
 	SupportedFrameworks getFramework() {
 		return SupportedFrameworks.SERVLET;
