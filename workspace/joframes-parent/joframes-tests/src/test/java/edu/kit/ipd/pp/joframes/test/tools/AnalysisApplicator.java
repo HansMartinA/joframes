@@ -140,6 +140,7 @@ class AnalysisApplicator {
 			final String output, final JoanaProfiles joProfile) throws Exception {
 		long analysisStart = System.currentTimeMillis();
 		AAResults result = new AAResults();
+		result.testCase = output + " " + framework;
 		InstrumenterWrapper instr = new InstrumenterWrapper();
 		instr.setExclusionRegex(APIConstants.DEFAULT_EXCLUSION_REGEX);
 		for (String appJar : applicationJars) {
@@ -254,6 +255,10 @@ class AnalysisApplicator {
 	 */
 	class AAResults {
 		/**
+		 * Stores the name of the test case this result belongs to.
+		 */
+		private String testCase;
+		/**
 		 * Stores the instruction count of the framework.
 		 */
 		private long insFramework;
@@ -281,6 +286,15 @@ class AnalysisApplicator {
 		 * Stores the violations Joana found.
 		 */
 		private TObjectIntMap<IViolation<SDGProgramPart>> violations;
+
+		/**
+		 * Returns the name of the test case.
+		 *
+		 * @return the test name.
+		 */
+		String getTestName() {
+			return testCase;
+		}
 
 		/**
 		 * Returns the instruction count of the framework.

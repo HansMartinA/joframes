@@ -14,6 +14,8 @@ import edu.kit.joana.ifc.sdg.core.violations.IUnaryViolation;
 import edu.kit.joana.ifc.sdg.core.violations.IViolation;
 import edu.kit.joana.ifc.sdg.core.violations.IViolationVisitor;
 import java.io.File;
+import java.util.ArrayList;
+
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -30,6 +32,10 @@ public abstract class BasicTest {
 	 */
 	private static final String JAR_PREFIX = "joframes-tests-0.4-";
 	/**
+	 * Stores all results.
+	 */
+	private static ArrayList<AnalysisApplicator.AAResults> results;
+	/**
 	 * Stores the applicator for the analysis.
 	 */
 	AnalysisApplicator anaApp;
@@ -41,6 +47,7 @@ public abstract class BasicTest {
 	public static void setUpSystem() {
 		System.setProperty(APIConstants.TEST_SYSTEM_PROPERTY, "true");
 		Log.setLogOption(LogOptions.DEFAULT_OUT_EXTENDED);
+		results = new ArrayList<>();
 	}
 
 	/**
@@ -48,6 +55,7 @@ public abstract class BasicTest {
 	 */
 	@AfterClass
 	public static void tearDownSystem() {
+		printAllResults();
 		System.clearProperty(APIConstants.TEST_SYSTEM_PROPERTY);
 	}
 
@@ -116,6 +124,7 @@ public abstract class BasicTest {
 		}
 		AnalysisApplicator.AAResults result = anaApp.applyAnalysis(getFramework(), new String[] {
 				"target" + File.separator + JAR_PREFIX + classifier}, getMainClass(), output, profile);
+		results.add(result);
 		System.out.println("Violations: " + result.getViolations().keySet().size() + ", minimal expected: "
 				+ minViolations);
 		for (IViolation<SDGProgramPart> part : result.getViolations().keySet()) {
@@ -153,5 +162,18 @@ public abstract class BasicTest {
 		}
 		System.out.println();
 		assertTrue(result.getViolations().keySet().size() >= minViolations);
+	}
+
+	/**
+	 * Prints all results at the end of the tests.
+	 */
+	private static void printAllResults() {
+		System.out.println();
+		for (AnalysisApplicator.AAResults result : results) {
+			System.out.println(result.getTestName() + " " + result.getFrameworkInstructionCount() + " "
+				+ result.getApplicationInstructionCount() + " " + result.getAdditionalInstructionsCount() + " "
+				+ result.getProcessingTime() + " " + result.getTimeOfJoana() + " " + result.getOverallTime());
+		}
+		System.out.println();
 	}
 }
