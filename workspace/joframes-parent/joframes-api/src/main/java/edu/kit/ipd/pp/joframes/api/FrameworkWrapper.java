@@ -112,6 +112,24 @@ class FrameworkWrapper {
 	}
 
 	/**
+	 * Returns the application loader of the class hierarchy.
+	 *
+	 * @return the application loader.
+	 */
+	ClassLoaderReference getApplicationLoader() {
+		return hierarchy.getScope().getApplicationLoader();
+	}
+
+	/**
+	 * Returns the extension loader of the class hierarchy.
+	 *
+	 * @return the extension loader.
+	 */
+	ClassLoaderReference getExtensionLoader() {
+		return hierarchy.getScope().getExtensionLoader();
+	}
+
+	/**
 	 * Returns a class for a class name.
 	 *
 	 * @param clRef class loader for the class.

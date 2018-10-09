@@ -249,7 +249,7 @@ class BytecodeInstrumenter {
 			editor.instrumentMethod();
 			instrumenter.visitClasses(classWrapper -> {
 				// Check that the class is out of the application classes.
-				if (wrapper.getIClass(wrapper.getClassHierarchy().getScope().getApplicationLoader(),
+				if (wrapper.getIClass(wrapper.getApplicationLoader(),
 						"L" + classWrapper.getClassInputName().substring(0,
 								classWrapper.getClassInputName().length() - ".class".length() - 1)) == null) {
 					return;
@@ -259,6 +259,7 @@ class BytecodeInstrumenter {
 						@Override
 						public void visitInvoke(final IInvokeInstruction instruction) {
 							if (checkInvokeInstruction(instruction, methodWrapper)) {
+								System.out.println(classWrapper.getClassInputName());
 								Log.logExtended("Adding instance in " + methodWrapper.getClassType()
 									+ methodWrapper.getMethodName() + methodWrapper.getMethodSignature());
 								this.insertAfter(new MethodEditor.Patch() {
@@ -310,7 +311,7 @@ class BytecodeInstrumenter {
 	 * @return true if the class is a subclass of a framework class. false otherwise.
 	 */
 	private boolean isSubclassOfFrameworkClasses(final String className) {
-		IClass subclass = wrapper.getIClass(wrapper.getClassHierarchy().getScope().getApplicationLoader(), className);
+		IClass subclass = wrapper.getIClass(wrapper.getApplicationLoader(), className);
 		if (subclass == null) {
 			return false;
 		}
@@ -336,8 +337,7 @@ class BytecodeInstrumenter {
 				&& isSubclassOfFrameworkClasses(invokedClass) && !(method.getMethodName().equals(APIConstants.INIT)
 						&& areDirectSubclasses(invokedClass, methodClass));
 		if (result) {
-			wrapper.countOneInstance(wrapper.getIClass(wrapper.getClassHierarchy().getScope().getApplicationLoader(),
-				invokedClass));
+			wrapper.countOneInstance(wrapper.getIClass(wrapper.getApplicationLoader(), invokedClass));
 		}
 		return result;
 	}
@@ -350,8 +350,8 @@ class BytecodeInstrumenter {
 	 * @return true if both classes are equal or direct subclasses. false otherwise.
 	 */
 	private boolean areDirectSubclasses(final String classOne, final String classTwo) {
-		IClass one = wrapper.getIClass(wrapper.getClassHierarchy().getScope().getApplicationLoader(), classOne);
-		IClass two = wrapper.getIClass(wrapper.getClassHierarchy().getScope().getApplicationLoader(), classTwo);
+		IClass one = wrapper.getIClass(wrapper.getApplicationLoader(), classOne);
+		IClass two = wrapper.getIClass(wrapper.getApplicationLoader(), classTwo);
 		if (one == null || two == null) {
 			return false;
 		}

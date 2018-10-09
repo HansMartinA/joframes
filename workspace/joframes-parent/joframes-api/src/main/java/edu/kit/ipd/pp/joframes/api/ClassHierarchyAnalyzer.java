@@ -6,7 +6,6 @@ import com.ibm.wala.ipa.callgraph.AnalysisScope;
 import com.ibm.wala.ipa.cha.ClassHierarchy;
 import com.ibm.wala.ipa.cha.ClassHierarchyException;
 import com.ibm.wala.ipa.cha.ClassHierarchyFactory;
-import com.ibm.wala.types.ClassLoaderReference;
 import com.ibm.wala.types.Selector;
 import com.ibm.wala.util.config.AnalysisScopeReader;
 import edu.kit.ipd.pp.joframes.api.exceptions.ClassHierarchyAnalysisException;
@@ -51,14 +50,6 @@ class ClassHierarchyAnalyzer {
 	 */
 	private FrameworkWrapper wrapper;
 	/**
-	 * Stores the extension class loader.
-	 */
-	private ClassLoaderReference extensionLoader;
-	/**
-	 * Stores the application class loader.
-	 */
-	private ClassLoaderReference applicationLoader;
-	/**
 	 * Stores the name of the class containing the main method.
 	 */
 	private String mainClassName;
@@ -97,8 +88,6 @@ class ClassHierarchyAnalyzer {
 		ClassHierarchy hierarchy = makeClassHierarchy(frameworkJars, applicationJars);
 		Log.logExtended("Created the class hierarchy.");
 		wrapper.setClassHierarchy(hierarchy);
-		extensionLoader = hierarchy.getScope().getExtensionLoader();
-		applicationLoader = hierarchy.getScope().getApplicationLoader();
 		Log.log("Analyzing the class hierarchy.");
 		analyzeFramework();
 		Log.logExtended("Analyzed the class hierarchy.");
@@ -183,7 +172,7 @@ class ClassHierarchyAnalyzer {
 			throws ClassHierarchyAnalysisException {
 		IClass actualBoundClass = boundClass;
 		if (declaration.getClassName() != null) {
-			actualBoundClass = wrapper.getIClass(extensionLoader, declaration.getClassName());
+			actualBoundClass = wrapper.getIClass(wrapper.getExtensionLoader(), declaration.getClassName());
 			if (actualBoundClass == null) {
 				Log.endLog("The class " + declaration.getClassName() + " could not be found.");
 				throw new ClassHierarchyAnalysisException("The class " + declaration.getClassName()
@@ -224,11 +213,11 @@ class ClassHierarchyAnalyzer {
 					if (mainClassName == null) {
 						stMethod.setIClass(findNextMainClass());
 					} else {
-						stMethod.setIClass(wrapper.getIClass(applicationLoader, mainClassName));
+						stMethod.setIClass(wrapper.getIClass(wrapper.getApplicationLoader(), mainClassName));
 					}
 					Log.logExtended("Using " + stMethod.getIClass().getName() + " as main class.");
 				} else {
-					stMethod.setIClass(wrapper.getIClass(extensionLoader, stMethod.getClassString()));
+					stMethod.setIClass(wrapper.getIClass(wrapper.getExtensionLoader(), stMethod.getClassString()));
 				}
 				if (stMethod.getIClass() == null) {
 					Log.endLog("The class " + stMethod.getClassString() + " for " + stMethod.getSignature()
@@ -255,7 +244,7 @@ class ClassHierarchyAnalyzer {
 	 */
 	private boolean checkSubclassForExplicitDeclaration(final IClass cl) {
 		assert cl != null;
-		return cl.getClassLoader().getReference() == applicationLoader
+		return cl.getClassLoader().getReference() == wrapper.getApplicationLoader()
 				&& !(cl.isAbstract() || cl.isInterface() || cl.isPrivate());
 	}
 
@@ -269,7 +258,7 @@ class ClassHierarchyAnalyzer {
 	private IClass findNextMainClass() {
 		ClassHierarchy hierarchy = wrapper.getClassHierarchy();
 		for (IClass cl : hierarchy) {
-			if (cl.getClassLoader().getReference() == applicationLoader && checkClassForMain(cl)) {
+			if (cl.getClassLoader().getReference() == wrapper.getApplicationLoader() && checkClassForMain(cl)) {
 				return cl;
 			}
 		}
@@ -313,7 +302,7 @@ class ClassHierarchyAnalyzer {
 				working.removeRule(r);
 			} else if (r.getClass() == Supertype.class) {
 				Supertype st = (Supertype) r;
-				IClass type = wrapper.getIClass(extensionLoader, st.getSuperType());
+				IClass type = wrapper.getIClass(wrapper.getExtensionLoader(), st.getSuperType());
 				if (type == null) {
 					Log.endLog("The super type " + st.getSuperType() + " could not be found.");
 					throw new ClassHierarchyAnalysisException("The super type " + st.getSuperType()
@@ -336,7 +325,7 @@ class ClassHierarchyAnalyzer {
 	 */
 	private void analyzeForBlock(final Block block)
 			throws ClassHierarchyAnalysisException {
-		IClass blockClass = wrapper.getIClass(extensionLoader, block.getClassName());
+		IClass blockClass = wrapper.getIClass(wrapper.getExtensionLoader(), block.getClassName());
 		if (blockClass == null) {
 			Log.endLog("The block class " + block.getClassName() + " could not be found.");
 			throw new ClassHierarchyAnalysisException("The block class " + block.getClassName() + "cannot be found.");
@@ -415,7 +404,7 @@ class ClassHierarchyAnalyzer {
 	 * @return true if the class belongs to the framework. false otherwise.
 	 */
 	private boolean isClassInFramework(final IClass cl) {
-		if (cl.getClassLoader().getReference() == applicationLoader) {
+		if (cl.getClassLoader().getReference() == wrapper.getApplicationLoader()) {
 			return false;
 		}
 		String packageName = cl.getName().getPackage().toString();
@@ -424,7 +413,7 @@ class ClassHierarchyAnalyzer {
 		} else if (wrapper.getFramework().getName().equals(JAVAFX)) {
 			return packageName.contains(JAVAFX.toLowerCase());
 		} else {
-			return cl.getClassLoader().getReference() == extensionLoader;
+			return cl.getClassLoader().getReference() == wrapper.getExtensionLoader();
 		}
 	}
 }
