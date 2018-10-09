@@ -121,7 +121,8 @@ public final class ServletSpecTest extends BasicTest {
 	 */
 	@Test
 	public void testCollections7() throws Exception {
-		makeAndPrintResults("collections7.jar", "coll7.jar", JoanaProfiles.MODERATE, 1, true, true);
+		anaApp.addSink("java.io.PrintWriter.println(Ljava/lang/Object;)V->p1", BuiltinLattices.STD_SECLEVEL_LOW);
+		makeAndPrintResults("collections7.jar", "coll7.jar", JoanaProfiles.MODERATE, 1, true, false);
 	}
 
 	/**
