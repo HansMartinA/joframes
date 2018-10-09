@@ -22,6 +22,7 @@ import java.io.FileOutputStream;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map.Entry;
+import static org.junit.Assert.fail;
 
 /**
  * This class applies the analysis and instrumentation of JoFrames and the analysis of Joana to a given
@@ -201,10 +202,20 @@ class AnalysisApplicator {
 		// SDGSerializer.toPDGFormat(sdg.getSDG(), new FileOutputStream("SDG.pdg"));
 		IFCAnalysis ifcAna = new IFCAnalysis(sdg);
 		for (Entry<String, String> entry : sources.entrySet()) {
-			ifcAna.addSourceAnnotation(sdg.getPart(entry.getKey()), entry.getValue());
+			SDGProgramPart part = sdg.getPart(entry.getKey());
+			if (part == null) {
+				System.out.println("Source annotation " + entry.getKey() + " not found.");
+				fail("Source annotation not found.");
+			}
+			ifcAna.addSourceAnnotation(part, entry.getValue());
 		}
 		for (Entry<String, String> entry : sinks.entrySet()) {
-			ifcAna.addSinkAnnotation(sdg.getPart(entry.getKey()), entry.getValue());
+			SDGProgramPart part = sdg.getPart(entry.getKey());
+			if (part == null) {
+				System.out.println("Sink annotation " + entry.getKey() + " not found.");
+				fail("Sink annotation not found.");
+			}
+			ifcAna.addSinkAnnotation(part, entry.getValue());
 		}
 		startTime = System.currentTimeMillis();
 		Collection<? extends IViolation<SecurityNode>> ifcResult = ifcAna.doIFC();
