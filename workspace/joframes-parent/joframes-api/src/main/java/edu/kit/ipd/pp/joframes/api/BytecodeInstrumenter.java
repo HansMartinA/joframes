@@ -261,8 +261,9 @@ class BytecodeInstrumenter {
 						@Override
 						public void visitInvoke(final IInvokeInstruction instruction) {
 							if (checkInvokeInstruction(instruction, methodWrapper)) {
-								Log.logExtended("Adding instance in " + methodWrapper.getClassType()
-									+ methodWrapper.getMethodName() + methodWrapper.getMethodSignature());
+								Log.logExtended("Adding instance of " + instruction.getClassType() + " in "
+										+ methodWrapper.getClassType() + methodWrapper.getMethodName()
+										+ methodWrapper.getMethodSignature());
 								this.insertAfter(new MethodEditor.Patch() {
 									@Override
 									public void emitTo(final MethodEditor.Output w) {
