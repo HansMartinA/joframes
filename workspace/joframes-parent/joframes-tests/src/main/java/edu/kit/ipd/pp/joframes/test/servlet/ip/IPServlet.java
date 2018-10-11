@@ -21,6 +21,10 @@ public final class IPServlet extends HttpServlet {
 	protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
 		String ip = req.getRemoteAddr();
 		builder.append(ip);
+	}
+
+	@Override
+	protected void doPost(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
 		PrintWriter writer = resp.getWriter();
 		writer.println(builder.toString());
 	}
