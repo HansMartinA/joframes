@@ -40,6 +40,10 @@ import edu.kit.ipd.pp.joframes.shrike.InstrumenterWrapper;
 import edu.kit.ipd.pp.joframes.shrike.MethodWrapper;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -59,10 +63,6 @@ class BytecodeInstrumenter {
 	 * Name of the package containing the external api classes.
 	 */
 	private static final String PACKAGE = "edu/kit/ipd/pp/joframes/api/external/";
-	/**
-	 * Format for the jar file containing the external api classes.
-	 */
-	private static final String OWN_JAR_FILE = "joframes-api-0.4.jar#" + PACKAGE;
 	/**
 	 * Simple name of the InstanceCollector class.
 	 */
@@ -218,21 +218,14 @@ class BytecodeInstrumenter {
 				Log.endLog("A jar file is not valid.");
 				throw new InstrumenterException("A jar file is not valid.", e);
 			}
-			// For test purposes, the loading of the external api classes is done by assuming that
-			// the project is used within eclipse.
-			if (Boolean.getBoolean(APIConstants.TEST_SYSTEM_PROPERTY)) {
-				String path = new File("").getAbsoluteFile().getParentFile().getAbsolutePath()
-						+ File.separator + "joframes-api-external" + File.separator + "target" + File.separator
-						+ "classes" + File.separator;
-				instrumenter.addInputDirectory(path);
-			} else {
-				// Actual class loading for the stand-alone application.
-				instrumenter.addInputJarEntry(OWN_JAR_FILE + IC_NAME);
-				instrumenter.addInputJarEntry(OWN_JAR_FILE + AC_NAME);
-				instrumenter.addInputJarEntry(OWN_JAR_FILE + AC_WW_NAME);
-			}
+			loadExternalClass(instrumenter, IC_NAME);
+			loadExternalClass(instrumenter, AC_NAME);
+			loadExternalClass(instrumenter, AC_WW_NAME);
 			Log.logExtended("Instrumenting the InstanceCollector.");
-			ClassInstrumenterWrapper clInstr = instrumenter.getClassInstrumenter(PACKAGE + IC_NAME);
+			ClassInstrumenterWrapper clInstr = instrumenter.getClassInstrumenter(IC_NAME);
+			if (clInstr == null) {
+				throw new InstrumenterException("The external API classes could not be found.");
+			}
 			MethodWrapper editor = clInstr.getMethod(CLINIT, DEFAULT_SIGNATURE);
 			for (IClass cl : wrapper.getFrameworkClasses()) {
 				Log.logExtended("Framework class " + cl.getName() + " added to the InstanceCollector.");
@@ -279,7 +272,7 @@ class BytecodeInstrumenter {
 				});
 			});
 			Log.logExtended("Instrumenting the ArtificialClass.");
-			clInstr = instrumenter.getClassInstrumenter(PACKAGE + AC_NAME);
+			clInstr = instrumenter.getClassInstrumenter(AC_NAME);
 			editor = clInstr.getMethod(START, DEFAULT_SIGNATURE);
 			instrumentStartPhase(editor);
 			editor = clInstr.getMethod(WORKING, DEFAULT_SIGNATURE);
@@ -291,18 +284,41 @@ class BytecodeInstrumenter {
 			}
 			editor = clInstr.getMethod(END, DEFAULT_SIGNATURE);
 			instrumentEndPhase(editor);
-			clInstr = instrumenter.getClassInstrumenter(PACKAGE + AC_WW_NAME);
+			clInstr = instrumenter.getClassInstrumenter(AC_WW_NAME);
 			editor = clInstr.getMethod("run", DEFAULT_SIGNATURE);
 			instrumentRunnableClassForWorkingPhase(editor);
 			instrumenter.setOutput(actualOutput);
 			instrumenter.outputClasses();
 			Log.logExtended("Finished instrumenting.");
 		} catch (IOException e) {
+			e.printStackTrace();
 			Log.endLog("Instrumentation failed.");
 			throw new InstrumenterException("An IO exception occurred while instrumenting the bytecode.", e);
 		} catch (InvalidClassFileException e) {
 			Log.endLog("Instrumentation failed.");
 			throw new InstrumenterException("Bytcode instrumentation resulted in an invalid class.", e);
+		}
+	}
+
+	/**
+	 * Loads an external API class.
+	 *
+	 * @param instrumenter instrumenter wrapper that loads the class.
+	 * @param className the full class name.
+	 * @throws IOException if the class cannot be read.
+	 */
+	private void loadExternalClass(final InstrumenterWrapper instrumenter, final String className) throws IOException {
+		URL url = getClass().getClassLoader().getResource(PACKAGE + className);
+		String urlPath = url.getPath();
+		if (urlPath.startsWith("file:")) {
+			new File(PACKAGE).mkdirs();
+			InputStream in = getClass().getClassLoader().getResourceAsStream(PACKAGE + className);
+			Files.copy(in, new File("").getAbsoluteFile().toPath().resolve(PACKAGE + className),
+					StandardCopyOption.REPLACE_EXISTING);
+			instrumenter.addInputClass(new File("").getAbsolutePath(), new File(PACKAGE + className).getAbsolutePath());
+		} else {
+			instrumenter.addInputClass(urlPath.substring(0, urlPath.length() - PACKAGE.length() - className.length()
+					- 1), urlPath);
 		}
 	}
 

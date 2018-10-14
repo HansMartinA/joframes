@@ -114,19 +114,20 @@ public class InstrumenterWrapper {
 	/**
 	 * Adds a class file to the instrumenter.
 	 *
+	 * @param base base directory in which the packages as directories with their classes resides.
 	 * @param pathToClass path to the class file.
 	 * @throws IOException if the class file can't be read.
 	 * @throws IllegalStateException when the method is called after all classes have been read.
 	 * @throws IllegalArgumentException when the given path is not valid.
 	 */
-	public void addInputClass(final String pathToClass) throws IOException {
+	public void addInputClass(final String base, final String pathToClass) throws IOException {
 		if (clInstrs != null) {
 			throw new IllegalStateException("A class file can only be added directly after the object construction.");
 		}
 		if (pathToClass == null || !pathToClass.endsWith(".class")) {
 			throw new IllegalArgumentException("The given class file (" + pathToClass + ") is not valid.");
 		}
-		offInstr.addInputClass(new File(pathToClass).getParentFile(), new File(pathToClass));
+		offInstr.addInputClass(new File(base), new File(pathToClass));
 	}
 
 	/**
