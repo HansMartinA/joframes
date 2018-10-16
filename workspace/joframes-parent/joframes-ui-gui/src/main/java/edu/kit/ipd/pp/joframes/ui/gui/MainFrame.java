@@ -1,10 +1,6 @@
 package edu.kit.ipd.pp.joframes.ui.gui;
 
 import edu.kit.ipd.pp.joframes.api.Pipeline;
-import edu.kit.ipd.pp.joframes.api.exceptions.ClassHierarchyAnalysisException;
-import edu.kit.ipd.pp.joframes.api.exceptions.ClassHierarchyCreationException;
-import edu.kit.ipd.pp.joframes.api.exceptions.InstrumenterException;
-import edu.kit.ipd.pp.joframes.api.exceptions.ParseException;
 import edu.kit.joana.ui.ifc.wala.console.gui.IFCConsoleGUI;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
@@ -213,18 +209,34 @@ public class MainFrame extends JFrame {
 			String fwSpecPath = frameworkSpec.getText();
 			String[] fwJars = frameworkSelection.getJarFiles();
 			String[] appJars = applicationSelection.getJarFiles();
+			String main = mainClass.getText();
 			String output = outputJar.getText();
+			if (fwSpecPath == null || fwSpecPath.equals("") || fwJars.length == 0 || appJars.length == 0) {
+				return;
+			}
 			run.setEnabled(false);
 			new Thread(() -> {
 				Pipeline p = new Pipeline(fwSpecPath, fwJars, appJars);
-				p.setOutput(output);
+				if (output != null && !output.equals("")) {
+					p.setOutput(output);
+				}
+				if (main != null && !main.equals("")) {
+					p.setMainClass(main);
+				}
 				try {
 					p.process();
-				} catch (ParseException | ClassHierarchyCreationException | ClassHierarchyAnalysisException
-						| InstrumenterException e) {
+					SwingUtilities.invokeLater(() -> {
+						if (joanaConnection.isSelected()) {
+							IFCConsoleGUI.main(new String[] {});
+						}
+						outputJar.setText(p.getOutput());
+					});
+				} catch (Exception e) {
+					e.printStackTrace();
 					SwingUtilities.invokeLater(() -> JOptionPane.showConfirmDialog(this, "An exception occurred: "
-							+ e.getMessage() + ". Cause: " + e.getCause().getMessage(), "Occurred exception",
-							JOptionPane.DEFAULT_OPTION, JOptionPane.ERROR_MESSAGE));
+							+ e.getMessage() + "."
+							+ (e.getCause() != null ? " Cause: " + e.getCause().getMessage() : ""),
+							"Occurred exception", JOptionPane.DEFAULT_OPTION, JOptionPane.ERROR_MESSAGE));
 				}
 				SwingUtilities.invokeLater(() -> {
 					if (joanaConnection.isSelected()) {
