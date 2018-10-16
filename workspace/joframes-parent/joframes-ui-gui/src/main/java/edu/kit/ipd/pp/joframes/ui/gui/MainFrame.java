@@ -60,6 +60,10 @@ public class MainFrame extends JFrame {
 	 */
 	private JButton chooseOutputJar;
 	/**
+	 * Text field for putting in the main class.
+	 */
+	private JTextField mainClass;
+	/**
 	 * CheckBox for the user to choose to start Joana after the instrumentation.
 	 */
 	private JCheckBox joanaConnection;
@@ -106,6 +110,8 @@ public class MainFrame extends JFrame {
 		outputJar.setPreferredSize(frameworkSpec.getPreferredSize());
 		outputJar.setEditable(false);
 		chooseOutputJar = new JButton("Choose output jar file");
+		mainClass = new JTextField();
+		mainClass.setPreferredSize(frameworkSpec.getPreferredSize());
 		joanaConnection = new JCheckBox("Start Joana after instrumentation");
 		run = new JButton("Run analysis and instrumentation");
 		fileChooser = new JFileChooser();
@@ -157,9 +163,15 @@ public class MainFrame extends JFrame {
 	private void layoutApplicationAndOutputSelection() {
 		con.gridy++;
 		add(applicationSelection, con);
-		JLabel curLabel = new JLabel("Output jar file:");
+		JLabel curLabel = new JLabel("Class with main method to use:");
 		con.gridy++;
 		con.gridwidth = 1;
+		add(curLabel, con);
+		con.gridx++;
+		add(mainClass, con);
+		curLabel = new JLabel("Output jar file:");
+		con.gridx = 0;
+		con.gridy++;
 		add(curLabel, con);
 		con.gridx++;
 		add(outputJar, con);
