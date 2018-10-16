@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>joframes</groupId>
 	<artifactId>joframes-parent</artifactId>
-	<version>0.4</version>
+	<version>1.0</version>
 	<packaging>pom</packaging>
 	<modules>
 		<module>joframes-language-syntax</module>

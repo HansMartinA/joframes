@@ -30,7 +30,7 @@ public abstract class BasicTest {
 	/**
 	 * Stores the prefix for the jar files containing the classes for a test case.
 	 */
-	private static final String JAR_PREFIX = "joframes-tests-0.4-";
+	private static final String JAR_PREFIX = "joframes-tests-1.0-";
 	/**
 	 * Stores all results.
 	 */

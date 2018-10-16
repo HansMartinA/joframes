@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>joframes</groupId>
 		<artifactId>joframes-parent</artifactId>
-		<version>0.4</version>
+		<version>1.0</version>
 	</parent>
 	<artifactId>joframes-tests</artifactId>
 	<repositories>
@@ -18,12 +18,12 @@
 		<dependency>
 			<groupId>joframes</groupId>
 			<artifactId>joframes-api</artifactId>
-			<version>0.4</version>
+			<version>1.0</version>
 		</dependency>
 		<dependency>
 			<groupId>joframes</groupId>
 			<artifactId>joframes-api-external</artifactId>
-			<version>0.4</version>
+			<version>1.0</version>
 		</dependency>
 		<dependency>
 			<groupId>edu.kit.ipd</groupId>
