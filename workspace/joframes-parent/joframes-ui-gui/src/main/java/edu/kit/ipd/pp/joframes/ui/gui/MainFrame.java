@@ -262,6 +262,8 @@ public class MainFrame extends JFrame {
 		chooser.resetChoosableFileFilters();
 		chooser.setFileFilter(filter);
 		chooser.setMultiSelectionEnabled(multiSelection);
+		chooser.setSelectedFile(new File(""));
+		chooser.setSelectedFiles(new File[] {new File("")});
 		int result = chooser.showDialog(null, "Select");
 		if (result == JFileChooser.APPROVE_OPTION) {
 			if (!multiSelection) {
