@@ -183,8 +183,8 @@ class BytecodeInstrumenter {
 	 */
 	void instrumentBytecode(final FrameworkWrapper frameworkWrapper, final String[] applicationJars)
 			throws InstrumenterException {
-		instrumentBytecode(wrapper, applicationJars,
-				String.format(DEFAULT_OUTPUT_NAME, wrapper.getFramework().getName()));
+		instrumentBytecode(frameworkWrapper, applicationJars,
+				String.format(DEFAULT_OUTPUT_NAME, frameworkWrapper.getFramework().getName()));
 	}
 
 	/**
