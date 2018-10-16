@@ -11,17 +11,13 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.io.File;
-import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JList;
 import javax.swing.JOptionPane;
-import javax.swing.JScrollPane;
 import javax.swing.JTextField;
-import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
@@ -48,45 +44,13 @@ public class MainFrame extends JFrame {
 	 */
 	private JButton chooseFrameworkSpec;
 	/**
-	 * Pane for the list of framework jar files.
+	 * Selection panel for the framework jar files.
 	 */
-	private JScrollPane frameworkJarsPane;
+	private JarSelectionPanel frameworkSelection;
 	/**
-	 * List of the framework jar files.
+	 * Selection panel for the application jar files.
 	 */
-	private JList<String> frameworkJars;
-	/**
-	 * Stores the model for the list of framework jar files.
-	 */
-	private DefaultListModel<String> frameworkJarsModel;
-	/**
-	 * Button to add a framework jar file.
-	 */
-	private JButton addFramework;
-	/**
-	 * Button to remove a framework jar file.
-	 */
-	private JButton removeFramework;
-	/**
-	 * Pane for the list of application jar files.
-	 */
-	private JScrollPane applicationJarsPane;
-	/**
-	 * List of the application jar files.
-	 */
-	private JList<String> applicationJars;
-	/**
-	 * Stores the model for the list of application jar files.
-	 */
-	private DefaultListModel<String> applicationJarsModel;
-	/**
-	 * Button to add an application jar file.
-	 */
-	private JButton addApplication;
-	/**
-	 * Button to remove an application jar file.
-	 */
-	private JButton removeApplication;
+	private JarSelectionPanel applicationSelection;
 	/**
 	 * Text field for the output jar file.
 	 */
@@ -120,7 +84,7 @@ public class MainFrame extends JFrame {
 	 * Creates a new instance.
 	 */
 	public MainFrame() {
-		super("");
+		super("JoFrames");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		createComponents();
 		layoutComponents();
@@ -136,18 +100,8 @@ public class MainFrame extends JFrame {
 		frameworkSpec.setPreferredSize(new Dimension(250, 30));
 		frameworkSpec.setEditable(false);
 		chooseFrameworkSpec = new JButton("Choose framework specification");
-		frameworkJarsModel = new DefaultListModel<>();
-		frameworkJars = new JList<>(frameworkJarsModel);
-		frameworkJars.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		frameworkJarsPane = new JScrollPane(frameworkJars);
-		addFramework = new JButton("Add framework jar file");
-		removeFramework = new JButton("Remove framework jar file");
-		applicationJarsModel = new DefaultListModel<>();
-		applicationJars = new JList<>(applicationJarsModel);
-		applicationJars.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		applicationJarsPane = new JScrollPane(applicationJars);
-		addApplication = new JButton("Add application jar file");
-		removeApplication = new JButton("Remove application jar file");
+		frameworkSelection = new JarSelectionPanel("framework");
+		applicationSelection = new JarSelectionPanel("application");
 		outputJar = new JTextField();
 		outputJar.setPreferredSize(frameworkSpec.getPreferredSize());
 		outputJar.setEditable(false);
@@ -160,6 +114,8 @@ public class MainFrame extends JFrame {
 		fileChooser.setMultiSelectionEnabled(false);
 		jarFilter = new FileNameExtensionFilter("jar file(s)", "jar");
 		xmlFilter = new FileNameExtensionFilter("XML file", "xml");
+		frameworkSelection.setJFileChooser(fileChooser, jarFilter);
+		applicationSelection.setJFileChooser(fileChooser, jarFilter);
 	}
 
 	/**
@@ -189,45 +145,21 @@ public class MainFrame extends JFrame {
 		add(frameworkSpec, con);
 		con.gridx++;
 		add(chooseFrameworkSpec, con);
-		curLabel = new JLabel("Framework jar files:");
 		con.gridx = 0;
 		con.gridy++;
-		con.gridwidth = 2;
-		add(curLabel, con);
-		con.gridy++;
-		con.gridwidth = 2;
-		con.gridheight = 2;
-		add(frameworkJarsPane, con);
-		con.gridx += 2;
-		con.gridwidth = 1;
-		con.gridheight = 1;
-		add(addFramework, con);
-		con.gridy++;
-		add(removeFramework, con);
+		con.gridwidth = 3;
+		add(frameworkSelection, con);
 	}
 
 	/**
 	 * Layouts the selection of the application jar files and the output jar file.
 	 */
 	private void layoutApplicationAndOutputSelection() {
-		JLabel curLabel = new JLabel("Application jar files:");
-		con.gridx = 0;
 		con.gridy++;
-		con.gridwidth = 2;
-		add(curLabel, con);
+		add(applicationSelection, con);
+		JLabel curLabel = new JLabel("Output jar file:");
 		con.gridy++;
-		con.gridwidth = 2;
-		con.gridheight = 2;
-		add(applicationJarsPane, con);
-		con.gridx += 2;
 		con.gridwidth = 1;
-		con.gridheight = 1;
-		add(addApplication, con);
-		con.gridy++;
-		add(removeApplication, con);
-		curLabel = new JLabel("Output jar file:");
-		con.gridx = 0;
-		con.gridy++;
 		add(curLabel, con);
 		con.gridx++;
 		add(outputJar, con);
@@ -254,51 +186,21 @@ public class MainFrame extends JFrame {
 	 */
 	private void addActionListeners() {
 		chooseFrameworkSpec.addActionListener(event -> {
-			String[] file = prepareAndShowFileChooser(xmlFilter, false);
+			String[] file = prepareAndShowFileChooser(fileChooser, xmlFilter, false);
 			if (file.length == 1) {
 				frameworkSpec.setText(file[0]);
 			}
 		});
-		addFramework.addActionListener(event -> {
-			String[] files = prepareAndShowFileChooser(jarFilter, true);
-			for (String f : files) {
-				frameworkJarsModel.addElement(f);
-			}
-		});
-		removeFramework.addActionListener(event -> {
-			String selVal = frameworkJars.getSelectedValue();
-			if (selVal != null) {
-				frameworkJarsModel.removeElement(selVal);
-			}
-		});
-		addApplication.addActionListener(event -> {
-			String[] files = prepareAndShowFileChooser(jarFilter, true);
-			for (String f : files) {
-				applicationJarsModel.addElement(f);
-			}
-		});
-		removeApplication.addActionListener(event -> {
-			String selVal = applicationJars.getSelectedValue();
-			if (selVal != null) {
-				applicationJarsModel.removeElement(selVal);
-			}
-		});
 		chooseOutputJar.addActionListener(event -> {
-			String[] file = prepareAndShowFileChooser(jarFilter, false);
+			String[] file = prepareAndShowFileChooser(fileChooser, jarFilter, false);
 			if (file.length == 1) {
 				outputJar.setText(file[0]);
 			}
 		});
 		run.addActionListener(event -> {
 			String fwSpecPath = frameworkSpec.getText();
-			String[] fwJars = new String[frameworkJarsModel.getSize()];
-			for (int i = 0; i < fwJars.length; i++) {
-				fwJars[i] = frameworkJarsModel.getElementAt(i);
-			}
-			String[] appJars = new String[applicationJarsModel.getSize()];
-			for (int i = 0; i < appJars.length; i++) {
-				appJars[i] = applicationJarsModel.getElementAt(i);
-			}
+			String[] fwJars = frameworkSelection.getJarFiles();
+			String[] appJars = applicationSelection.getJarFiles();
 			String output = outputJar.getText();
 			run.setEnabled(false);
 			new Thread(() -> {
@@ -323,23 +225,25 @@ public class MainFrame extends JFrame {
 	}
 
 	/**
-	 * Prepares the file chooser with the appropriate file extension filter and displays it to the user.
+	 * Prepares a file chooser with the appropriate file extension filter and displays it to the user.
 	 *
+	 * @param chooser the file chooser to display.
 	 * @param filter the file extension filter to be used.
 	 * @param multiSelection true if multiple files can be selected. false otherwise.
 	 * @return an array of all selected files. If multiSelection is set to false, the array contains only one element.
 	 *         If the user selected no file, the array is empty.
 	 */
-	private String[] prepareAndShowFileChooser(final FileNameExtensionFilter filter, final boolean multiSelection) {
-		fileChooser.resetChoosableFileFilters();
-		fileChooser.setFileFilter(filter);
-		fileChooser.setMultiSelectionEnabled(multiSelection);
-		int result = fileChooser.showDialog(this, "Select");
+	static String[] prepareAndShowFileChooser(final JFileChooser chooser, final FileNameExtensionFilter filter,
+			final boolean multiSelection) {
+		chooser.resetChoosableFileFilters();
+		chooser.setFileFilter(filter);
+		chooser.setMultiSelectionEnabled(multiSelection);
+		int result = chooser.showDialog(null, "Select");
 		if (result == JFileChooser.APPROVE_OPTION) {
 			if (!multiSelection) {
-				return new String[] {fileChooser.getSelectedFile().getAbsolutePath()};
+				return new String[] {chooser.getSelectedFile().getAbsolutePath()};
 			}
-			File[] selectedFiles = fileChooser.getSelectedFiles();
+			File[] selectedFiles = chooser.getSelectedFiles();
 			String[] resultArray = new String[selectedFiles.length];
 			for (int i = 0; i < selectedFiles.length; i++) {
 				resultArray[i] = selectedFiles[i].getAbsolutePath();
