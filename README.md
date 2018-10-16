@@ -12,6 +12,10 @@ The build process is automated through build scripts located in the scripts dire
 
 JoFrames depends on WALA and JOANA and on some other projects for the tests. Therefore, all of them, especially WALA and JOANA, have to be build once before JoFrames can be used. Executing a build script enables the possibility to import all JoFrames modules directly in Eclipse as maven projects and to use them. Additionaly, the modules com.ibm.wala.core, com.ibm.wala.shrike, com.ibm.wala.util, joana.api, joana.api.annotations.passon, joana.contrib.lib, joana.ifc.sdg.core, joana.ifc.sdg.graph, joana.ifc.sdg.irlsod, joana.ifc.sdg.mhpoptimization, joana.ifc.sdg.util, joana.ui.annotations, joana.ui.ifc.wala.console, joana.util, joana.wala.core, joana.wala.flowless, joana.wala.summary and joana.wala.util can be imported as simple Eclipse projects.
 
+## Tests
+
+All test cases for JoFrames were run at least ten times. The detailed results can be found under "docs/test-results.ods".
+
 ## License
 
 The source code is released under the MIT-License.
